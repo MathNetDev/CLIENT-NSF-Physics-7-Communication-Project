@@ -21,7 +21,7 @@ $(function() {
     var $settings = $('.setting');
 
     // Connect to the server using the Admin.Socket object constructor
-    var socket = Admin.Socket(io(location.host));
+    var socket = Admin.Socket(io('http://localhost:8888'));
     
     var class_id;
     
