@@ -3,7 +3,8 @@ $(function() {
 
     $logout_button.click(function() {
         socket.logout(sessionStorage.getItem('username'), 
-                      sessionStorage.getItem('class_id')
+                      sessionStorage.getItem('class_id'),
+                      false
                      );
     });
 

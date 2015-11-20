@@ -61,7 +61,7 @@ function group_join_response(username, class_id, group_id) {
     socket.get_settings(class_id, group_id);
 }
 
-function logout_response() {
+function logout_response(disconnect) {
     var $login_view = $('.login_view');
     var $class_view = $('.class_view');
     var $group_view = $('.group_view');
@@ -69,9 +69,10 @@ function logout_response() {
     $login_view.show();
     $class_view.hide();
     $group_view.hide();
-
-    sessionStorage.removeItem('class_id');
-    sessionStorage.removeItem('username');
+    if(!disconnect){
+        sessionStorage.removeItem('class_id');
+        sessionStorage.removeItem('username');
+    }
 }
 
 // EDIT THIS FUNCTION
@@ -118,7 +119,7 @@ function coordinate_change_response(username, class_id, group_id, x, y, info) {
 }
 
 // EDIT THIS FUNCTION
-function group_leave_response(username, class_id, group_id) {
+function group_leave_response(username, class_id, group_id, disconnect) {
     // This function must call socket.groups_get(username, class_id)
     var $login_view = $('.login_view');
     var $class_view = $('.class_view');
@@ -127,7 +128,9 @@ function group_leave_response(username, class_id, group_id) {
     $login_view.hide();
     $class_view.show();
     $group_view.hide();
-    sessionStorage.removeItem('group_id');
+    if(!disconnect){
+        sessionStorage.removeItem('group_id');
+    }
     
     //socket.group_info(username, class_id, group_id, false);
 }

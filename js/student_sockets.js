@@ -23,8 +23,8 @@
             socket.emit('group_join', username, class_id, group_id);
         }
         
-        var group_leave = function(username, class_id, group_id) {
-            socket.emit('group_leave', username, class_id, group_id);
+        var group_leave = function(username, class_id, group_id, disconnect) {
+            socket.emit('group_leave', username, class_id, group_id, disconnect);
         }
 
         var group_info = function(username, class_id, group_id, status) {
@@ -52,7 +52,7 @@
         });
 
         socket.on('logout_response', function(data) {
-            logout_response();
+            logout_response(data.disconnect);
         });
 
         socket.on('groups_get_response', function(data) {
@@ -64,7 +64,7 @@
         });
 
         socket.on('group_leave_response', function(data) {
-            group_leave_response(data.username, data.class_id, data.group_id);
+            group_leave_response(data.username, data.class_id, data.group_id, data.disconnect);
         });
 
         socket.on('group_info_response', function(data) {

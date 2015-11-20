@@ -11,6 +11,14 @@ $(function() {
     $class_view.hide();
     $group_view.hide();
 
+    if(sessionStorage.getItem('class_id')){
+        socket.login(sessionStorage.getItem('username'), sessionStorage.getItem('class_id'));
+        if(sessionStorage.getItem('group_id')){
+            socket.group_join(sessionStorage.getItem('username'), sessionStorage.getItem('class_id'), 
+                              sessionStorage.getItem('group_id'));          
+        }//emit group_join if there is an group_id
+    }//emit login if there is a class_id 
+
     $login_button.click(function() {
         socket.login($username.val().trim(), $class_id.val().trim());
     });
