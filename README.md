@@ -1,76 +1,24 @@
-# NSF Physics 7 Communication Project #
+# CLIENT | NSF Physics 7 Communication Project #
 
 ### What is this repository for? ###
 
-A client-server project using Node.js. Students in groups will plot linear functions using an iPad application. This repository holds the communication layer of the application (client) and the server frontend and backend. More documentation can be found [here](https://drive.google.com/a/ucdavis.edu/folderview?id=0B1W6Ca2MINIsfmVmNEVxRWUyQkE5MXNseXRBZC1VV3A3ZzJBOUMwZGJuWE1HbFphZmhtaHM).
-
-### Dependencies ###
-* npm
-* Node.js
-* Socket.io
-* Express.js
-* MySQL
+The client side of a project using Node.js. Students in groups will plot linear functions using an iPad application. This repository holds the communication layer of the application (client). More documentation can be found [here](https://drive.google.com/a/ucdavis.edu/folderview?id=0B1W6Ca2MINIsfmVmNEVxRWUyQkE5MXNseXRBZC1VV3A3ZzJBOUMwZGJuWE1HbFphZmhtaHM).
 
 
 ### Important Note ###
 
 When creating a class, the page requires a secret. The current secret is **ucd_247**.
 
-
-
 ### Installation & Setup ###
 
-#### OSX ####
-
-First, you will want to install git, npm, Node.js, and MySQL if you haven't already. We'll be using brew.
-```
-brew update
-brew install git node mysql
-brew doctor
-```
-
-If you had to install MySQL, you'll need to set it up. 
-
-Once MySQL is setup, be sure to start the MySQL server. **Your MySQL server needs to be at least version 5.6.**
-
-Next, you'll want to clone this repository `git clone https://bitbucket.org/psalessi/nsf-physics-7-communication-project.git` 
-
-Move into this new directory.
-
-From there, you'll need to create a `secrets.js` file. The format should be the following but filled in with your database credentials (and what you wish your database and tables to be named):
+To run the client side of this project, all you need to do is open the files **admin.html** and **student.html** in your browser of choice, for the
+admin (teacher) view and the student view, respectively. To specify the server that you connect to, you just change the URL given to the 
+io() object that is given to the (Student/Admin).Socket() object. The default is
 
 ```
-#!javascript
-module.exports = {
-    host:"localhost",
-    user:"root",
-    password:"password",
-    database:"database_name",
-    class_table:"class_table_name",
-    group_table:"group_table_name"
-}
+Admin.Socket(io('http://localhost:8888'))
 ```
-
-Once you have created secrets.js, you need to install the node modules for the project by running `npm install`.
-
-After installation, you then run `node create_database.js` to create the necessary schema in MySQL.
-
-Now, you are ready to run the server. To do so, run `node server.js`. You can then navigate to wherever the server is running and add the correct port number to the url.
-For example, if running on `localhost` and `port 8888`, you would go to [http://localhost:8888/](http://localhost:8888/).
-
-By default, the port number is set to `8888`, but if you wish to change it, simply open `server.js` and edit the port number on **line 4**. The line should look like this `var port = 8888;`.
-
-#### Linux (Ubuntu) ####
-
-First, you will want to install git, npm, Node.js, and MySQL if you haven't already using `apt-get`.
-
-```
-sudo apt-get update
-sudo apt-get install git nodejs mysql-server-5.6
-```
-
-The server setup is the same as OSX except instead of using the command `node` to start the server and create the database, you want to use the command `nodejs`.
-
+and can be found at line **73** in student.html for Student.Socket and line **24** in admin.js for Admin.Socket.
 
 
 ### Versions ###
