@@ -23,6 +23,20 @@ function login_response(username, class_id) {
     socket.groups_get(username, class_id);
 }
 
+function logout_response(disconnect) {
+    var $login_view = $('.login_view');
+    var $class_view = $('.class_view');
+    var $group_view = $('.group_view');
+
+    $login_view.show();
+    $class_view.hide();
+    $group_view.hide();
+    if(!disconnect){
+        sessionStorage.removeItem('class_id');
+        sessionStorage.removeItem('username');
+    }
+}
+
 function groups_get_response(username, class_id, groups) {
     var $groups = $('#buttons');
     var current_user = sessionStorage.getItem('username');
@@ -62,18 +76,21 @@ function group_join_response(username, class_id, group_id) {
     socket.get_settings(class_id, group_id);
 }
 
-function logout_response(disconnect) {
+// EDIT THIS FUNCTION
+function group_leave_response(username, class_id, group_id, disconnect) {
+    // This function must call socket.groups_get(username, class_id)
     var $login_view = $('.login_view');
     var $class_view = $('.class_view');
     var $group_view = $('.group_view');
 
-    $login_view.show();
-    $class_view.hide();
+    $login_view.hide();
+    $class_view.show();
     $group_view.hide();
     if(!disconnect){
-        sessionStorage.removeItem('class_id');
-        sessionStorage.removeItem('username');
+        sessionStorage.removeItem('group_id');
     }
+    
+    //socket.group_info(username, class_id, group_id, false);
 }
 
 // EDIT THIS FUNCTION
@@ -117,23 +134,6 @@ function coordinate_change_response(username, class_id, group_id, x, y, info) {
     $('#' + username + ' .y').html(y);
     $messages.append(username + ' has moved their point to (' 
                           + x + ', ' + y +')<br/>');
-}
-
-// EDIT THIS FUNCTION
-function group_leave_response(username, class_id, group_id, disconnect) {
-    // This function must call socket.groups_get(username, class_id)
-    var $login_view = $('.login_view');
-    var $class_view = $('.class_view');
-    var $group_view = $('.group_view');
-
-    $login_view.hide();
-    $class_view.show();
-    $group_view.hide();
-    if(!disconnect){
-        sessionStorage.removeItem('group_id');
-    }
-    
-    //socket.group_info(username, class_id, group_id, false);
 }
 
 // EDIT THIS FUNCTION
