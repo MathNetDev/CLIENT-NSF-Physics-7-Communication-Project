@@ -1,3 +1,4 @@
+"use strict";
 $(function() {
 
     var $leave_group_button = $('#leave_group');

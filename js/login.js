@@ -1,3 +1,4 @@
+"use strict";
 $(function() {
     var $login_button = $('#login');
     var $class_id = $('#class_id');

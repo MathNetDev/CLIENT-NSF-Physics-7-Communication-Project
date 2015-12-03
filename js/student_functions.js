@@ -1,3 +1,4 @@
+"use strict";
 function server_error(error) {
     var $login_view = $('.login_view');
     var $class_view = $('.class_view');

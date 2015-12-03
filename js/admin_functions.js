@@ -1,3 +1,4 @@
+"use strict";
 // Handles errors on the client side
 function server_error(error) {
     $('#error_frame').html(JSON.stringify(error)); 
