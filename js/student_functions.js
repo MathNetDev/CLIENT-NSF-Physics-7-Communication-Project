@@ -1,4 +1,6 @@
 "use strict";
+
+//displays server error on client side
 function server_error(error) {
     var $login_view = $('.login_view');
     var $class_view = $('.class_view');
@@ -8,7 +10,7 @@ function server_error(error) {
     sessionStorage.setItem('error', error);
     location.reload();
 }
-
+//shows class_view and sets sessionStorage for class_id and username, then calls groups_get
 function login_response(username, class_id) {
     var $login_view = $('.login_view');
     var $class_view = $('.class_view');
@@ -22,7 +24,8 @@ function login_response(username, class_id) {
     sessionStorage.setItem('username', username);
     socket.groups_get(username, class_id);
 }
-
+//shows login_view, and removes class_id and username from sessionStorage 
+//if logout was not a disconnect
 function logout_response(disconnect) {
     var $login_view = $('.login_view');
     var $class_view = $('.class_view');
@@ -36,7 +39,7 @@ function logout_response(disconnect) {
         sessionStorage.removeItem('username');
     }
 }
-
+//populates $groups with buttons with info from groups.
 function groups_get_response(username, class_id, groups) {
     var $groups = $('#buttons');
     var current_user = sessionStorage.getItem('username');
@@ -49,14 +52,15 @@ function groups_get_response(username, class_id, groups) {
         $groups.append(button);
     }
 }
-
+//increments group_size if status is true (user is joining group), else decrements
 function group_numbers_response(username, class_id, group_id, status, group_size){
     group_size = (status ? group_size++ : group_size--);
     $("#grp" + group_id).val('Group ' + group_id + ' - ' + group_size);
     //console.log(group_id + " " + group_size);
 
 }
-
+//resets $messages and $people, sets group_id in sessionStorage, then calls group_info
+// and get_settings
 function group_join_response(username, class_id, group_id) {
     var $login_view = $('.login_view');
     var $class_view = $('.class_view');
@@ -76,7 +80,7 @@ function group_join_response(username, class_id, group_id) {
     socket.get_settings(class_id, group_id);
 }
 
-// EDIT THIS FUNCTION
+// shows class_view, and removes group_id from sessionStorage if disconnect is not true
 function group_leave_response(username, class_id, group_id, disconnect) {
     // This function must call socket.groups_get(username, class_id)
     var $login_view = $('.login_view');
@@ -93,7 +97,8 @@ function group_leave_response(username, class_id, group_id, disconnect) {
     //socket.group_info(username, class_id, group_id, false);
 }
 
-// EDIT THIS FUNCTION
+// populates $people with members array values, and appends join/leave message
+// based on status. removes #username if leave
 function group_info_response(username, class_id, group_id, members, status) {
     var current_user = sessionStorage.getItem('username');
     var current_group = sessionStorage.getItem('group_id');
@@ -126,7 +131,7 @@ function group_info_response(username, class_id, group_id, members, status) {
     }
 }
 
-// EDIT THIS FUNCTION
+// set #username.(x/y) with the respective coordinates, and adds relavent message
 function coordinate_change_response(username, class_id, group_id, x, y, info) {
     $messages = $('#messages');
     
@@ -136,7 +141,7 @@ function coordinate_change_response(username, class_id, group_id, x, y, info) {
                           + x + ', ' + y +')<br/>');
 }
 
-// EDIT THIS FUNCTION
+// updates $class_settings based on settings array
 function get_settings_response(class_id, settings) {
     $class_settings = $('#settings');
     $class_settings.html('');
@@ -146,7 +151,7 @@ function get_settings_response(class_id, settings) {
         $class_settings.append(setting_item);
     }
 }
-
+//adds a new group button
 function add_group_response() {
     var $groups = $('#buttons');
     var group_number = $('#buttons > li:last').index() + 2;
@@ -155,7 +160,7 @@ function add_group_response() {
     button += '" /></li>';
     $groups.append(button);
 }
-
+//removes last group button
 function delete_group_response() {
     $('#buttons > li:last').remove();
 }
