@@ -54,7 +54,7 @@ function groups_get_response(username, class_id, groups) {
 }
 //increments group_size if status is true (user is joining group), else decrements
 function group_numbers_response(username, class_id, group_id, status, group_size){
-    group_size = (status ? group_size++ : group_size--);
+    var group_size = (status ? group_size++ : group_size--);
     $("#grp" + group_id).val('Group ' + group_id + ' - ' + group_size);
     //console.log(group_id + " " + group_size);
 
@@ -94,6 +94,7 @@ function group_leave_response(username, class_id, group_id, disconnect) {
         sessionStorage.removeItem('group_id');
     }
     
+    field_remove_user(username);
     //socket.group_info(username, class_id, group_id, false);
 }
 
@@ -102,8 +103,8 @@ function group_leave_response(username, class_id, group_id, disconnect) {
 function group_info_response(username, class_id, group_id, members, status) {
     var current_user = sessionStorage.getItem('username');
     var current_group = sessionStorage.getItem('group_id');
-    $group_name = $('#number');
-    $people = $('#people');
+    var $group_name = $('#number');
+    var $people = $('#people');
     //$people.html('');
     if(status){
         for (var i in members) {
@@ -129,26 +130,43 @@ function group_info_response(username, class_id, group_id, members, status) {
         $("#" + username).remove();
         $('#messages').append(username + ' has left the group<br/>');
     }
+    field_sync_users(members);
 }
 
 // set #username.(x/y) with the respective coordinates, and adds relavent message
 function coordinate_change_response(username, class_id, group_id, x, y, info) {
-    $messages = $('#messages');
+    var $messages = $('#messages');
     
     $('#' + username + ' .x').html(x);
     $('#' + username + ' .y').html(y);
     $messages.append(username + ' has moved their point to (' 
                           + x + ', ' + y +')<br/>');
+
+    field_move_users(username, x, y, info);
 }
 
 // updates $class_settings based on settings array
 function get_settings_response(class_id, settings) {
-    $class_settings = $('#settings');
+    var $class_settings = $('#settings');
     $class_settings.html('');
 
     for (var setting in settings) {
         var setting_item = "<li>" + setting + ": " + settings[setting] + "</li>";
         $class_settings.append(setting_item);
+        if (setting == "Hide Options" ){
+            settings[setting] ? (
+                $("#display-settings").hide(), 
+                $('#messages').append('Admin has turned off options.<br/>')
+            ) : (
+                $("#display-settings").show(),
+                $('#messages').append('Admin has turned on options.<br/>')
+            );//hide display options if certain global is turned on.
+
+            $("#display-settings input:checkbox").prop('checked', '');
+            update_display_settings();
+        }
+        //if setting == "whateveroption"
+        //  enableOptionInApp(settings[setting]);
     }
 }
 //adds a new group button

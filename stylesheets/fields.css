@@ -1,0 +1,92 @@
+
+
+html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: fixed;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  font: 13px sans-serif;
+  /*position: relative; */
+  position: fixed;
+  overflow: hidden;
+  margin:0px;
+}
+
+
+rect {
+  fill: none;
+  stroke: #ff7f0e;
+  pointer-events: all;
+}
+
+circle, .line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.field {
+    fill:none;
+    stroke-opacity:0.4;
+    stroke-width: 2.5px;
+}
+
+.pointvector {
+  fill: none;
+  stroke: orange;
+  stroke-opacity:0.4;
+  stroke-width: 2px;
+}
+
+.resultvector {
+  fill: none;
+  stroke: red;
+  stroke-opacity:0.4;
+  stroke-width: 4px;
+}
+
+circle {
+  fill: #fff;
+  cursor: move;
+}
+
+.selected {
+  stroke: #ff7f0e;
+}
+
+#field-svg {
+  border-style: solid;
+  border-width: 1px;
+}
+
+#field-container {
+  /* border-style: solid;
+  border-width: 1px; */
+  margin:10px;
+}
+
+input[type=checkbox]
+{
+  /* Double-sized Checkboxes */
+  -webkit-transform: scale(1.5); /* Safari and Chrome */
+  padding: 10px;
+}
+
+.checkboxtext {
+  /* Checkbox text */
+  font-size: 110%;
+  display: inline;
+  margin-left:5px;
+  margin-right:10px;
+}
+
+.part-button {
+  font-size:150%;
+  margin:10px;
+}
+

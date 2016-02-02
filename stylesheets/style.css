@@ -7,6 +7,7 @@
 body {
     padding: 20px;
     background-color: rgba(114, 190, 210, 0.46);
+    overflow-y:scroll;
 }
 #error_frame:not(:empty){
     color:red;
