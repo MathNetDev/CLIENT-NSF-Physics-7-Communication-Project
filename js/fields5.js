@@ -20,13 +20,19 @@ var MAX_ABS_CHARGE = 10;
 
 var colors = ["red","green"];
 
-var width = 600,
-    height = 400,
-    radius = MAX_DOT_SIZE;
+// Need margin spacing to make room for axes
+var margin = {top: 40, right: 40, bottom: 40, left: 40},
+    width = 680 - margin.left - margin.right,
+    height = 480 - margin.top - margin.bottom,
+    radius = MAX_DOT_SIZE,
+    axisPadding = 10;
 
 // Grid size variables
 var horizontalBlock = width/10;
 var verticalBlock = height/10;
+
+// Grid line spacing
+var gridSpacing = 5;
 
 var horizontalBlockHalf = horizontalBlock / 2;
 var verticalBlockHalf = verticalBlock / 2;
@@ -39,7 +45,6 @@ var field_display_settings = {
     'show_fieldlines':false, 
     'show_pointvectors':false,
     'show_movement': false};
-
 
 //Fill the select combo with the values for the charges -10 .. 10
 d3.range(-10,11).map(function(i){
@@ -57,8 +62,10 @@ d3.range(-10,11).map(function(i){
 var svg = d3.select("#field-container")
     .append("svg")
     .attr("id", "field-svg")
-    .attr("width", width)
-    .attr("height", height);
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 // drag behavior - applied to circles 
 var drag = d3.behavior.drag()
@@ -173,6 +180,63 @@ var partSizeScale = d3.scale.linear().domain([1, MAX_ABS_CHARGE]).rangeRound([MI
 
 // square root scale used by point force vectors - this is a compromise of precision with display
 var pointVectorScale = d3.scale.sqrt().domain([-5.0, 5.0]).rangeRound([-500, 500]).clamp(true);  
+
+/*-------------------  Axes ----------------------*/
+
+var xAxis = d3.svg.axis()
+    .scale(xScale)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(yScale)
+    .orient("left");
+
+svg.append("g")
+    .attr("class", "xaxis")
+    .attr("transform", "translate(0," + (height + axisPadding) + ")")
+    .call(xAxis);
+
+svg.append("g")
+    .attr("class", "yaxis")
+    .attr("transform", "translate(" + -axisPadding + ",0)")
+    .call(yAxis);
+
+/*-------------------  Grid ----------------------*/
+
+// draw grid lines for y values
+svg.selectAll("line.yLineGrid").data(yScale.ticks(verticalBlock/gridSpacing)).enter()
+    .append("line")
+        .attr(
+        {
+            "class":"horizontalGrid",
+            "x1" : 0,
+            "x2" : width,
+            "y1" : function(d){ return yScale(d);},
+            "y2" : function(d){ return yScale(d);},
+            "fill" : "none",
+            "shape-rendering" : "crispEdges",
+            "stroke" : "black",
+            "stroke-width" : "1px",
+            "opacity" : "0.2"
+        });
+
+// draw grid lines for x values
+svg.selectAll("line.xLineGrid").data(xScale.ticks(horizontalBlock/gridSpacing)).enter()
+    .append("line")
+        .attr(
+        {
+            "class":"horizontalGrid",
+            "x1" : function(d){ return xScale(d);},
+            "x2" : function(d){ return xScale(d);},
+            "y1" : height,
+            "y2" : 0,
+            "fill" : "none",
+            "shape-rendering" : "crispEdges",
+            "stroke" : "black",
+            "stroke-width" : "1px",
+            "opacity" : "0.2"
+            
+        });
 
 /*-------------------  Drag functions ----------------------*/
 
