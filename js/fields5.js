@@ -17,6 +17,7 @@ var AVE_DOT_SIZE = Math.floor((MIN_DOT_SIZE + MAX_DOT_SIZE) / 2.0);
 console.log(AVE_DOT_SIZE);
 
 var MAX_ABS_CHARGE = 10;
+var CHARGE_STEP = 5;
 
 var colors = ["red","green"];
 
@@ -47,12 +48,20 @@ var field_display_settings = {
     'show_movement': false};
 
 //Fill the select combo with the values for the charges -10 .. 10
-d3.range(-10,11).map(function(i){
+d3.range(-MAX_ABS_CHARGE, MAX_ABS_CHARGE+1, CHARGE_STEP).map(function(i){
     // for now, eliminate neutral charges
     if (i !== 0) {
         d3.select("#charge").append("option")
             .attr("value", i)
-            .text(i+"uC"); 
+            .text(i + "uC"); 
+    }
+    else {
+         d3.select("#charge").append("option")
+            .attr("value", -1)
+            .text(-1 + "uC");
+         d3.select("#charge").append("option")
+            .attr("value", 1)
+            .text((i+1) + "uC"); 
     }
 });
 
@@ -165,7 +174,7 @@ function redraw_charges() {
         .filter(function(d) { return d.active == true && 
             (d.name === sessionStorage.getItem('username') /*|| sessionStorage.getItem("username") === null*/ )})
         .call(drag);
-
+    
     circles.exit().remove();
 }
 
