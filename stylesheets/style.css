@@ -1,11 +1,14 @@
 .container {
     border: 2px solid rgba(0, 0, 0, 0.23);
-    padding: 20px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 15px;
+    padding-right: 15px;
     border-radius: 10px;
     background-color: #FFFFFF;
 }
 body {
-    padding: 20px;
+    padding: 15px;
     background-color: rgba(114, 190, 210, 0.46);
     overflow-y:scroll;
 }

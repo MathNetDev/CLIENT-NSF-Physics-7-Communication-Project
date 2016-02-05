@@ -42,7 +42,7 @@
         </div>
 
         <div class="group_view">
-          <div class="col-md-8">
+          <div class="col-md-9">
             <h2 id="number">Group</h2>
             <!-- add in class name, display buttons based on the class's groups to enter the individual groups  -->
             <!-- foreach group, create a html button with onclick to emit action to a group -->
@@ -74,6 +74,8 @@
                         <span class="checkboxtext">Show field lines</span> -->
                         <input type="checkbox" id="show_pointvectors">
                         <span class="checkboxtext">Show point vectors</span>
+                        <input type="checkbox" id="show_fieldvectors">
+                        <span class="checkboxtext">Show field vectors</span>
                     </form>
                 </span>
             </div>
@@ -83,6 +85,8 @@
               <script type="text/javascript" src="js/fields5.js"></script>
               <script type="text/javascript" src="js/field_lines.js"></script>
 
+          </div>
+          <div class="col-md-3">
             <h3>People - Coordinates</h3>
             <ul id="people"></ul>
             <input type="button" value="←" class="change_coord" data-x=-1 data-y=0 />
@@ -94,8 +98,8 @@
             <input type="button" value="Leave Group" id="leave_group"/><br><br>
 
             <ul id="settings"></ul>
+            <div id="messages"></div>
           </div>
-          <div class="col-md-4" id="messages"></div>
         </div>
       </div>
     </div>

@@ -45,6 +45,7 @@ var field_display_settings = {
     'show_equipotentials': false,
     'show_fieldlines':false, 
     'show_pointvectors':false,
+    'show_fieldvectors':false,
     'show_movement': false};
 
 //Fill the select combo with the values for the charges -10 .. 10
@@ -132,7 +133,9 @@ function redraw() {
     if (field_display_settings.show_pointvectors === true) {
         redraw_pointvectors();
     }
-
+    if (field_display_settings.show_fieldvectors === true) {
+        redraw_fieldvectors();
+    }
     redraw_charges();
 }
 
@@ -188,7 +191,7 @@ var yScale = d3.scale.linear().domain([-height/20, height/20]).rangeRound([heigh
 var partSizeScale = d3.scale.linear().domain([1, MAX_ABS_CHARGE]).rangeRound([MIN_DOT_SIZE, MAX_DOT_SIZE]).clamp(true);  
 
 // square root scale used by point force vectors - this is a compromise of precision with display
-var pointVectorScale = d3.scale.sqrt().domain([-5.0, 5.0]).rangeRound([-500, 500]).clamp(true);  
+var pointVectorScale = d3.scale.sqrt().domain([-5.0, 5.0]).rangeRound([-100, 100]).clamp(true);  
 
 /*-------------------  Axes ----------------------*/
 
@@ -411,18 +414,19 @@ function field_sync_users(other_members) {
             }
 
         } else {
+            //update info in case
             console.log("Username " + other_members[i].member_name + " already in users list!");
         }
 
     }
 
     // remove any users that have left - must work backwards in case there are multiple deletes
-    for(var i = users.length; i--;) {
-        if (!active_member(other_members, users[i].name)) {
-            console.log("field_sync: did not find " + users[i].name + " in active members");
-            users.splice(i, 1);
-        }
-    }
+    // for(var i = users.length; i--;) {
+    //     if (!active_member(other_members, users[i].name)) {
+    //         console.log("field_sync: did not find " + users[i].name + " in active members");
+    //         users.splice(i, 1);
+    //     }
+    // }
 
 
     // need to 

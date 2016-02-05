@@ -128,6 +128,7 @@ function group_info_response(username, class_id, group_id, members, status) {
         $('#messages').append(username + ' has joined the group<br/>');
     } else {
         $("#" + username).remove();
+        field_remove_user(username);
         $('#messages').append(username + ' has left the group<br/>');
     }
     field_sync_users(members);
