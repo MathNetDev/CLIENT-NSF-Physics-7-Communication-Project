@@ -157,13 +157,13 @@ function get_settings_response(class_id, settings) {
         if (setting == "Hide Options" ){
             settings[setting] ? (
                 $("#display-settings").hide(), 
-                $('#messages').append('Admin has turned off options.<br/>')
+                $('#messages').append('Admin has turned off options.<br/>'),
+                $("#display-settings input:checkbox").prop('checked', '')
             ) : (
                 $("#display-settings").show(),
                 $('#messages').append('Admin has turned on options.<br/>')
             );//hide display options if certain global is turned on.
-
-            $("#display-settings input:checkbox").prop('checked', '');
+            
             update_display_settings();
         }
         //if setting == "whateveroption"

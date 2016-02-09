@@ -14,16 +14,28 @@ defs = svg.append("defs")
 defs.append("marker")
     .attr({
       "id":"arrow",
-      "viewBox":"0 -5 10 10",
-      "refX":5,
-      "refY":0,
-      "markerWidth":4,
+      "viewBox":"0 0 10 10",
+      "refX":0,
+      "refY":5,
+      "markerWidth":3,
       "markerHeight":4,
       "orient":"auto"
     })
     .append("path")
-      .attr("d", "M0,-5L10,0L0,5")
-      .attr("class","arrowHead");
+      .attr("d", "M0,0L10,5L0,10");
+defs.append("marker")
+    .attr({
+      "id":"revArrow",
+      "viewBox":"0 0 10 10",
+      "refX":5,
+      "refY":5,
+      "markerWidth":3,
+      "markerHeight":4,
+      "orient":"auto"
+    })
+    .append("path")
+      .attr("d", "M-2,5L8,0L8,10");
+      
 
 function redraw_pointvectors() {
     var currentTime = new Date().getTime();
@@ -70,15 +82,15 @@ function redraw_pointvectors() {
                     var othY = height - charges[j][1];
                     console.log("---- against charge at " + othX + " " + othY);
                     var othpolarity = (charges[j][2] > 0) ? 1 : -1;
-                    var distX = (curX - othX) / 115.0;  // to convert from pixels to meters
-                    var distY = (curY - othY) / 115.0;
+                    var distX = (((curX - othX) / 115.0) * .0254);  // to convert from pixels to inches to meters
+                    var distY = (((curY - othY) / 115.0) * .0254);  // this assumes a screen dpi of 115 (19" 1920x1080 screen)
                     console.log("distX: " + distX + " distY: " + distY);
                     var distXSq = distX * distX;
                     var distYSq = distY * distY;
                     var distanceSq = distXSq + distYSq;
                     //var distance = Math.sqrt(distanceSq);
 
-                    var force = Math.abs((K * curChg * charges[j][2] * 1.0e-6) / distanceSq);
+                    var force = Math.abs((K * curChg * (charges[j][2] * 1.0e-6)) / distanceSq);
 
                     var theta_rad = Math.atan2(othY - curY, othX - curX);
                     var theta_deg = theta_rad * (180.0 / Math.PI);
@@ -117,14 +129,23 @@ function redraw_pointvectors() {
 
             var final_dx = Math.cos(final_theta_rad) * pointVectorScale(final_mag);
             var final_dy = Math.sin(final_theta_rad) * pointVectorScale(final_mag);
-
+            if(polarity == 1){
+              svg.append("line")          // attach a line
+                  .attr("class", "resultvector")
+                  .attr("marker-end", "url(#arrow)")
+                  .attr("x1", curX)     // x position of the first end of the line
+                  .attr("y1", height - curY)      // y position of the first end of the line
+                  .attr("x2", curX + final_dx)     // x position of the second end of the line
+                  .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
+          } else if (polarity == -1) {
             svg.append("line")          // attach a line
-                .attr("class", "resultvector")
-                .attr("marker-end", "url(#arrow)")
-                .attr("x1", curX)     // x position of the first end of the line
-                .attr("y1", height - curY)      // y position of the first end of the line
-                .attr("x2", curX + final_dx)     // x position of the second end of the line
-                .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
+                  .attr("class", "resultvector")
+                  .attr("marker-start", "url(#revArrow)")
+                  .attr("x1", curX)     // x position of the first end of the line
+                  .attr("y1", height - curY)      // y position of the first end of the line
+                  .attr("x2", curX + final_dx)     // x position of the second end of the line
+                  .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
+          }
     // }
 
     currentTime -= new Date().getTime()
@@ -169,15 +190,15 @@ function redraw_fieldvectors() {
                 var othY = height - charges[j][1];
                 console.log("---- against charge at " + othX + " " + othY);
                 var othpolarity = (charges[j][2] > 0) ? 1 : -1;
-                var distX = (curX - othX) / 115.0;  // to convert from pixels to meters
-                var distY = (curY - othY) / 115.0;
+                var distX = (((curX - othX) / 115.0) * .0254);  // to convert from pixels to inches to meters
+                var distY = (((curY - othY) / 115.0) * .0254);  // this assumes a screen dpi of 115 (19" 1920x1080 screen)
                 console.log("distX: " + distX + " distY: " + distY);
                 var distXSq = distX * distX;
                 var distYSq = distY * distY;
                 var distanceSq = distXSq + distYSq;
                 //var distance = Math.sqrt(distanceSq);
 
-                var force = Math.abs((K * charges[j][2] * 1.0e-9) / distanceSq);
+                var force = Math.abs((K * (charges[j][2] * 1.0e-6)) / distanceSq);
 
                 var theta_rad = Math.atan2(othY - curY, othX - curX);
                 var theta_deg = theta_rad * (180.0 / Math.PI);

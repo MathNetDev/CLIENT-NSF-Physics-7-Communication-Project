@@ -17,7 +17,11 @@ body {
   margin:0px;
 }
 
-
+#revArrow{
+    fill: #FF0000;
+    stroke-width:3;
+    stroke-dasharray:0; 
+}
 #arrow{
     fill: #FF0000;
     stroke-width:3;
