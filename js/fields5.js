@@ -16,6 +16,8 @@ var MAX_DOT_SIZE = 20;
 var AVE_DOT_SIZE = Math.floor((MIN_DOT_SIZE + MAX_DOT_SIZE) / 2.0);
 console.log(AVE_DOT_SIZE);
 
+var LABEL_Y_SPACING = 1.2;
+
 var MAX_ABS_CHARGE = 10;
 var CHARGE_STEP = 5;
 
@@ -46,7 +48,8 @@ var field_display_settings = {
     'show_fieldlines':false, 
     'show_pointvectors':false,
     'show_fieldvectors':false,
-    'show_movement': false};
+    'show_movement': false,
+    'show_labels': true};
 
 //Fill the select combo with the values for the charges -10 .. 10
 d3.range(-MAX_ABS_CHARGE, MAX_ABS_CHARGE+1, CHARGE_STEP).map(function(i){
@@ -118,6 +121,9 @@ function redraw() {
     d3.selectAll(".field").remove();
     d3.selectAll(".pointvector").remove();
     d3.selectAll(".resultvector").remove();
+    
+    // Name labels need to be deleted to be redrawn
+    d3.selectAll(".name").remove();
 
     // Draw the surfaces - these functions in field_lines.js
     // var currentTime = new Date().getTime();
@@ -136,9 +142,27 @@ function redraw() {
     if (field_display_settings.show_fieldvectors === true) {
         redraw_fieldvectors();
     }
+    if (field_display_settings.show_labels === true) {
+	redraw_labels();
+    }
     redraw_charges();
 }
 
+function redraw_labels() {
+    // Add name labels to circles
+    // Note: Not actually grouped with circle, just placed relative, so probably not best implementation but works for now
+    var labels = svg.append("g")
+	.attr("class", "name")
+      .selectAll(".name")
+	.data(users)
+      .enter().append("text")
+	.classed("selected", function(d) { return d === selected; })
+        .attr("name", function (d) { return d.name; })
+	.attr("x", function(d) { return d.x - AVE_DOT_SIZE; })
+	.attr("y", function(d) { return d.y - AVE_DOT_SIZE*LABEL_Y_SPACING; })
+	.text(function(d) { return d.name; })
+	.call(drag);
+}
 
 function redraw_charges() {
     //console.log("redraw_charges...");
@@ -258,6 +282,11 @@ function dragmove(d) {
   	d3.select(this)
       		.attr("cx", d.x = Math.max(radius, Math.min(width - radius, d3.event.x)))
       		.attr("cy", d.y = Math.max(radius, Math.min(height - radius, d3.event.y)));
+	
+	// Move the corresponding name label with charge
+	d3.select('.name .selected')
+		.attr("x", d3.event.x - AVE_DOT_SIZE)
+		.attr("y", d3.event.y - AVE_DOT_SIZE*LABEL_Y_SPACING);
   }
 }
 
