@@ -215,7 +215,7 @@ var yScale = d3.scale.linear().domain([-height/20, height/20]).rangeRound([heigh
 var partSizeScale = d3.scale.linear().domain([1, MAX_ABS_CHARGE]).rangeRound([MIN_DOT_SIZE, MAX_DOT_SIZE]).clamp(true);  
 
 // square root scale used by point force vectors - this is a compromise of precision with display
-var pointVectorScale = d3.scale.sqrt().domain([-5.0, 5.0]).rangeRound([-50, 50]).clamp(true);  
+var pointVectorScale = d3.scale.sqrt().domain([-250.0, 250.0]).rangeRound([-100, 100]).clamp(true);  
 
 /*-------------------  Axes ----------------------*/
 

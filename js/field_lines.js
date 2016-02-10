@@ -198,7 +198,7 @@ function redraw_fieldvectors() {
                 var distanceSq = distXSq + distYSq;
                 //var distance = Math.sqrt(distanceSq);
 
-                var force = Math.abs((K * (charges[j][2] * 1.0e-6)) / distanceSq);
+                var force = Math.abs((K * 1e-6 *(charges[j][2] * 1.0e-6)) / distanceSq);
 
                 var theta_rad = Math.atan2(othY - curY, othX - curX);
                 var theta_deg = theta_rad * (180.0 / Math.PI);
