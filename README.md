@@ -12,13 +12,7 @@ When creating a class, the page requires a secret. The current secret is **ucd_2
 ### Installation & Setup ###
 
 To run the client side of this project, all you need to do is open the files **admin.html** and **student.html** in your browser of choice, for the
-admin (teacher) view and the student view, respectively. To specify the server that you connect to, you just change the URL given to the 
-io() object that is given to the (Student/Admin).Socket() object. The default is
-
-```
-Admin.Socket(io('http://localhost:8888'))
-```
-and can be found at line **73** in student.html for Student.Socket and line **24** in admin.js for Admin.Socket.
+admin (teacher) view and the student view, respectively. To specify the server that you connect to, you just change the URL given in **host.js** to your specific server.
 
 
 ### Versions ###
