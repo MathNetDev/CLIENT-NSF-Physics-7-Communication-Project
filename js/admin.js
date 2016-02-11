@@ -36,7 +36,7 @@ $(function() {
     //
     // ADD CLASS
     //
-    $create_button.bind('touchstart click', function() {
+    $create_button.bind('click', function() {
         // Tell the server to create a class in the database
         socket.add_class($class_input.val().trim(), parseInt($group_input.val().trim()), $secret.val().trim());
     });
@@ -44,7 +44,7 @@ $(function() {
     //
     // JOIN CLASS
     //
-    $join_button.bind('touchstart click', function() {
+    $join_button.bind('click', function() {
         socket.join_class($class_id.val().trim(), $secret.val().trim());
     });
 
@@ -52,7 +52,7 @@ $(function() {
     // ADD GROUP
     //
     //
-    $add_button.bind('touchstart click', function() {
+    $add_button.bind('click', function() {
         // Tell the server to create a new group for the class in the database
         socket.add_group(sessionStorage.getItem('admin_class_id'), $secret.val().trim());
     });
@@ -60,7 +60,7 @@ $(function() {
     //
     // DELETE GROUP
     //
-    $delete_button.bind('touchstart click', function() {
+    $delete_button.bind('click', function() {
         // Only remove if there are groups
         if ($('.groups > li').length > 0) {
             socket.delete_group(sessionStorage.getItem('admin_class_id'), $('.groups > li:last').index() + 1, $secret.val().trim());
@@ -70,14 +70,14 @@ $(function() {
     //
     // LEAVE CLASS
     //
-    $leave_button.bind('touchstart click', function() {
+    $leave_button.bind('click', function() {
         socket.leave_class(sessionStorage.getItem('admin_class_id'), $secret.val().trim());
     });
 
     //
     // SAVE SETTTINGS
     //
-    $save_button.bind('touchstart click', function() {
+    $save_button.bind('click', function() {
         var data = {};
         for(var i=0; i<$settings.length; i++) {
             data[$settings[i].name] = $settings[i].checked;
