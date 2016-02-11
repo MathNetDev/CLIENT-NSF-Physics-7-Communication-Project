@@ -28,7 +28,7 @@
         <div class="col-md-12">
           Class ID : <input type="text" id="class_id" name="class_id"/><br/>
           Nickname : <input type="text" id="nickname" name="nickname"/><br/>
-          <input type="submit" value="Login" id="login"/><br/>
+          <input class="btn btn-default" type="submit" value="Login" id="login"/><br/>
         </div>
       </div>
       
@@ -38,7 +38,7 @@
           <!-- add in class name, display buttons based on the class's groups to enter the individual groups  -->
           <ul id="buttons"> </ul>
           <!-- foreach group, create a html button with onclick to emit action to a group -->
-          <input type="button" value="Log Out" id="logout" />
+          <input class="btn btn-default" type="button" value="Log Out" id="logout" />
         </div>
 
         <div class="group_view">
@@ -93,13 +93,13 @@
           <div class="col-md-3">
             <h3>People - Coordinates</h3>
             <ul id="people"></ul>
-            <input type="button" value="←" class="change_coord" data-x=-1 data-y=0 />
-            <input type="button" value="↑" class="change_coord" data-x=0 data-y=1 />
-            <input type="button" value="↓" class="change_coord" data-x=0 data-y=-1 />
-            <input type="button" value="→" class="change_coord" data-x=1 data-y=0 />
+            <input type="button" value="←" class="btn btn-default change_coord" data-x=-1 data-y=0 />
+            <input type="button" value="↑" class="btn btn-default change_coord" data-x=0 data-y=1 />
+            <input type="button" value="↓" class="btn btn-default change_coord" data-x=0 data-y=-1 />
+            <input type="button" value="→" class="btn btn-default change_coord" data-x=1 data-y=0 />
             <br/>
           
-            <input type="button" value="Leave Group" id="leave_group"/><br><br>
+            <input class="btn btn-default" type="button" value="Leave Group" id="leave_group"/><br><br>
 
             <ul id="settings"></ul>
             <div id="messages"></div>

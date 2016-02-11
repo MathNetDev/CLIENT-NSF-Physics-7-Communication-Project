@@ -20,11 +20,7 @@ $(function() {
         }//emit group_join if there is an group_id
     }//emit login if there is a class_id 
 
-    $login_button.click(function() {
-        socket.login($username.val().trim(), $class_id.val().trim());
-    });
-    
-    $login_button.bind('touchstart', function() {
+    $login_button.bind('touchstart click', function() {
         socket.login($username.val().trim(), $class_id.val().trim());
     });
 

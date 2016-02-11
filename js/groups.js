@@ -3,8 +3,8 @@ $(function() {
 
     var $leave_group_button = $('#leave_group');
     var $coord_change_buttons = $('.change_coord');
-
-    $coord_change_buttons.click(function(event) {
+  
+    $coord_change_buttons.bind('touchstart click', function(event) {
         var x = parseInt($(event.target).attr('data-x'));
         var y = parseInt($(event.target).attr('data-y'));
         socket.coordinate_change(sessionStorage.getItem('username'),
@@ -14,8 +14,8 @@ $(function() {
                                  y
                                 );
     });
-
-    $leave_group_button.click(function() {
+    
+    $leave_group_button.bind('touchstart click', function() {
         socket.group_leave(sessionStorage.getItem('username'),
                            sessionStorage.getItem('class_id'),
                            sessionStorage.getItem('group_id'),
