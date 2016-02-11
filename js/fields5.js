@@ -49,7 +49,8 @@ var field_display_settings = {
     'show_pointvectors':false,
     'show_fieldvectors':false,
     'show_movement': false,
-    'show_labels': true};
+    'show_labels': true,
+    'show_axes': true};
 
 //Fill the select combo with the values for the charges -10 .. 10
 d3.range(-MAX_ABS_CHARGE, MAX_ABS_CHARGE+1, CHARGE_STEP).map(function(i){
@@ -121,13 +122,17 @@ function redraw() {
     d3.selectAll(".field").remove();
     d3.selectAll(".pointvector").remove();
     d3.selectAll(".resultvector").remove();
-    
-    // Name labels need to be deleted to be redrawn
+
+    d3.selectAll("circle").remove();
     d3.selectAll(".name").remove();
+    d3.selectAll(".axes").remove();
 
     // Draw the surfaces - these functions in field_lines.js
     // var currentTime = new Date().getTime();
-
+    
+    if (field_display_settings.show_axes === true) {
+	redraw_axes();
+    }
     if (field_display_settings.show_fieldlines === true) {
         redraw_fieldlines();
     }
@@ -145,6 +150,7 @@ function redraw() {
     if (field_display_settings.show_labels === true) {
 	redraw_labels();
     }
+    
     redraw_charges();
 }
 
@@ -227,52 +233,59 @@ var yAxis = d3.svg.axis()
     .scale(yScale)
     .orient("left");
 
-svg.append("g")
-    .attr("class", "xaxis")
-    .attr("transform", "translate(0," + (height + axisPadding) + ")")
-    .call(xAxis);
+function redraw_axes()
+{
+    svg.append("g")
+	.attr("class", "axes")
+	.attr("transform", "translate(0," + (height + axisPadding) + ")")
+	.call(xAxis);
 
-svg.append("g")
-    .attr("class", "yaxis")
-    .attr("transform", "translate(" + -axisPadding + ",0)")
-    .call(yAxis);
+    svg.append("g")
+	.attr("class", "axes")
+	.attr("transform", "translate(" + -axisPadding + ",0)")
+	.call(yAxis);
+	
+    /*-------------------  Grid ----------------------*/
+    
+    // draw grid lines for y values
+    svg.selectAll("line.yLineGrid").data(yScale.ticks(verticalBlock/gridSpacing)).enter()
+	.append("line")
+	    .attr(
+	    {
+		"class" : "axes",
+		"x1" : 0,
+		"x2" : width,
+		"y1" : function(d){ return yScale(d);},
+		"y2" : function(d){ return yScale(d);},
+		"fill" : "none",
+		"shape-rendering" : "crispEdges",
+		"stroke" : "black",
+		"stroke-width" : "1px",
+		"opacity" : "0.2"
+	    });
+    
+    // draw grid lines for x values
+    svg.selectAll("line.xLineGrid").data(xScale.ticks(horizontalBlock/gridSpacing)).enter()
+	.append("line")
+	    .attr(
+	    {
+		"class" : "axes",
+		"x1" : function(d){ return xScale(d);},
+		"x2" : function(d){ return xScale(d);},
+		"y1" : height,
+		"y2" : 0,
+		"fill" : "none",
+		"shape-rendering" : "crispEdges",
+		"stroke" : "black",
+		"stroke-width" : "1px",
+		"opacity" : "0.2"
+		
+	    });
+}
 
-/*-------------------  Grid ----------------------*/
+/*
+*/
 
-// draw grid lines for y values
-svg.selectAll("line.yLineGrid").data(yScale.ticks(verticalBlock/gridSpacing)).enter()
-    .append("line")
-        .attr(
-        {
-            "class":"horizontalGrid",
-            "x1" : 0,
-            "x2" : width,
-            "y1" : function(d){ return yScale(d);},
-            "y2" : function(d){ return yScale(d);},
-            "fill" : "none",
-            "shape-rendering" : "crispEdges",
-            "stroke" : "black",
-            "stroke-width" : "1px",
-            "opacity" : "0.2"
-        });
-
-// draw grid lines for x values
-svg.selectAll("line.xLineGrid").data(xScale.ticks(horizontalBlock/gridSpacing)).enter()
-    .append("line")
-        .attr(
-        {
-            "class":"horizontalGrid",
-            "x1" : function(d){ return xScale(d);},
-            "x2" : function(d){ return xScale(d);},
-            "y1" : height,
-            "y2" : 0,
-            "fill" : "none",
-            "shape-rendering" : "crispEdges",
-            "stroke" : "black",
-            "stroke-width" : "1px",
-            "opacity" : "0.2"
-            
-        });
 
 /*-------------------  Drag functions ----------------------*/
 
