@@ -23,6 +23,10 @@ $(function() {
     $login_button.click(function() {
         socket.login($username.val().trim(), $class_id.val().trim());
     });
+    
+    $login_button.bind('touchstart', function() {
+        socket.login($username.val().trim(), $class_id.val().trim());
+    });
 
     $error_header.html(sessionStorage.getItem('error'))
                  .promise()
