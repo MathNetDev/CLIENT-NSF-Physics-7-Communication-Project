@@ -141,9 +141,7 @@ function redraw() {
         redraw_equipotentials();
     }
 
-    if (field_display_settings.show_pointvectors === true) {
-        redraw_pointvectors();
-    }
+    
     if (field_display_settings.show_fieldvectors === true) {
         redraw_fieldvectors();
     }
@@ -152,6 +150,9 @@ function redraw() {
     }
     
     redraw_charges();
+    if (field_display_settings.show_pointvectors === true) {
+        redraw_pointvectors();
+    }
 }
 
 function redraw_labels() {

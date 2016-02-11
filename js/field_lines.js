@@ -296,7 +296,7 @@ function redraw_equipotentials() {
                        var distX = curX - charges[j][0];
                        var distY = curY - charges[j][1];
                        var distanceSq = distX*distX + distY*distY;
-                       var force = charges[j][2] / distanceSq;
+                       var force = (K * 1e-6 * (charges[j][2]*1e-6)) / distanceSq;
 
                        var distanceFactor = force/ Math.sqrt(distanceSq);
 
@@ -337,7 +337,7 @@ function redraw_equipotentials() {
                                var distX = curX - charges[j][0];
                                var distY = curY - charges[j][1];
                                var distanceSq = distX*distX + distY*distY;
-                               var force = charges[j][2] / distanceSq;
+                               var force = (K * 1e-6 * (charges[j][2] * 1e-6)) / distanceSq;
 
                                var distanceFactor = force / Math.sqrt(distanceSq);
 
