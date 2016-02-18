@@ -50,7 +50,9 @@ var field_display_settings = {
     'show_fieldvectors':false,
     'show_movement': false,
     'show_labels': true,
-    'show_axes': true};
+    'show_axes': true,
+    'show_points': true
+    };
 
 //Fill the select combo with the values for the charges -10 .. 10
 d3.range(-MAX_ABS_CHARGE, MAX_ABS_CHARGE+1, CHARGE_STEP).map(function(i){
@@ -64,6 +66,9 @@ d3.range(-MAX_ABS_CHARGE, MAX_ABS_CHARGE+1, CHARGE_STEP).map(function(i){
          d3.select("#charge").append("option")
             .attr("value", -1)
             .text(-1 + "uC");
+        d3.select("#charge").append("option")
+            .attr("value", 0)
+            .text(0 + "uC");
          d3.select("#charge").append("option")
             .attr("value", 1)
             .text((i+1) + "uC"); 
@@ -131,44 +136,52 @@ function redraw() {
     // var currentTime = new Date().getTime();
     
     if (field_display_settings.show_axes === true) {
-	redraw_axes();
+	   redraw_axes();
     }
     if (field_display_settings.show_fieldlines === true) {
         redraw_fieldlines();
     }
-
     if (field_display_settings.show_equipotentials === true) {
         redraw_equipotentials();
     }
-
-    
     if (field_display_settings.show_fieldvectors === true) {
         redraw_fieldvectors();
     }
-    if (field_display_settings.show_labels === true) {
-	redraw_labels();
+    if (field_display_settings.show_labels === true && field_display_settings.show_points === true) {
+	   redraw_labels();
     }
-    
-    redraw_charges();
+    if (field_display_settings.show_points === true) {
+        redraw_charges();
+    }
     if (field_display_settings.show_pointvectors === true) {
         redraw_pointvectors();
     }
+    checkForZeros();
 }
+function checkForZeros() {
+    var zeroCharge = svg.selectAll("circle")
+                        .filter( function(d){ return d.charge == 0})
+                        .remove();
+    var zeroChargeText = svg.selectAll("text")
+                        .filter( function(d){ return d.charge == 0})
+                        .remove();
+} //hides charge and labels of point charge 0 for "spectator" mode
 
 function redraw_labels() {
     // Add name labels to circles
     // Note: Not actually grouped with circle, just placed relative, so probably not best implementation but works for now
     var labels = svg.append("g")
-	.attr("class", "name")
-      .selectAll(".name")
-	.data(users)
-      .enter().append("text")
-	.classed("selected", function(d) { return d === selected; })
+	    .attr("class", "name")
+        .selectAll(".name")
+	    .data(users)
+        .enter().append("text")
+	    .classed("selected", function(d) { return d === selected; })
         .attr("name", function (d) { return d.name; })
-	.attr("x", function(d) { return d.x - AVE_DOT_SIZE; })
-	.attr("y", function(d) { return d.y - AVE_DOT_SIZE*LABEL_Y_SPACING; })
-	.text(function(d) { return d.name; })
-	.call(drag);
+        .attr("charge", function (d) { return d.charge})
+	    .attr("x", function(d) { return d.x - AVE_DOT_SIZE; })
+	    .attr("y", function(d) { return d.y - AVE_DOT_SIZE*LABEL_Y_SPACING; })
+	    .text(function(d) { return d.name; })
+	    .call(drag);
 }
 
 function redraw_charges() {
@@ -190,7 +203,6 @@ function redraw_charges() {
                     .attr("y0", function (d) { return d.y0; })
                     .attr("charge", function (d) { return d.charge; })
                     .attr("r", function (d) { return field_display_settings.show_particle_size ? partSizeScale(d.radius) : AVE_DOT_SIZE; })
-                    
                     .attr("active", function(d) { return d.active; })
                     .style("fill", function(d) { return field_display_settings.show_particle_charge ? d.color : "LightGray"; });
 
@@ -208,7 +220,7 @@ function redraw_charges() {
         .filter(function(d) { return d.active == true && 
             (d.name === sessionStorage.getItem('username') /*|| sessionStorage.getItem("username") === null*/ )})
         .call(drag);
-    
+
     circles.exit().remove();
 }
 
