@@ -1,5 +1,12 @@
 "use strict";
 
+function escapeStr(str) 
+{
+    if (str)
+        return str.replace(/([ #;?%&,.+*~\':"!^$[\]()=>|\/@])/g,'\\$1');      
+
+    return str;
+}
 //displays server error on client side
 function server_error(error) {
     var $login_view = $('.login_view');
@@ -19,6 +26,8 @@ function login_response(username, class_id) {
     $login_view.hide();
     $class_view.show();
     $group_view.hide();
+
+    username = username.replace('&lt;','<').replace('&gt;', '>');
 
     sessionStorage.setItem('class_id', class_id);
     sessionStorage.setItem('username', username);
@@ -108,7 +117,8 @@ function group_info_response(username, class_id, group_id, members, status) {
     //$people.html('');
     if(status){
         for (var i in members) {
-            if(members[i].member_name != current_user) {
+            
+            if(members[i].member_name.replace('&lt;','<').replace('&gt;', '>') != current_user) {
                 var member = '<li id="' + members[i].member_name + '">';
                 member += members[i].member_name;
                 member += ' - (<span class="x">' + members[i].member_x + '</span>, ';
@@ -127,7 +137,9 @@ function group_info_response(username, class_id, group_id, members, status) {
     
         $('#messages').append(username + ' has joined the group<br/>');
     } else {
-        $("#" + username).remove();
+        var escUsername = username.replace('&lt;','\\<').replace('&gt;', '\\>');
+        escUsername = escapeStr(escUsername);
+        $("#" + escUsername).remove();
         field_remove_user(username);
         $('#messages').append(username + ' has left the group<br/>');
     }
@@ -137,9 +149,12 @@ function group_info_response(username, class_id, group_id, members, status) {
 // set #username.(x/y) with the respective coordinates, and adds relavent message
 function coordinate_change_response(username, class_id, group_id, x, y, info) {
     var $messages = $('#messages');
-    
-    $('#' + username + ' .x').html(x);
-    $('#' + username + ' .y').html(y);
+    var escUsername = username.replace('&lt;','\\<').replace('&gt;', '\\>');
+    escUsername = escapeStr(escUsername);
+    $('#' + escUsername + ' .x').html(x);
+    $('#' + escUsername + ' .y').html(y);
+    console.log(username);
+
     $messages.append(username + ' has moved their point to (' 
                           + x + ', ' + y +')<br/>');
 
