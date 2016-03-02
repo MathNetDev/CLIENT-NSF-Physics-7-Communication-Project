@@ -1,4 +1,13 @@
 "use strict";
+
+function escapeStr(str) 
+{
+    if (str)
+        return str.replace(/([ #;?%&,.+*~\':"!^$[\]()=><|\/@])/g,'\\$1');      
+
+    return str;
+}
+
 // Handles errors on the client side
 function server_error(error) {
     $('#error_frame').html(JSON.stringify(error)); 
@@ -78,11 +87,15 @@ function group_info_response(username, class_id, group_id, group, status) {
         }
     }
     else {
-        $("#" + username).remove();
+        username = username.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+        username = escapeStr(username);
+        $('li[id="' + username + '"]').remove();
     }
 }
 
 function coordinate_change_response(username, class_id, group_id, x, y, info) {
-    $('#' + username + ' .x').html(x);
-    $('#' + username + ' .y').html(y);
+    username = username.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+    username = escapeStr(username);
+    $('li[id="' + username + '"] .x').html(x);
+    $('li[id="' + username + '"] .y').html(y);
 }

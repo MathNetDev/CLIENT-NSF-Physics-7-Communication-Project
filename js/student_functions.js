@@ -3,10 +3,11 @@
 function escapeStr(str) 
 {
     if (str)
-        return str.replace(/([ #;?%&,.+*~\':"!^$[\]()=>|\/@])/g,'\\$1');      
+        return str.replace(/([ #;?%&,.+*~\':"!^$[\]()=><|\/@])/g,'\\$1');      
 
     return str;
 }
+
 //displays server error on client side
 function server_error(error) {
     var $login_view = $('.login_view');
@@ -27,7 +28,7 @@ function login_response(username, class_id) {
     $class_view.show();
     $group_view.hide();
 
-    username = username.replace('&lt;','<').replace('&gt;', '>');
+    username = username.replace(/&lt;/g,'<').replace(/&gt;/g, '>');
 
     sessionStorage.setItem('class_id', class_id);
     sessionStorage.setItem('username', username);
@@ -65,7 +66,6 @@ function groups_get_response(username, class_id, groups) {
 function group_numbers_response(username, class_id, group_id, status, group_size){
     var group_size = (status ? group_size++ : group_size--);
     $("#grp" + group_id).val('Group ' + group_id + ' - ' + group_size);
-    //console.log(group_id + " " + group_size);
 
 }
 //resets $messages and $people, sets group_id in sessionStorage, then calls group_info
@@ -118,7 +118,7 @@ function group_info_response(username, class_id, group_id, members, status) {
     if(status){
         for (var i in members) {
             
-            if(members[i].member_name.replace('&lt;','<').replace('&gt;', '>') != current_user) {
+            if(members[i].member_name.replace(/&lt;/g,'<').replace(/&gt;/g, '>') != current_user) {
                 var member = '<li id="' + members[i].member_name + '">';
                 member += members[i].member_name;
                 member += ' - (<span class="x">' + members[i].member_x + '</span>, ';
@@ -137,7 +137,7 @@ function group_info_response(username, class_id, group_id, members, status) {
     
         $('#messages').append(username + ' has joined the group<br/>');
     } else {
-        var escUsername = username.replace('&lt;','\\<').replace('&gt;', '\\>');
+        var escUsername = username.replace(/&lt;/g,'<').replace(/&gt;/g, '>');
         escUsername = escapeStr(escUsername);
         $("#" + escUsername).remove();
         field_remove_user(username);
@@ -149,11 +149,10 @@ function group_info_response(username, class_id, group_id, members, status) {
 // set #username.(x/y) with the respective coordinates, and adds relavent message
 function coordinate_change_response(username, class_id, group_id, x, y, info) {
     var $messages = $('#messages');
-    var escUsername = username.replace('&lt;','\\<').replace('&gt;', '\\>');
+    var escUsername = username.replace(/&lt;/g,'<').replace(/&gt;/g, '>');
     escUsername = escapeStr(escUsername);
     $('#' + escUsername + ' .x').html(x);
     $('#' + escUsername + ' .y').html(y);
-    console.log(username);
 
     $messages.append(username + ' has moved their point to (' 
                           + x + ', ' + y +')<br/>');

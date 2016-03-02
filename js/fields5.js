@@ -373,7 +373,7 @@ function field_sync_users(other_members) {
 
     // add any new users 
     for (var i in other_members) {
-        other_members[i].member_name = other_members[i].member_name.replace('&lt;','<').replace('&gt;', '>');
+        other_members[i].member_name = other_members[i].member_name.replace(/&lt;/g,'<').replace(/&gt;/g, '>');
         // test to see if this member_name is known, if not, add this user to users
         if (known_users.indexOf(other_members[i].member_name) == -1) {
 
@@ -550,7 +550,7 @@ function find_user(user_name) {
 // data is an object containing the user's name, and new x_coord and y_coord.
 function field_move_users(username, x_coord, y_coord, info) {
     console.log("field_move_users called.");
-    username = username.replace('&lt;', '<').replace('&gt;', '>');
+    username = username.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
     console.log(username);
     var user_data = find_user(username);
     console.log(user_data);
@@ -610,7 +610,7 @@ function field_move_users(username, x_coord, y_coord, info) {
 
 function field_remove_user(username) {
     console.log("*** field_remove_user ***");
-    username = username.replace('&lt;', '<').replace('&gt;', '>');
+    username = username.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
     // remove user that has left the group - must work backwards in case there are multiple deletes
     for(var i = users.length; i--;) {
         if (users[i].name === username) {
