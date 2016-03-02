@@ -172,7 +172,8 @@ function get_settings_response(class_id, settings) {
             settings[setting] ? (
                 $("#display-settings").hide(), 
                 $('#messages').append('Admin has turned off options.<br/>'),
-                $("#display-settings input:checkbox").prop('checked', '')
+                $("#display-settings input:checkbox").prop('checked', ''),
+                $("#display-settings #show_points").prop('checked', true)
             ) : (
                 $("#display-settings").show(),
                 $('#messages').append('Admin has turned on options.<br/>')
