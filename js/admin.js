@@ -33,6 +33,11 @@ $(function() {
     $manage_view.hide();
     $settings_view.hide();
 
+
+    if(sessionStorage.getItem('admin_class_id')){
+        console.log("made it");
+        socket.join_class(sessionStorage.getItem('admin_class_id'), 'ucd-247');
+    }
     //
     // ADD CLASS
     //
@@ -71,7 +76,7 @@ $(function() {
     // LEAVE CLASS
     //
     $leave_button.bind('click', function() {
-        socket.leave_class(sessionStorage.getItem('admin_class_id'), $secret.val().trim());
+        socket.leave_class(sessionStorage.getItem('admin_class_id'), $secret.val().trim(), false);
     });
 
     //
@@ -84,4 +89,5 @@ $(function() {
         }
         socket.save_settings(sessionStorage.getItem('admin_class_id'), data, $secret.val().trim());
     });
+
 });
