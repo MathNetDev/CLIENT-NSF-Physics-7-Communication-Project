@@ -133,18 +133,18 @@ function redraw_pointvectors() {
               svg.append("line")          // attach a line
                   .attr("class", "resultvector")
                   .attr("marker-end", "url(#arrow)")
-                  .attr("x1", curX)     // x position of the first end of the line
-                  .attr("y1", height - curY)      // y position of the first end of the line
-                  .attr("x2", curX + final_dx)     // x position of the second end of the line
-                  .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
+                  .attr("x1", curX - (final_dx/2))     // x position of the first end of the line
+                  .attr("y1", height - (curY - (final_dy/2)))      // y position of the first end of the line
+                  .attr("x2", curX + (final_dx/2))     // x position of the second end of the line
+                  .attr("y2", height - (curY + (final_dy/2)));    // y position of the second end of the line
           } else if (polarity == -1) {
             svg.append("line")          // attach a line
                   .attr("class", "resultvector")
                   .attr("marker-start", "url(#revArrow)")
-                  .attr("x1", curX)     // x position of the first end of the line
-                  .attr("y1", height - curY)      // y position of the first end of the line
-                  .attr("x2", curX + final_dx)     // x position of the second end of the line
-                  .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
+                  .attr("x1", curX - (final_dx/2))     // x position of the first end of the line
+                  .attr("y1", height - (curY - (final_dy/2)))      // y position of the first end of the line
+                  .attr("x2", curX + (final_dx/2))     // x position of the second end of the line
+                  .attr("y2", height - (curY + (final_dy/2)));    // y position of the second end of the line
           }
     // }
 
@@ -243,7 +243,8 @@ function redraw_testvector(){
 }
 function redraw_fieldvectors() {
     var currentTime = new Date().getTime();
-
+    var maxForce = 0;
+    var calcVectors = [];
     // pull current location data out of users array
     var charges = users.map(function(d) { return [d.x, d.y, d.charge]; });
 
@@ -311,19 +312,34 @@ function redraw_fieldvectors() {
             var final_theta_rad = Math.atan2(total_forceY, total_forceX);
             var final_theta_deg = final_theta_rad * (180.0 / Math.PI);
             var final_mag = Math.sqrt(total_forceX*total_forceX + total_forceY*total_forceY);
-            console.log("Final forceX: " + total_forceX + " forceY: " + total_forceY + " => " + final_theta_deg, " mag: " + final_mag);
+            if(!isNaN(final_mag)){
+              maxForce = Math.max(maxForce, Math.abs(final_mag));
+              console.log("Final forceX: " + total_forceX + " forceY: " + total_forceY + " => " + final_theta_deg, " mag: " + final_mag);
 
-            var final_dx = Math.cos(final_theta_rad) * pointVectorScale(final_mag);
-            var final_dy = Math.sin(final_theta_rad) * pointVectorScale(final_mag);
-            console.log(" ** final_dx : " + final_dx + "  final_dy: " + final_dy + "  ");
-            svg.append("line")          // attach a line
-                .attr("class", "resultvector")
-                .attr("marker-end", "url(#arrow)")
-                .attr("x1", curX)     // x position of the first end of the line
-                .attr("y1", height - curY)      // y position of the first end of the line
-                .attr("x2", curX + final_dx)     // x position of the second end of the line
-                .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
+              var final_dx = Math.cos(final_theta_rad) * pointVectorScale(final_mag);
+              var final_dy = Math.sin(final_theta_rad) * pointVectorScale(final_mag);
+              console.log(" ** final_dx : " + final_dx + "  final_dy: " + final_dy + "  ");
+            
+              calcVectors.push([final_dx, final_dy, final_theta_rad, curX, curY, final_mag]);
+            }
+            
       }
+   } 
+   for (i= 0; i < calcVectors.length; i++){
+        var vector = calcVectors[i];
+        var stroke = "";
+        var percentage =  Math.max(vector[5] / maxForce, 0.2);
+        var dirX = Math.cos(vector[2]) * 35;
+        var dirY = Math.sin(vector[2]) * 35;
+        svg.append("line")          // attach a line
+          .attr("class", "resultvector")
+          .attr("marker-end", "url(#arrow)")
+          .style("opacity", percentage)
+          .attr("x1", vector[3] - (dirX/2))     // x position of the first end of the line
+          .attr("y1", height - (vector[4] - (dirY/2)))      // y position of the first end of the line
+          .attr("x2", vector[3] + (dirX/2))     // x position of the second end of the line
+          .attr("y2", height - (vector[4] + (dirY/2)));    // y position of the second end of the line
+        
    }
 
     currentTime -= new Date().getTime()
