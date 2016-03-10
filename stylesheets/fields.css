@@ -34,10 +34,11 @@ body {
     stroke-dasharray:0; 
 }
 
-rect {
+ellipse {
   fill: none;
-  stroke: #ff7f0e;
+  stroke: rgb(187, 96, 187);
   pointer-events: all;
+  stroke-width: 1.5px;
 }
 
 circle, .line {

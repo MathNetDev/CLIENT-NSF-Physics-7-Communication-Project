@@ -6,6 +6,10 @@ var users = [];
    /* {"name":"AAA", "x0": -1, "y0": -1, "x": 30, "y": 30, "radius": 20, "color" : "green", "active": true },
     {"name":"BBB", "x0": -1, "y0": -1, "x": 70, "y": 70, "radius": 20, "color" : "purple", "active": true },
     {"name":"CCC", "x0": -1, "y0": -1, "x": 110, "y": 100, "radius": 20, "color" : "red", "active": false }]; */
+var testCharge = [{"name" : "test_charge", "x":300, "y":200, "x0":null,
+            "y0":null, "charge":1, "rx":2, "ry":2, "active":true, "color":"purple"
+        }];
+//create var for testcharge to see if it exists
 
 // currently selected charge
 var selected = null;
@@ -52,7 +56,8 @@ var field_display_settings = {
     'show_labels': true,
     'show_axes': true,
     'show_points': true,
-    'draw_vectors': false
+    'draw_vectors': false,
+    'show_testcharge': false
     };
 
 //Fill the select combo with the values for the charges -10 .. 10
@@ -98,8 +103,6 @@ var drag = d3.behavior.drag()
     
 // Vector drawing
 var test_vector;
-    
-
 
 //use d3.svg.line for rendering field lines and equipotential surfaces
 var line = d3.svg.line();
@@ -110,7 +113,7 @@ var line = d3.svg.line();
 d3.select("#charge").on("change", function(){
     var new_charge = d3.select(this).node().value;
     
-    if (selected) { 
+    if (selected && selected.name != "test_charge") { 
         selected.charge = new_charge;
         selected.radius = Math.abs(new_charge);
         selected.color = (new_charge < 0.0) ? colors[0] : colors[1];
@@ -118,7 +121,7 @@ d3.select("#charge").on("change", function(){
         // charge didn't move, but we do need to let other know about any change
         notify_group(0, 0);
     } else {
-        alert("Nothing selected");
+        //alert("Nothing selected");
     }
     //selected[2] = d3.select(this).node().value;
     redraw();
@@ -139,7 +142,7 @@ function redraw() {
     d3.selectAll("circle").remove();
     d3.selectAll(".name").remove();
     d3.selectAll(".axes").remove();
-
+    d3.selectAll("ellipse").remove();
     // Draw the surfaces - these functions in field_lines.js
     // var currentTime = new Date().getTime();
     
@@ -164,6 +167,10 @@ function redraw() {
     if (field_display_settings.show_pointvectors === true) {
         redraw_pointvectors();
     }
+    if (field_display_settings.show_testcharge === true) {
+        redraw_testcharge();
+    }
+
     checkForZeros();
 }
 function checkForZeros() {
@@ -230,6 +237,31 @@ function redraw_charges() {
         .call(drag);
 
     circles.exit().remove();
+}
+function redraw_testcharge(){
+    console.log("redraw_testcharge()");
+
+    charge = svg.selectAll("ellipse").data(testCharge);
+    charge.enter().append("ellipse");
+    console.log(charge);
+    var chargeAttributes = charge
+                .classed("selected", function(d) { return d === selected; })
+                .attr("name", function (d) { return d.name; })
+                .attr("cx", function (d) { return d.x; })
+                .attr("cy", function (d) { return d.y; })
+                .attr("x0", function (d) { return d.x0; })
+                .attr("y0", function (d) { return d.y0; })
+                .attr("charge", function (d) { return d.charge; })
+                .attr("ry", function (d) { return partSizeScale(d.ry) })
+                .attr("rx", function (d) { return partSizeScale(d.rx) })
+                .attr("active", function(d) { return d.active; })
+                .style("fill", function(d) { return field_display_settings.show_particle_charge ? d.color : "LightGray"; });
+    charge
+        .filter(function(d) { return d.active == true && d.name === "test_charge" })
+        .call(drag);
+
+    charge.exit().remove();
+    redraw_testvector();
 }
 
 /*-------------------  Scales ----------------------*/
@@ -311,13 +343,13 @@ function redraw_axes()
 /*-------------------  Drag functions ----------------------*/
 
 function dragmove(d) {
-    
- if(d.name === sessionStorage.getItem('username') && field_display_settings.draw_vectors === false){
+  if((d.name === sessionStorage.getItem('username') || d.name === "test_charge")
+	 && field_display_settings.draw_vectors === false)
+  {
   	d3.select(this)
       		.attr("cx", d.x = Math.max(radius, Math.min(width - radius, d3.event.x)))
       		.attr("cy", d.y = Math.max(radius, Math.min(height - radius, d3.event.y)));
-	
-	// Move the corresponding name label with charge
+
 	d3.select('.name .selected')
 		.attr("x", d3.event.x - AVE_DOT_SIZE)
 		.attr("y", d3.event.y - AVE_DOT_SIZE*LABEL_Y_SPACING);
@@ -327,19 +359,26 @@ function dragmove(d) {
 function dragstart(d) {
 
     // record where the drag started
-  if(d.name === sessionStorage.getItem('username') && field_display_settings.draw_vectors === false){ 
+  if((d.name === sessionStorage.getItem('username') || d.name === "test_charge")
+	 && field_display_settings.draw_vectors === false)
+  { 
+
     d.x0 = d.x;
     d.y0 = d.y;
-
+    
     // update the charge menu and selected var
     selected = d;
     changeSelected();
+    
   }
 }
 
 function dragend(d) {
 
-  if(d.name === sessionStorage.getItem('username') && field_display_settings.draw_vectors === false){
+  if((d.name === sessionStorage.getItem('username') || d.name === "test_charge")
+	 && field_display_settings.draw_vectors === false)
+  {
+
     var x0_scaled = xScale.invert(d.x0);
     var y0_scaled = yScale.invert(d.y0);
     var x_scaled = xScale.invert(d.x);
@@ -347,8 +386,13 @@ function dragend(d) {
     var delta_x = Math.round(x_scaled - x0_scaled);
     var delta_y = Math.round(y_scaled - y0_scaled);
     console.log("delta_x: " + delta_x + " delta_y: " + delta_y);
-
-    notify_group(delta_x, delta_y);
+    if(d.name === "test_charge"){
+        testCharge[0].x += delta_x;
+        testCharge[0].y += delta_y;
+    }
+    if(d.name === sessionStorage.getItem('username')){
+        notify_group(delta_x, delta_y);
+    }
 
     redraw();
   }

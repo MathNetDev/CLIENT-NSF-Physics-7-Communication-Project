@@ -82,7 +82,7 @@
         });
 
         socket.on('leave-class-response', function(data) {
-            leave_class_response();
+            leave_class_response(data.disconnect);
         });
 
         socket.on('group_info_response', function(data) {

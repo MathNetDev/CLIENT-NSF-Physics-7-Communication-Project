@@ -144,18 +144,18 @@ function redraw_pointvectors() {
               svg.append("line")          // attach a line
                   .attr("class", "resultvector")
                   .attr("marker-end", "url(#arrow)")
-                  .attr("x1", curX)     // x position of the first end of the line
-                  .attr("y1", height - curY)      // y position of the first end of the line
-                  .attr("x2", curX + final_dx)     // x position of the second end of the line
-                  .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
+                  .attr("x1", curX - (final_dx/2))     // x position of the first end of the line
+                  .attr("y1", height - (curY - (final_dy/2)))      // y position of the first end of the line
+                  .attr("x2", curX + (final_dx/2))     // x position of the second end of the line
+                  .attr("y2", height - (curY + (final_dy/2)));    // y position of the second end of the line
           } else if (polarity == -1) {
             svg.append("line")          // attach a line
                   .attr("class", "resultvector")
                   .attr("marker-start", "url(#revArrow)")
-                  .attr("x1", curX)     // x position of the first end of the line
-                  .attr("y1", height - curY)      // y position of the first end of the line
-                  .attr("x2", curX + final_dx)     // x position of the second end of the line
-                  .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
+                  .attr("x1", curX - (final_dx/2))     // x position of the first end of the line
+                  .attr("y1", height - (curY - (final_dy/2)))      // y position of the first end of the line
+                  .attr("x2", curX + (final_dx/2))     // x position of the second end of the line
+                  .attr("y2", height - (curY + (final_dy/2)));    // y position of the second end of the line
           }
     // }
 
@@ -163,26 +163,105 @@ function redraw_pointvectors() {
     console.log("redraw_pointvectors iteration took: " + (-1*currentTime)+"ms." )
 
 }
+function redraw_testvector(){
+  var currentTime = new Date().getTime();
+
+    if (selected === null)
+        return;
+
+    // pull current location data out of users array
+    var charges = users.map(function(d) { return [d.x, d.y, d.charge]; });
+
+    //Iterate for each charge
+    //for (var chargeIndex = 0; chargeIndex < charges.length; chargeIndex++) {
+    
+            var curX = testCharge[0].x;
+            var curY = height - testCharge[0].y;
+            var curChg = testCharge[0].charge * 1.0e-6;
+            var polarity = (testCharge[0].charge > 0) ? 1 : -1;
+
+            console.log("---- calc for charge at " + curX + " " + curY + " sign " + polarity);
+
+            var total_forceX = 0.0;
+            var total_forceY = 0.0;
+
+            //Superposition the force vector at the current point
+            for (var j = 0; j < charges.length; j++) {
+                    var othX = charges[j][0];
+                    var othY = height - charges[j][1];
+                    console.log("---- against charge at " + othX + " " + othY);
+                    var othpolarity = (charges[j][2] > 0) ? 1 : -1;
+                    var distX = (((curX - othX) / 115.0) * .0254);  // to convert from pixels to inches to meters
+                    var distY = (((curY - othY) / 115.0) * .0254);  // this assumes a screen dpi of 115 (19" 1920x1080 screen)
+                    console.log("distX: " + distX + " distY: " + distY);
+                    var distXSq = distX * distX;
+                    var distYSq = distY * distY;
+                    var distanceSq = distXSq + distYSq;
+                    //var distance = Math.sqrt(distanceSq);
+
+                    var force = Math.abs((K * curChg * (charges[j][2] * 1.0e-6)) / distanceSq);
+
+                    var theta_rad = Math.atan2(othY - curY, othX - curX);
+                    var theta_deg = theta_rad * (180.0 / Math.PI);
+                    console.log("** " + j + " (" + othX + "," + othY + ") d^2: " + distanceSq + " theta: " + theta_deg + " F: " + force);
+
+                    var forceX = force * Math.cos(theta_rad);
+                    var forceY = force * Math.sin(theta_rad);
+                    console.log("raw forceX: " + forceX + " raw forceY: " + forceY);
+
+                    if (polarity === othpolarity) {
+                        forceX *= -1;
+                        forceY *= -1;
+                    }
+
+                    console.log("forceX: " + forceX + " forceY: " + forceY);
+
+                    total_forceX += forceX;
+                    total_forceY += forceY;
+
+                    /*
+                    // draw a line from center out to other charge
+                    svg.append("line")          // attach a line
+                        .attr("class", "pointvector")
+                        .attr("x1", curX)     // x position of the first end of the line
+                        .attr("y1", height - curY)      // y position of the first end of the line
+                        .attr("x2", othX)     // x position of the second end of the line
+                        .attr("y2", height - othY);    // y position of the second end of the line
+                    */
+                
+            }
+
+            var final_theta_rad = Math.atan2(total_forceY, total_forceX);
+            var final_theta_deg = final_theta_rad * (180.0 / Math.PI);
+            var final_mag = Math.sqrt(total_forceX*total_forceX + total_forceY*total_forceY);
+            console.log("Final forceX: " + total_forceX + " forceY: " + total_forceY + " => " + final_theta_deg, " mag: " + final_mag);
+
+            var final_dx = Math.cos(final_theta_rad) * pointVectorScale(final_mag);
+            var final_dy = Math.sin(final_theta_rad) * pointVectorScale(final_mag);
+            if(polarity === 1){
+              svg.append("line")          // attach a line
+                  .attr("class", "resultvector")
+                  .attr("marker-end", "url(#arrow)")
+                  .attr("x1", curX)     // x position of the first end of the line
+                  .attr("y1", height - curY)      // y position of the first end of the line
+                  .attr("x2", curX + final_dx)     // x position of the second end of the line
+                  .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
+              console.log("did this append?");
+            }
+
+    currentTime -= new Date().getTime()
+    console.log("redraw_testvector iteration took: " + (-1*currentTime)+"ms." )
+}
 function redraw_fieldvectors() {
     var currentTime = new Date().getTime();
-
+    var maxForce = 0;
+    var calcVectors = [];
     // pull current location data out of users array
     var charges = users.map(function(d) { return [d.x, d.y, d.charge]; });
 
     if (charges.length === 0)
         return;
 
-    var chargeIndex = -1;
-    for (var i=0; i < users.length; i++) {
-        if (users[i] === selected) {
-            chargeIndex = i;
-        }
-    }
-
-    if (chargeIndex == -1) {
-        console.log("UNABLE TO FIND selected in users!");
-        return;
-    }
     //Iterate for each charge
     for (var heightLoc = 0; heightLoc <= (height/(10*gridSpacing*vectorFreq)); heightLoc++){
       for (var widthLoc = 0; widthLoc <= (width/(10*gridSpacing*vectorFreq)); widthLoc++){
@@ -244,23 +323,38 @@ function redraw_fieldvectors() {
             var final_theta_rad = Math.atan2(total_forceY, total_forceX);
             var final_theta_deg = final_theta_rad * (180.0 / Math.PI);
             var final_mag = Math.sqrt(total_forceX*total_forceX + total_forceY*total_forceY);
-            console.log("Final forceX: " + total_forceX + " forceY: " + total_forceY + " => " + final_theta_deg, " mag: " + final_mag);
+            if(!isNaN(final_mag)){
+              maxForce = Math.max(maxForce, Math.abs(final_mag));
+              console.log("Final forceX: " + total_forceX + " forceY: " + total_forceY + " => " + final_theta_deg, " mag: " + final_mag);
 
-            var final_dx = Math.cos(final_theta_rad) * pointVectorScale(final_mag);
-            var final_dy = Math.sin(final_theta_rad) * pointVectorScale(final_mag);
-            console.log(" ** final_dx : " + final_dx + "  final_dy: " + final_dy + "  ");
-            svg.append("line")          // attach a line
-                .attr("class", "resultvector")
-                .attr("marker-end", "url(#arrow)")
-                .attr("x1", curX)     // x position of the first end of the line
-                .attr("y1", height - curY)      // y position of the first end of the line
-                .attr("x2", curX + final_dx)     // x position of the second end of the line
-                .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
+              var final_dx = Math.cos(final_theta_rad) * pointVectorScale(final_mag);
+              var final_dy = Math.sin(final_theta_rad) * pointVectorScale(final_mag);
+              console.log(" ** final_dx : " + final_dx + "  final_dy: " + final_dy + "  ");
+            
+              calcVectors.push([final_dx, final_dy, final_theta_rad, curX, curY, final_mag]);
+            }
+            
       }
+   } 
+   for (i= 0; i < calcVectors.length; i++){
+        var vector = calcVectors[i];
+        var stroke = "";
+        var percentage =  Math.max(vector[5] / maxForce, 0.2);
+        var dirX = Math.cos(vector[2]) * 35;
+        var dirY = Math.sin(vector[2]) * 35;
+        svg.append("line")          // attach a line
+          .attr("class", "resultvector")
+          .attr("marker-end", "url(#arrow)")
+          .style("opacity", percentage)
+          .attr("x1", vector[3] - (dirX/2))     // x position of the first end of the line
+          .attr("y1", height - (vector[4] - (dirY/2)))      // y position of the first end of the line
+          .attr("x2", vector[3] + (dirX/2))     // x position of the second end of the line
+          .attr("y2", height - (vector[4] + (dirY/2)));    // y position of the second end of the line
+        
    }
 
     currentTime -= new Date().getTime()
-    console.log("redraw_pointvectors iteration took: " + (-1*currentTime)+"ms." )
+    console.log("redraw_fieldvectors iteration took: " + (-1*currentTime)+"ms." )
 
 
 }

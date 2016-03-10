@@ -58,7 +58,7 @@ function delete_group_response() {
 }
 
 // Changes view from management to creation of classes
-function leave_class_response() {
+function leave_class_response(disconnect) {
     var $create_view = $('.create_view');
     var $manage_view = $('.manage_view');
     var $settings_view = $('.settings_view');
@@ -68,6 +68,10 @@ function leave_class_response() {
     $create_view.show();
     $manage_view.hide();
     $settings_view.hide();
+
+    if(!disconnect){
+        sessionStorage.removeItem('admin_class_id');
+    }
 }
 
 // Adds user information to the proper group
