@@ -35,7 +35,18 @@ defs.append("marker")
     })
     .append("path")
       .attr("d", "M-2,5L8,0L8,10");
-      
+defs.append("marker")
+  .attr({
+    "id":"testArrow",
+    "viewBox":"0 0 10 10",
+    "refX":0,
+    "refY":5,
+    "markerWidth":3,
+    "markerHeight":4,
+    "orient":"auto"
+  })
+  .append("path")
+    .attr("d", "M0,0L10,5L0,10");
 
 function redraw_pointvectors() {
     var currentTime = new Date().getTime();
