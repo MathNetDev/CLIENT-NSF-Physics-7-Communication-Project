@@ -88,6 +88,8 @@ var svg = d3.select("#field-container")
     .append("svg")
     .on("mousedown", vectorStart)
     .on("mouseup", vectorEnd)
+	.on("touchstart", vectorStart)
+    .on("touchend", vectorEnd)
     .attr("id", "field-svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
@@ -405,41 +407,43 @@ function changeSelected() {
 
 function vectorStart() {
     if (field_display_settings.draw_vectors === true) {
-	var coordinates = d3.mouse(this);
-	test_vector = svg.append("line")
-	    .attr(
-	    {
-		"class" : "vectors",
-		"x1" : coordinates[0] - margin.left,
-		"y1" : coordinates[1] - margin.top,
-		"x2" : coordinates[0] - margin.left,
-		"y2" : coordinates[1] - margin.top,
-		"stroke" : "steelblue",
-		"stroke-width" : "4px",
-		"opacity" : 0.4,
-		"marker-end": "url(#testArrow)"
-	    })
-	    .on("click", function() {this.remove();});
-	
-	d3.select("#field-svg").on("mousemove", vectorMove);
+		var coordinates = d3.mouse(this);
+		test_vector = svg.append("line")
+			.attr(
+			{
+			"class" : "vectors",
+			"x1" : coordinates[0] - margin.left,
+			"y1" : coordinates[1] - margin.top,
+			"x2" : coordinates[0] - margin.left,
+			"y2" : coordinates[1] - margin.top,
+			"stroke" : "steelblue",
+			"stroke-width" : "4px",
+			"opacity" : 0.4,
+			"marker-end": "url(#testArrow)"
+			})
+			.on("click", function() {this.remove();});
+		
+		d3.select("#field-svg").on("mousemove", vectorMove);
+		d3.select("#field-svg").on("touchmove", vectorMove);
     }
 }
 
 function vectorMove() {
     if (field_display_settings.draw_vectors === true) {
-	var coordinates = d3.mouse(this);
-	test_vector
-	    .attr("x2", coordinates[0] - margin.left)
-	    .attr("y2", coordinates[1] - margin.top);
+		var coordinates = d3.mouse(this);
+		test_vector
+			.attr("x2", coordinates[0] - margin.left)
+			.attr("y2", coordinates[1] - margin.top);
     }
 }
 
 function vectorEnd() {
     if (field_display_settings.draw_vectors === true) {
-	if ((Math.pow((test_vector.attr("y2") - test_vector.attr("y1")), 2)) < 5) {
-	    test_vector.remove();
-	}
-	d3.select("#field-svg").on("mousemove", null);
+		if ((Math.pow((test_vector.attr("y2") - test_vector.attr("y1")), 2)) < 5) {
+			test_vector.remove();
+		}
+		d3.select("#field-svg").on("mousemove", null);
+		d3.select("#field-svg").on("touchmove", null);
     }
 }
 
