@@ -83,6 +83,10 @@ function group_join_response(username, class_id, group_id) {
     $class_view.hide();
     $group_view.show();
 
+    // Clear points and redraw
+    users = [];
+    redraw();
+    
     sessionStorage.setItem('group_id', group_id);
 
     socket.group_info(username, class_id, group_id, true);
