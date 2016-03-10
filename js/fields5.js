@@ -143,6 +143,7 @@ function redraw() {
     d3.selectAll(".field").remove();
     d3.selectAll(".pointvector").remove();
     d3.selectAll(".resultvector").remove();
+    d3.selectAll(".testvector").remove();
 
     d3.selectAll("circle").remove();
     d3.selectAll(".name").remove();

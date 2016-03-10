@@ -47,6 +47,18 @@ defs.append("marker")
   })
   .append("path")
     .attr("d", "M0,0L10,5L0,10");
+defs.append("marker")
+  .attr({
+    "id":"testChargeArrow",
+    "viewBox":"0 0 10 10",
+    "refX":0,
+    "refY":5,
+    "markerWidth":3,
+    "markerHeight":4,
+    "orient":"auto"
+  })
+  .append("path")
+    .attr("d", "M0,0L10,5L0,10");
 
 function redraw_pointvectors() {
     var currentTime = new Date().getTime();
@@ -240,8 +252,8 @@ function redraw_testvector(){
             var final_dy = Math.sin(final_theta_rad) * pointVectorScale(final_mag);
             if(polarity === 1){
               svg.append("line")          // attach a line
-                  .attr("class", "resultvector")
-                  .attr("marker-end", "url(#arrow)")
+                  .attr("class", "testvector")
+                  .attr("marker-end", "url(#testChargeArrow)")
                   .attr("x1", curX)     // x position of the first end of the line
                   .attr("y1", height - curY)      // y position of the first end of the line
                   .attr("x2", curX + final_dx)     // x position of the second end of the line

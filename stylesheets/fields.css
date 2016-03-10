@@ -33,6 +33,11 @@ body {
     stroke-width:3;
     stroke-dasharray:0; 
 }
+#testChargeArrow{
+    fill: rgb(187, 96, 187);
+    stroke-width:3;
+    stroke-dasharray:0; 
+}
 
 ellipse {
   fill: none;
@@ -59,7 +64,12 @@ circle, .line {
   stroke-opacity:0.4;
   stroke-width: 2px;
 }
-
+.testvector {
+  fill: none;
+  stroke: rgb(187, 96, 187);
+  stroke-opacity:0.4;
+  stroke-width: 4px;
+}
 .resultvector {
   fill: none;
   stroke: red;
