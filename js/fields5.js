@@ -25,6 +25,8 @@ var LABEL_Y_SPACING = 1.2;
 var MAX_ABS_CHARGE = 10;
 var CHARGE_STEP = 5;
 
+var MIN_VECTOR_LENGTH = 10;
+
 var colors = ["red","green"];
 
 // Need margin spacing to make room for axes
@@ -90,6 +92,7 @@ var svg = d3.select("#field-container")
     .on("mouseup", vectorEnd)
 	.on("touchstart", vectorStart)
     .on("touchend", vectorEnd)
+	.on("touchcancel", vectorEnd)
     .attr("id", "field-svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
@@ -421,7 +424,13 @@ function vectorStart() {
 			"opacity" : 0.4,
 			"marker-end": "url(#testArrow)"
 			})
-			.on("click", function() {this.remove();});
+			.on("click", function() {this.remove();})
+			.on("touchstart", function() {this.remove();});
+		
+		// Prevent scrolling while drawing lines
+		$('html, body').on('touchmove', function(e){ 
+			e.preventDefault(); 
+		});
 		
 		d3.select("#field-svg").on("mousemove", vectorMove);
 		d3.select("#field-svg").on("touchmove", vectorMove);
@@ -439,9 +448,11 @@ function vectorMove() {
 
 function vectorEnd() {
     if (field_display_settings.draw_vectors === true) {
-		if ((Math.pow((test_vector.attr("y2") - test_vector.attr("y1")), 2)) < 5) {
+		if ((Math.pow((test_vector.attr("y2") - test_vector.attr("y1")), 2)) < MIN_VECTOR_LENGTH) {
 			test_vector.remove();
 		}
+		
+		$('html, body').off('touchmove');
 		d3.select("#field-svg").on("mousemove", null);
 		d3.select("#field-svg").on("touchmove", null);
     }
