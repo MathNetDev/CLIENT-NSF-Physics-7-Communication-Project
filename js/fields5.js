@@ -107,7 +107,8 @@ var drag = d3.behavior.drag()
     .on("dragend", dragend);
     
 // Vector drawing
-var test_vector;
+var drawn_vector;
+var drawn_vectors = [];
 
 //use d3.svg.line for rendering field lines and equipotential surfaces
 var line = d3.svg.line();
@@ -244,6 +245,7 @@ function redraw_charges() {
 
     circles.exit().remove();
 }
+
 function redraw_testcharge(){
     console.log("redraw_testcharge()");
 
@@ -268,6 +270,14 @@ function redraw_testcharge(){
 
     charge.exit().remove();
     redraw_testvector();
+}
+
+function remove_drawn_vectors() {
+	$.each(drawn_vectors, function(i, vector) {
+		vector.remove();
+	})
+	
+	drawn_vectors = [];
 }
 
 /*-------------------  Scales ----------------------*/
@@ -412,7 +422,7 @@ function changeSelected() {
 function vectorStart() {
     if (field_display_settings.draw_vectors === true) {
 		var coordinates = d3.mouse(this);
-		test_vector = svg.append("line")
+		drawn_vector = svg.append("line")
 			.attr(
 			{
 			"class" : "vectors",
@@ -441,7 +451,7 @@ function vectorStart() {
 function vectorMove() {
     if (field_display_settings.draw_vectors === true) {
 		var coordinates = d3.mouse(this);
-		test_vector
+		drawn_vector
 			.attr("x2", coordinates[0] - margin.left)
 			.attr("y2", coordinates[1] - margin.top);
     }
@@ -449,8 +459,12 @@ function vectorMove() {
 
 function vectorEnd() {
     if (field_display_settings.draw_vectors === true) {
-		if ((Math.pow((test_vector.attr("y2") - test_vector.attr("y1")), 2)) < MIN_VECTOR_LENGTH) {
-			test_vector.remove();
+		if ((Math.pow((drawn_vector.attr("y2") - drawn_vector.attr("y1")), 2) +
+			 Math.pow((drawn_vector.attr("x2") - drawn_vector.attr("x1")), 2)) < MIN_VECTOR_LENGTH) {
+			drawn_vector.remove();
+		}
+		else {
+			drawn_vectors.push(drawn_vector);
 		}
 		
 		$('html, body').off('touchmove');

@@ -85,7 +85,7 @@ function group_join_response(username, class_id, group_id) {
 
     // Clear points and redraw
     users = [];
-    //redraw();
+    remove_drawn_vectors();
     
     sessionStorage.setItem('group_id', group_id);
 
