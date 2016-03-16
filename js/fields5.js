@@ -148,7 +148,7 @@ function redraw() {
 
     d3.selectAll("circle").remove();
     d3.selectAll(".name").remove();
-    d3.selectAll(".axes").remove();
+    d3.selectAll(".axis").remove();
     d3.selectAll("ellipse").remove();
     // Draw the surfaces - these functions in field_lines.js
     // var currentTime = new Date().getTime();
@@ -295,27 +295,32 @@ var pointVectorScale = d3.scale.sqrt().domain([-250.0, 250.0]).rangeRound([-100,
 /*-------------------  Axes ----------------------*/
 
 var xAxis = d3.svg.axis()
-    .scale(xScale)
-    .orient("bottom");
+		.scale(xScale)
+		.orient("bottom")
+		.innerTickSize(-height)
+		.outerTickSize(0)
+		.tickPadding(verticalBlock/gridSpacing);
 
 var yAxis = d3.svg.axis()
-    .scale(yScale)
-    .orient("left");
+		.scale(yScale)
+		.orient("left")
+		.innerTickSize(-width)
+		.outerTickSize(0)
+		.tickPadding(horizontalBlock/gridSpacing);
 
 function redraw_axes()
 {
     svg.append("g")
-	.attr("class", "axes")
-	.attr("transform", "translate(0," + (height + axisPadding) + ")")
-	.call(xAxis);
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(xAxis);
 
     svg.append("g")
-	.attr("class", "axes")
-	.attr("transform", "translate(" + -axisPadding + ",0)")
-	.call(yAxis);
+		.attr("class", "y axis")
+		.call(yAxis);
 	
     /*-------------------  Grid ----------------------*/
-    
+    /*
     // draw grid lines for y values
     svg.selectAll("line.yLineGrid").data(yScale.ticks(verticalBlock/gridSpacing)).enter()
 	.append("line")
@@ -350,6 +355,7 @@ function redraw_axes()
 		"opacity" : "0.2"
 		
 	    });
+	    */
 }
 
 /*
