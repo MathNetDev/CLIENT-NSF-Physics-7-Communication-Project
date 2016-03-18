@@ -34,9 +34,13 @@ function add_class_response(class_id, class_name, group_count) {
     var group_number = parseInt(group_count);
     for (var group=1; group < group_number+1; group++) {
         groups_html += "<li>Group " + group;
-        groups_html += "<ul class='g" + group + "'></ul></li>";
+        groups_html += "<div class='g" + group + "'></div></li>";
     }
     $groups.html(groups_html);
+    
+    for (var group=1; group < group_number+1; group++) {
+        draw_mirror(".g"+group)
+    }
 }
 
 // Adds a group to the end of the list
