@@ -39,7 +39,8 @@ function add_class_response(class_id, class_name, group_count) {
     $groups.html(groups_html);
     
     for (var group=1; group < group_number+1; group++) {
-        draw_mirror(".g"+group)
+        draw_mirror(".g"+group);
+        users.push([]);
     }
 }
 
@@ -93,11 +94,15 @@ function group_info_response(username, class_id, group_id, group, status) {
             member += '</li>';
             $people.append(member);
         }
+        field_sync_users(group_id, group);
     }
     else {
         username = username.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
         username = escapeStr(username);
         $('li[id="' + username + '"]').remove();
+        console.log(group_id);
+        field_remove_user(username, group_id);
+        field_sync_users(group_id, group);
     }
 }
 
@@ -106,4 +111,5 @@ function coordinate_change_response(username, class_id, group_id, x, y, info) {
     username = escapeStr(username);
     $('li[id="' + username + '"] .x').html(x);
     $('li[id="' + username + '"] .y').html(y);
+    field_move_users(username, group_id, x, y, info);
 }

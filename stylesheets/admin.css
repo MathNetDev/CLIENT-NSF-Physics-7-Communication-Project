@@ -22,3 +22,9 @@
   border-width: 1px; */
   margin:10px;
 }
+circle {
+  fill: #fff;
+  cursor: move;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}

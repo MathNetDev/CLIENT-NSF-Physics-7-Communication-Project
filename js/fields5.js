@@ -178,7 +178,7 @@ function redraw() {
         redraw_testcharge();
     }
 
-    checkForZeros();
+    //checkForZeros();
 }
 function checkForZeros() {
     var zeroCharge = svg.selectAll("circle")
