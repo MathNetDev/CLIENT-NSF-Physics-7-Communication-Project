@@ -301,7 +301,7 @@ function field_remove_user(username, group_id) {
     username = username.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
     // remove user that has left the group - must work backwards in case there are multiple deletes
 
-    for(var i = users[group_id-1].length-1; i > 0; i--) {
+    for(var i = users[group_id-1].length-1; i > -1; i--) {
         if (users[group_id-1][i].name === username) {
             console.log("field_remove_user: removing " + users[i].name);
             users[group_id-1].splice(i, 1);
