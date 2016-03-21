@@ -66,7 +66,10 @@ function draw_mirror(selector) {
         .append("svg")
         .attr("id", "field-svg")
         .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom);
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("id", "trans")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
       
         
     redraw_axes(svg);
@@ -89,8 +92,7 @@ function redraw(group_id, users) {
 
 function redraw_axes(svg)
 {
-    svg = svg.append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    svg = svg.selectAll("#trans");
     svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height + ")")
