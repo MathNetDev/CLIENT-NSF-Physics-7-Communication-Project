@@ -73,7 +73,6 @@ function draw_mirror(selector) {
 }
 
 function redraw(group_id, users) {
-    console.log("redraw...");
     var selector = ".g" + group_id + " #field-svg";
     var svg = d3.select(selector)
 
@@ -214,22 +213,13 @@ function field_sync_users(group, other_members) {
     
         }
     
-        // remove any users that have left - must work backwards in case there are multiple deletes
-        // for(var i = users.length; i--;) {
-        //     if (!active_member(other_members, users[i].name)) {
-        //         console.log("field_sync: did not find " + users[i].name + " in active members");
-        //         users.splice(i, 1);
-        //     }
-        // }
-    
-    
         // need to 
         redraw(group, users);
     }
     function find_user(user_name, group) {
     for (var i in users[group-1]) {
         if (users[group-1][i].name === user_name) {
-            return users[i];
+            return users[group-1][i];
         }
     }
     return null;
@@ -237,10 +227,7 @@ function field_sync_users(group, other_members) {
     function field_move_users(username, group_id, x_coord, y_coord, info) {
     console.log("field_move_users called.");
     username = username.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-    console.log(username);
-    console.log(group_id);
     var user_data = find_user(username, group_id);
-    console.log(user_data);
     if (user_data) {
         console.log("updating user_data for user: " + username);
 
@@ -286,7 +273,7 @@ function field_sync_users(group, other_members) {
         user_data.x = xScale(x_coord);
         user_data.y = yScale(y_coord);
         console.log(find_user(username, group_id));
-        console.log(yScale(y_coord));
+        console.log(yScale(y_coord)); //updates properly
 
 
     } else {
@@ -308,219 +295,3 @@ function field_remove_user(username, group_id) {
         }
     }
 }
-/*
-function draw_mirror(selector, data) {
-
-  
-    
-    
-    function field_sync_users(other_members) {
-    
-        // get list of user names we are already tracking
-        var known_users = users.map(function(d) {return d.name;});
-    
-        // add any new users 
-        for (var i in other_members) {
-            other_members[i].member_name = other_members[i].member_name.replace(/&lt;/g,'<').replace(/&gt;/g, '>');
-            // test to see if this member_name is known, if not, add this user to users
-            if (known_users.indexOf(other_members[i].member_name) == -1) {
-    
-                var user_obj = {"name":other_members[i].member_name, 
-                        "x":xScale(other_members[i].member_x),
-                        "y":yScale(other_members[i].member_y),
-                        "x0":null, "y0":null,
-                        "charge":null, "radius":null, "active":false, "color":null};
-    
-                users.push(user_obj);
-    
-                // check various cases of where this user is in initialization
-                // 1) Is this me?
-                if (user_obj.name === sessionStorage.getItem('username')) {
-                    console.log("Found self - *** set selected");
-                    // set selected to myself
-                    selected = user_obj;
-    
-                    // my member_info field should be ""
-                    if (other_members[i].member_info === "") {
-                        console.log("Got expected member_info == ''");
-                        // go ahead and set my charge 
-                        // generate a random integer charge magnitude between 1 and MAX_ABS_CHARGE
-                        var rad = Math.floor(Math.random() * MAX_ABS_CHARGE) + 1;
-                        // randomly select pos or neg for the charge
-                        var chg = (Math.random() < 0.5) ? rad * -1 : rad;
-                        // based on -/+, select the color: red / green
-                        var col = (chg < 0.0) ? colors[0] : colors[1];
-    
-                        // update my user_obj
-                        user_obj.active = true;
-                        user_obj.charge = chg;
-                        user_obj.radius = rad;
-                        user_obj.color = col;
-    
-    
-                        // this code is also used by standalone, single user app,
-                        // in which case socket will not be defined.
-                        if (typeof(socket) !== 'undefined') {
-                            var info_object = {
-                                state:"initialized",
-                                charge:user_obj.charge,
-                                radius:user_obj.radius,
-                                color:user_obj.color
-                            };
-                            socket.coordinate_change(sessionStorage.getItem('username'),
-                                     sessionStorage.getItem('class_id'),
-                                     sessionStorage.getItem('group_id'),
-                                     0,     // dx
-                                     0,     // dy
-                                     info_object
-                                    );
-                        } else {
-                            console.log("typeof(socket) is undefined - this must be local mode");
-                        }
-                    } else {
-                        console.log("ERROR: Did not expect member_info to be NON-NULL at this point!");
-                        console.log(other_members[i]);
-                    }
-                } else {
-                    console.log("Adding OTHER user to my users list");
-    
-                    if (other_members[i].member_info !== "") {
-                        console.log("Got expected member_info !== ''");
-    
-                        var info_obj = JSON.parse(other_members[i].member_info);
-                        console.log(info_obj);
-    
-                        if (info_obj.hasOwnProperty('charge')) {
-                            console.log("Found'charge' property in info_obj");
-                            user_obj.charge = info_obj.charge;
-                        } else {
-                            console.log("ERROR: Did not find 'charge' property in info_obj");
-                        }
-    
-                        if (info_obj.hasOwnProperty('radius')) {
-                            console.log("Found'radius' property in info_obj");
-                            user_obj.radius = info_obj.radius;
-                        } else {
-                            console.log("ERROR: Did not find 'radius' property in info_obj");
-                        }
-    
-                        if (info_obj.hasOwnProperty('color')) {
-                            console.log("Found'color' property in info_obj");
-                            user_obj.color = info_obj.color;
-                        } else {
-                            console.log("ERROR: Did not find 'color' property in info_obj");
-                        }
-    
-                    } else {
-                        console.log("*** Adding OTHER but there is no member_info - is this okay?");
-                    }
-    
-                }
-    
-            } else {
-                //update info in case
-                console.log("Username " + other_members[i].member_name + " already in users list!");
-            }
-    
-        }
-    
-        // remove any users that have left - must work backwards in case there are multiple deletes
-        // for(var i = users.length; i--;) {
-        //     if (!active_member(other_members, users[i].name)) {
-        //         console.log("field_sync: did not find " + users[i].name + " in active members");
-        //         users.splice(i, 1);
-        //     }
-        // }
-    
-    
-        // need to 
-        redraw();
-    }
-        
-    
-    function find_user(user_name) {
-        for (var i in users) {
-            if (users[i].name === user_name) {
-                return users[i];
-            }
-        }
-        return null;
-    }
-    
-    
-    // this function gets called each time any single user moves their point
-    // data is an object containing the user's name, and new x_coord and y_coord.
-    function field_move_users(username, x_coord, y_coord, info) {
-        console.log("field_move_users called.");
-        username = username.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-        console.log(username);
-        var user_data = find_user(username);
-        console.log(user_data);
-        if (user_data) {
-            console.log("updating user_data for user: " + username);
-    
-            // make any necessary updates to our local information from OTHERs based on member_info
-            if (username !== sessionStorage.username) {
-    
-                if (info === "" || info === null || info == "null") {
-                    console.log("WARNING: info is null - must have been an arrow push!");
-                } else {
-                    console.log(info);
-                    console.log("typeof(info) = " + typeof(info) + " converting to obj");
-    
-                    var info_obj = JSON.parse(info);
-                    console.log(info_obj);
-    
-                    if (info_obj.hasOwnProperty('charge')) {
-                        console.log("Found'charge' property in info_obj");
-                        user_data.charge = info_obj.charge;
-                    } else {
-                        console.log("ERROR: Did not find 'charge' property in info_obj");
-                    }
-    
-                    if (info_obj.hasOwnProperty('radius')) {
-                        console.log("Found'radius' property in info_obj");
-                        user_data.radius = info_obj.radius;
-                    } else {
-                        console.log("ERROR: Did not find 'radius' property in info_obj");
-                    }
-    
-                    if (info_obj.hasOwnProperty('color')) {
-                        console.log("Found'color' property in info_obj");
-                        user_data.color = info_obj.color;
-                    } else {
-                        console.log("ERROR: Did not find 'color' property in info_obj");
-                    }
-                } 
-    
-            } else {
-                console.log("Don't need to update charge from coord_change for SELF.");
-            }
-    
-            // also update the coordinates
-            user_data.x = xScale(x_coord);
-            user_data.y = yScale(y_coord);
-    
-    
-        } else {
-            console.log("ERROR: Oh, oh: got a move_user message about somebody we don't know: " + username);
-            console.log("TODO: could add this user here???");
-        }
-    
-        redraw();
-    }
-    
-    function field_remove_user(username) {
-        console.log("*** field_remove_user ***");
-        username = username.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-        // remove user that has left the group - must work backwards in case there are multiple deletes
-        for(var i = users.length; i--;) {
-            if (users[i].name === username) {
-                console.log("field_remove_user: removing " + users[i].name);
-                users.splice(i, 1);
-            }
-        }
-    }
-
-}
-*/
