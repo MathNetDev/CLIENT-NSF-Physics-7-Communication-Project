@@ -71,7 +71,6 @@ function draw_mirror(selector) {
         .attr("id", "trans")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
       
-        
     redraw_axes(svg);
 }
 
@@ -162,8 +161,8 @@ function field_sync_users(group, other_members) {
             if (known_users.indexOf(other_members[i].member_name) == -1) {
     
                 var user_obj = {"name":other_members[i].member_name, 
-                        "x":xScale(other_members[i].member_x),
-                        "y":yScale(other_members[i].member_y),
+                        "x":xScale(other_members[i].member_x)+40,
+                        "y":yScale(other_members[i].member_y)+40,
                         "x0":null, "y0":null,
                         "charge":null, "radius":null, "active":false, "color":null};
     
@@ -272,8 +271,8 @@ function field_sync_users(group, other_members) {
         }
 
         // also update the coordinates
-        user_data.x = xScale(x_coord);
-        user_data.y = yScale(y_coord);
+        user_data.x = xScale(x_coord)+40;
+        user_data.y = yScale(y_coord)+40;
         console.log(find_user(username, group_id));
         console.log(yScale(y_coord)); //updates properly
 

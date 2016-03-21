@@ -749,7 +749,6 @@ function field_remove_user(username) {
     }
 }
 
-
 function notify_group(dx, dy) {
 
     var user_obj = find_user(sessionStorage.getItem('username'));
@@ -776,7 +775,6 @@ function notify_group(dx, dy) {
     }
 }
 
-
 /*-------------------  Options processing -----------------*/
 
 function update_display_settings () {
@@ -798,4 +796,3 @@ function update_display_settings () {
     redraw();
 
 }
-
