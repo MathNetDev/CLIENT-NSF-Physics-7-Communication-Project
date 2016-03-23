@@ -111,8 +111,8 @@ function redraw_labels(svg, users) {
         .enter().append("text")
         .attr("name", function (d) { return d.name; })
         .attr("charge", function (d) { return d.charge})
-        .attr("x", function(d) { return d.x - AVE_DOT_SIZE; })
-        .attr("y", function(d) { return d.y - AVE_DOT_SIZE*LABEL_Y_SPACING; })
+        .attr("x", function(d) { return d.x - AVE_DOT_SIZE - (d.radius/2); })
+        .attr("y", function(d) { return d.y - AVE_DOT_SIZE*LABEL_Y_SPACING - (d.radius/2); })
         .text(function(d) { return d.name; });
         //.call(drag);
 }
@@ -132,9 +132,9 @@ function redraw_charges(svg, users) {
                     .attr("x0", function (d) { return d.x0; })
                     .attr("y0", function (d) { return d.y0; })
                     .attr("charge", function (d) { return d.charge; })
-                    .attr("r", function (d) { return /*field_display_settings.show_particle_size ? partSizeScale(d.radius) :*/ AVE_DOT_SIZE; })
+                    .attr("r", function (d) { return  partSizeScale(d.radius) /*: AVE_DOT_SIZE*/; })
                     .attr("active", function(d) { return d.active; })
-                    .style("fill", function(d) { return /*field_display_settings.show_particle_charge ? d.color :*/ "LightGray"; });
+                    .style("fill", function(d) { return  d.color /*: "LightGray"*/; });
 
     circles.exit().remove();
 }

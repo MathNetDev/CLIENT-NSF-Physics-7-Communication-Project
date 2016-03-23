@@ -7,7 +7,7 @@ var users = [];
     {"name":"BBB", "x0": -1, "y0": -1, "x": 70, "y": 70, "radius": 20, "color" : "purple", "active": true },
     {"name":"CCC", "x0": -1, "y0": -1, "x": 110, "y": 100, "radius": 20, "color" : "red", "active": false }]; */
 var testCharge = [{"name" : "test_charge", "x":300, "y":200, "x0":null,
-            "y0":null, "charge":1, "rx":2, "ry":2, "active":true, "color":"purple"
+            "y0":null, "charge":1, "rx":2, "ry":2, "active":true, "color":"rgba(128, 0, 128, 0.7)"
         }];
 //create var for testcharge to see if it exists
 
@@ -27,7 +27,7 @@ var CHARGE_STEP = 5;
 
 var MIN_VECTOR_LENGTH = 10;
 
-var colors = ["red","green"];
+var colors = ["rgba(255, 0, 0, 0.7)","rgba(0, 128, 0, 0.7)"];
 
 // Need margin spacing to make room for axes
 var margin = {top: 40, right: 40, bottom: 40, left: 40},
@@ -200,8 +200,8 @@ function redraw_labels() {
 	    .classed("selected", function(d) { return d === selected; })
         .attr("name", function (d) { return d.name; })
         .attr("charge", function (d) { return d.charge})
-	    .attr("x", function(d) { return d.x - AVE_DOT_SIZE; })
-	    .attr("y", function(d) { return d.y - AVE_DOT_SIZE*LABEL_Y_SPACING; })
+	    .attr("x", function(d) { return field_display_settings.show_particle_size ? (d.x - AVE_DOT_SIZE - (d.radius/2)) : (d.x - AVE_DOT_SIZE); })
+	    .attr("y", function(d) { return field_display_settings.show_particle_size ? (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING - (d.radius/2)) : (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING); })
 	    .text(function(d) { return d.name; });
 	    //.call(drag);
 }
