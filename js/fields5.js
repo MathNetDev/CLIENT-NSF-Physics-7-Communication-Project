@@ -13,7 +13,7 @@ var testCharge = [{"name" : "test_charge", "x":300, "y":200, "x0":null,
 
 // currently selected charge
 var selected = null;
-
+var startCharge = 10;
 
 var MIN_DOT_SIZE = 10;
 var MAX_DOT_SIZE = 20;
@@ -528,9 +528,9 @@ function field_sync_users(other_members) {
                     console.log("Got expected member_info == ''");
                     // go ahead and set my charge 
                     // generate a random integer charge magnitude between 1 and MAX_ABS_CHARGE
-                    var rad = Math.floor(Math.random() * MAX_ABS_CHARGE) + 1;
+                    var rad = startCharge;;
                     // randomly select pos or neg for the charge
-                    var chg = (Math.random() < 0.5) ? rad * -1 : rad;
+                    var chg =  startCharge * -1 ;
                     // based on -/+, select the color: red / green
                     var col = (chg < 0.0) ? colors[0] : colors[1];
 
