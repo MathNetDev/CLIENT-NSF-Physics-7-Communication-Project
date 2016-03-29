@@ -164,10 +164,10 @@ function redraw_forcevectors() {
             svg.append("line")          // attach a line
                   .attr("class", "resultvector")
                   .attr("marker-start", "url(#revArrow)")
-                  .attr("x2", curX)     // x position of the first end of the line
-                  .attr("y2", height - curY)      // y position of the first end of the line
-                  .attr("x1", curX + final_dx)     // x position of the second end of the line
-                  .attr("y1", height - (curY + final_dy));    // y position of the second end of the line
+                  .attr("x1", curX)     // x position of the first end of the line
+                  .attr("y1", height - curY)      // y position of the first end of the line
+                  .attr("x2", curX + final_dx)     // x position of the second end of the line
+                  .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
           }
     // }
 

@@ -162,9 +162,7 @@ function redraw() {
     if (field_display_settings.show_equipotentials === true) {
         redraw_equipotentials();
     }
-    if (field_display_settings.show_fieldvectors === true) {
-        redraw_fieldvectors();
-    }
+   
     if (field_display_settings.show_labels === true && field_display_settings.show_points === true) {
 	   redraw_labels();
     }
@@ -176,6 +174,9 @@ function redraw() {
     }
     if (field_display_settings.show_testcharge === true) {
         redraw_testcharge();
+    }
+	 if (field_display_settings.show_fieldvectors === true) {
+        redraw_fieldvectors();
     }
 
     //checkForZeros();
