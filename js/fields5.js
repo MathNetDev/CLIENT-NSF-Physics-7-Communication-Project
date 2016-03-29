@@ -68,18 +68,18 @@ d3.range(-MAX_ABS_CHARGE, MAX_ABS_CHARGE+1, CHARGE_STEP).map(function(i){
     if (i !== 0) {
         d3.select("#charge").append("option")
             .attr("value", i)
-            .text(i + "uC"); 
+            .text(i + "μC"); 
     }
     else {
          d3.select("#charge").append("option")
             .attr("value", -1)
-            .text(-1 + "uC");
+            .text(-1 + "μC");
         d3.select("#charge").append("option")
             .attr("value", 0)
-            .text(0 + "uC");
+            .text(0 + "μC");
          d3.select("#charge").append("option")
             .attr("value", 1)
-            .text((i+1) + "uC"); 
+            .text((i+1) + "μC"); 
     }
 });
 
