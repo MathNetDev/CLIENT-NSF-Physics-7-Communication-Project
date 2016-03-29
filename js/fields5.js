@@ -52,7 +52,7 @@ var field_display_settings = {
     'show_particle_size': false,
     'show_equipotentials': false,
     'show_fieldlines':false, 
-    'show_pointvectors':false,
+    'show_forcevectors':false,
     'show_fieldvectors':false,
     'show_movement': false,
     'show_labels': true,
@@ -171,8 +171,8 @@ function redraw() {
     if (field_display_settings.show_points === true) {
         redraw_charges();
     }
-    if (field_display_settings.show_pointvectors === true) {
-        redraw_pointvectors();
+    if (field_display_settings.show_forcevectors === true) {
+        redraw_forcevectors();
     }
     if (field_display_settings.show_testcharge === true) {
         redraw_testcharge();

@@ -60,7 +60,7 @@ defs.append("marker")
   .append("path")
     .attr("d", "M0,0L10,5L0,10");
 
-function redraw_pointvectors() {
+function redraw_forcevectors() {
     var currentTime = new Date().getTime();
 
     if (selected === null)
@@ -156,23 +156,23 @@ function redraw_pointvectors() {
               svg.append("line")          // attach a line
                   .attr("class", "resultvector")
                   .attr("marker-end", "url(#arrow)")
-                  .attr("x1", curX - (final_dx/2))     // x position of the first end of the line
-                  .attr("y1", height - (curY - (final_dy/2)))      // y position of the first end of the line
-                  .attr("x2", curX + (final_dx/2))     // x position of the second end of the line
-                  .attr("y2", height - (curY + (final_dy/2)));    // y position of the second end of the line
+                  .attr("x1", curX)     // x position of the first end of the line
+                  .attr("y1", height - curY)      // y position of the first end of the line
+                  .attr("x2", curX + final_dx)     // x position of the second end of the line
+                  .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
           } else if (polarity == -1) {
             svg.append("line")          // attach a line
                   .attr("class", "resultvector")
                   .attr("marker-start", "url(#revArrow)")
-                  .attr("x1", curX - (final_dx/2))     // x position of the first end of the line
-                  .attr("y1", height - (curY - (final_dy/2)))      // y position of the first end of the line
-                  .attr("x2", curX + (final_dx/2))     // x position of the second end of the line
-                  .attr("y2", height - (curY + (final_dy/2)));    // y position of the second end of the line
+                  .attr("x2", curX)     // x position of the first end of the line
+                  .attr("y2", height - curY)      // y position of the first end of the line
+                  .attr("x1", curX + final_dx)     // x position of the second end of the line
+                  .attr("y1", height - (curY + final_dy));    // y position of the second end of the line
           }
     // }
 
     currentTime -= new Date().getTime()
-    console.log("redraw_pointvectors iteration took: " + (-1*currentTime)+"ms." )
+    console.log("redraw_forcevectors iteration took: " + (-1*currentTime)+"ms." )
 
 }
 function redraw_testvector(){

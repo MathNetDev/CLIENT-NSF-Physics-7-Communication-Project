@@ -18,12 +18,12 @@ body {
 }
 
 #revArrow{
-    fill: #FF0000;
+    fill: mediumseagreen;
     stroke-width:3;
     stroke-dasharray:0; 
 }
 #arrow{
-    fill: #FF0000;
+    fill: mediumseagreen;
     stroke-width:3;
     stroke-dasharray:0; 
 }
@@ -72,7 +72,7 @@ circle, .line {
 }
 .resultvector {
   fill: none;
-  stroke: red;
+  stroke: mediumseagreen;
   stroke-opacity:0.4;
   stroke-width: 4px;
 }
