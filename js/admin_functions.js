@@ -54,6 +54,8 @@ function add_group_response() {
     new_group += "<li>Group " + group_number;
     new_group += "<ul class='g" + group_number + "'></ul></li>";
     $groups.append(new_group);
+    draw_mirror(".g"+group_number);
+    users.push([]);
 }
 
 // Deletes the last group from the list
