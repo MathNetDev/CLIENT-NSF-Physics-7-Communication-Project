@@ -290,7 +290,7 @@ function field_remove_user(username, group_id) {
 
     for(var i = users[group_id-1].length-1; i > -1; i--) {
         if (users[group_id-1][i].name === username) {
-            console.log("field_remove_user: removing " + users[i].name);
+            console.log("field_remove_user: removing " + users[group_id-1][i].name);
             users[group_id-1].splice(i, 1);
         }
     }
