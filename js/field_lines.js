@@ -175,7 +175,7 @@ function redraw_forcevectors() {
           } else if (polarity == -1) {
             svg.append("line")          // attach a line
                   .attr("class", "resultvector")
-                  .attr("marker-start", "url(#arrow)")
+                  .attr("marker-end", "url(#arrow)")
                   .attr("x1", curX)     // x position of the first end of the line
                   .attr("y1", height - curY)      // y position of the first end of the line
                   .attr("x2", curX + final_dx)     // x position of the second end of the line
