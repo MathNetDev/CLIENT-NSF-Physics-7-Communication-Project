@@ -18,12 +18,17 @@ body {
 }
 
 #revArrow{
-    fill: #FF0000;
+    fill: red;
     stroke-width:3;
     stroke-dasharray:0; 
 }
 #arrow{
-    fill: #FF0000;
+    fill: red;
+    stroke-width:3;
+    stroke-dasharray:0; 
+}
+#forceArrow{
+    fill: mediumseagreen;
     stroke-width:3;
     stroke-dasharray:0; 
 }
@@ -76,7 +81,12 @@ circle, .line {
   stroke-opacity:0.4;
   stroke-width: 4px;
 }
-
+.forcevector {
+  fill: none;
+  stroke: mediumseagreen;
+  stroke-opacity:0.4;
+  stroke-width: 4px;
+}
 circle {
   fill: #fff;
   cursor: move;

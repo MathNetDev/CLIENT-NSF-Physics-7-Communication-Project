@@ -13,7 +13,7 @@ var testCharge = [{"name" : "test_charge", "x":300, "y":200, "x0":null,
 
 // currently selected charge
 var selected = null;
-
+var startCharge = 10;
 
 var MIN_DOT_SIZE = 10;
 var MAX_DOT_SIZE = 20;
@@ -52,7 +52,7 @@ var field_display_settings = {
     'show_particle_size': false,
     'show_equipotentials': false,
     'show_fieldlines':false, 
-    'show_pointvectors':false,
+    'show_forcevectors':false,
     'show_fieldvectors':false,
     'show_movement': false,
     'show_labels': true,
@@ -68,18 +68,18 @@ d3.range(-MAX_ABS_CHARGE, MAX_ABS_CHARGE+1, CHARGE_STEP).map(function(i){
     if (i !== 0) {
         d3.select("#charge").append("option")
             .attr("value", i)
-            .text(i + "uC"); 
+            .text(i + "μC"); 
     }
     else {
          d3.select("#charge").append("option")
             .attr("value", -1)
-            .text(-1 + "uC");
+            .text(-1 + "μC");
         d3.select("#charge").append("option")
             .attr("value", 0)
-            .text(0 + "uC");
+            .text(0 + "μC");
          d3.select("#charge").append("option")
             .attr("value", 1)
-            .text((i+1) + "uC"); 
+            .text((i+1) + "μC"); 
     }
 });
 
@@ -145,6 +145,7 @@ function redraw() {
     d3.selectAll(".pointvector").remove();
     d3.selectAll(".resultvector").remove();
     d3.selectAll(".testvector").remove();
+    d3.selectAll(".forcevector").remove();
 
     d3.selectAll("circle").remove();
     d3.selectAll(".name").remove();
@@ -162,20 +163,21 @@ function redraw() {
     if (field_display_settings.show_equipotentials === true) {
         redraw_equipotentials();
     }
-    if (field_display_settings.show_fieldvectors === true) {
-        redraw_fieldvectors();
-    }
+   
     if (field_display_settings.show_labels === true && field_display_settings.show_points === true) {
 	   redraw_labels();
     }
     if (field_display_settings.show_points === true) {
         redraw_charges();
     }
-    if (field_display_settings.show_pointvectors === true) {
-        redraw_pointvectors();
+    if (field_display_settings.show_forcevectors === true) {
+        redraw_forcevectors();
     }
     if (field_display_settings.show_testcharge === true) {
         redraw_testcharge();
+    }
+	 if (field_display_settings.show_fieldvectors === true) {
+        redraw_fieldvectors();
     }
 
     //checkForZeros();
@@ -526,9 +528,9 @@ function field_sync_users(other_members) {
                     console.log("Got expected member_info == ''");
                     // go ahead and set my charge 
                     // generate a random integer charge magnitude between 1 and MAX_ABS_CHARGE
-                    var rad = Math.floor(Math.random() * MAX_ABS_CHARGE) + 1;
+                    var rad = startCharge;;
                     // randomly select pos or neg for the charge
-                    var chg = (Math.random() < 0.5) ? rad * -1 : rad;
+                    var chg =  startCharge * -1 ;
                     // based on -/+, select the color: red / green
                     var col = (chg < 0.0) ? colors[0] : colors[1];
 
