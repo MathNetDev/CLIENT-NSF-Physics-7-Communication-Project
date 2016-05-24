@@ -524,7 +524,7 @@ function field_sync_users(other_members) {
                 selected = user_obj;
 
                 // my member_info field should be ""
-                if (other_members[i].member_info === "") {
+                if (typeof other_members[i].member_info === "object" && other_members[i].member_info !== null) {
                     console.log("Got expected member_info == ''");
                     // go ahead and set my charge 
                     // generate a random integer charge magnitude between 1 and MAX_ABS_CHARGE
@@ -567,10 +567,10 @@ function field_sync_users(other_members) {
             } else {
                 console.log("Adding OTHER user to my users list");
 
-                if (other_members[i].member_info !== "") {
+                if (typeof other_members[i].member_info === "object" && other_members[i].member_info !== null){
                     console.log("Got expected member_info !== ''");
 
-                    var info_obj = JSON.parse(other_members[i].member_info);
+                    var info_obj = other_members[i].member_info;
                     console.log(info_obj);
 
                     if (info_obj.hasOwnProperty('charge')) {
@@ -691,13 +691,13 @@ function field_move_users(username, x_coord, y_coord, info) {
         // make any necessary updates to our local information from OTHERs based on member_info
         if (username !== sessionStorage.username) {
 
-            if (info === "" || info === null || info == "null") {
+            if (typeof info === "object" && info !== null) {
                 console.log("WARNING: info is null - must have been an arrow push!");
             } else {
                 console.log(info);
                 console.log("typeof(info) = " + typeof(info) + " converting to obj");
 
-                var info_obj = JSON.parse(info);
+                var info_obj = info;
                 console.log(info_obj);
 
                 if (info_obj.hasOwnProperty('charge')) {

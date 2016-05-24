@@ -121,7 +121,7 @@ function group_info_response(username, class_id, group_id, members, status) {
     //$people.html('');
     if(status){
         for (var i in members) {
-            
+            members[i].member_info = JSON.parse(members[i].member_info);
             if(members[i].member_name.replace(/&lt;/g,'<').replace(/&gt;/g, '>') != current_user) {
                 var member = '<li id="' + members[i].member_name + '">';
                 member += members[i].member_name;
@@ -160,7 +160,7 @@ function coordinate_change_response(username, class_id, group_id, x, y, info) {
 
     $messages.append(username + ' has moved their point to (' 
                           + x + ', ' + y +')<br/>');
-
+    info = JSON.parse(info);
     field_move_users(username, x, y, info);
 }
 
