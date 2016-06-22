@@ -1,14 +1,22 @@
 "use strict";
 
-function escapeStr(str) 
-{
+/**
+ * @function escapeStr
+ * @param {string} str the string to be escaped
+ * @description to escape user inputted strings to prevent injection attacks
+ */
+function escapeStr(str) {
     if (str)
         return str.replace(/([ #;?%&,.+*~\':"!^$[\]()=><|\/@])/g,'\\$1');      
 
     return str;
 }
 
-//displays server error on client side
+/**
+ * @function server_error
+ * @param {string} error the error to output on the page
+ * @description to handle errors sent by the server
+ */
 function server_error(error) {
     var $login_view = $('.login_view');
     var $class_view = $('.class_view');
@@ -18,7 +26,13 @@ function server_error(error) {
     sessionStorage.setItem('error', error);
     location.reload();
 }
-//shows class_view and sets sessionStorage for class_id and username, then calls groups_get
+
+/**
+ * @function login_response
+ * @param {string} username name of user logging in
+ * @param {number} class_id id of class user is logging into
+ * @description shows class view, adds data to sessionStorage, and gets group data
+ */
 function login_response(username, class_id) {
     var $login_view = $('.login_view');
     var $class_view = $('.class_view');
@@ -34,8 +48,12 @@ function login_response(username, class_id) {
     sessionStorage.setItem('username', username);
     socket.groups_get(username, class_id);
 }
-//shows login_view, and removes class_id and username from sessionStorage 
-//if logout was not a disconnect
+
+/**
+ * @function logout_response
+ * @param {boolean} disconnect name of user logging in
+ * @description switches to login view and deletes data from sessionStorage
+ */
 function logout_response(disconnect) {
     var $login_view = $('.login_view');
     var $class_view = $('.class_view');
@@ -49,6 +67,14 @@ function logout_response(disconnect) {
         sessionStorage.removeItem('username');
     }
 }
+
+/**
+ * @function groups_get_response
+ * @param {string} username name of user getting the groups
+ * @param {number} class_id id of class that groups belong to
+ * @param {object[]} groups array of object holding each groups info
+ * @description displays each group in class with user count
+ */
 //populates $groups with buttons with info from groups.
 function groups_get_response(username, class_id, groups) {
     var $groups = $('#buttons');

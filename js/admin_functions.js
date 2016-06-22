@@ -1,20 +1,33 @@
 "use strict";
 
-function escapeStr(str) 
-{
+/**
+ * @function escapeStr
+ * @param {string} str the string to be escaped
+ * @description to escape user inputted strings to prevent injection attacks
+ */
+function escapeStr(str) {
     if (str)
         return str.replace(/([ #;?%&,.+*~\':"!^$[\]()=><|\/@])/g,'\\$1');      
 
     return str;
 }
 
-// Handles errors on the client side
+/**
+ * @function server_error
+ * @param {string} error the error to output on the page
+ * @description to handle errors sent by the server
+ */
 function server_error(error) {
     $('#error_frame').html(JSON.stringify(error)); 
 }
 
-// Changes admin page view from creation to management
-// Creates starting groups 
+/**
+ * @function add_class_response
+ * @param {number} class_id the id of the new class
+ * @param {string} class_name the name of the new class
+ * @param {string} group_count the number of groups in the new class
+ * @description creates the starting group svgs for the admin view
+ */
 function add_class_response(class_id, class_name, group_count) {
     var $create_view = $('.create_view');
     var $manage_view = $('.manage_view');
@@ -44,7 +57,10 @@ function add_class_response(class_id, class_name, group_count) {
     }
 }
 
-// Adds a group to the end of the list
+/**
+ * @function add_group_response
+ * @description adds a group to the end of the list
+ */
 function add_group_response() {
     var $groups = $('.groups');
     
@@ -58,13 +74,20 @@ function add_group_response() {
     users.push([]);
 }
 
-// Deletes the last group from the list
+/**
+ * @function delete_group_response
+ * @description deletes the last group from the list
+ */
 function delete_group_response() {
     $('#error_frame').html('');
     $('.groups > li:last').remove(); 
 }
 
-// Changes view from management to creation of classes
+/**
+ * @function leave_class_response
+ * @param {boolean} disconnect whether to delete the session storage
+ * @description changes the admin view from a class to the login page
+ */
 function leave_class_response(disconnect) {
     var $create_view = $('.create_view');
     var $manage_view = $('.manage_view');
@@ -81,8 +104,15 @@ function leave_class_response(disconnect) {
     }
 }
 
-// Adds user information to the proper group
-// Updates the data every time there is a change takes place
+/**
+ * @function group_info_response
+ * @param {string} username username of person being removed from group
+ * @param {number} class_id id of class being updated
+ * @param {number} group_id id of group being updated
+ * @param {object[]} group holds the information of each user in the group
+ * @param {boolean} status whether to remove a user from the group
+ * @description updates the group info for each user every time a change takes place
+ */
 function group_info_response(username, class_id, group_id, group, status) {
     var $people = $('.g' + group_id);
     //$people.html('');
@@ -108,6 +138,16 @@ function group_info_response(username, class_id, group_id, group, status) {
     }
 }
 
+/**
+ * @function coordinate_change_response
+ * @param {string} username username of person whose point has moved
+ * @param {number} class_id id of class being updated
+ * @param {number} group_id id of group being updated
+ * @param {number} x the x coordinate of the point
+ * @param {number} y the y coordinate of the point
+ * @param {object} info JSON object holding any extra user info 
+ * @description updates points on the view every time a user moves one
+ */
 function coordinate_change_response(username, class_id, group_id, x, y, info) {
     username = username.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
     username = escapeStr(username);
