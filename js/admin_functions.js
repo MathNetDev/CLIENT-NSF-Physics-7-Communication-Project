@@ -155,3 +155,16 @@ function coordinate_change_response(username, class_id, group_id, x, y, info) {
     $('li[id="' + username + '"] .y').html(y);
     field_move_users(username, group_id, x, y, info);
 }
+
+/**
+ * @function get_classes_response
+ * @param {array[object]} classes array of objects holding classes and their hashed IDs
+ * @description appends list objects of Classes and their IDs to an unordered list in admin.html
+ */
+function get_classes_response(classes){
+    $('#get-classes-head').html("List of Classes: ID");
+    for (var i = 0; i < classes.length; i++) {
+        //console.log(classes[i]);
+        $('#get-classes').append('<li>Class: <b>' + classes[i].class_name + '</b> ID: <b>' + classes[i].hashed_id + '</b></li>');
+    }
+}
