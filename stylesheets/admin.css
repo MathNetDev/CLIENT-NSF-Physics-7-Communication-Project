@@ -7,9 +7,15 @@
 .tick text{
   font-size: 12px;
 }
-
+.btn{
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
 .tick line{
   opacity: 0.2;
+}
+#get-classes li:hover{
+  background-color: rgba(211, 214, 34, 0.42);
 }
 
 #field-svg {
