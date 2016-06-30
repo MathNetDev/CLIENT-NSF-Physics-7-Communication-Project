@@ -203,7 +203,7 @@ function redraw_testvector(){
             var curY = height - testCharge[0].y;
             var curChg = testCharge[0].charge * 1.0e-6;
             var polarity = (testCharge[0].charge > 0) ? 1 : -1;
-
+            
             console.log("---- calc for charge at " + curX + " " + curY + " sign " + polarity);
 
             var total_forceX = 0.0;
@@ -262,16 +262,14 @@ function redraw_testvector(){
 
             var final_dx = Math.cos(final_theta_rad) * pointVectorScale(final_mag);
             var final_dy = Math.sin(final_theta_rad) * pointVectorScale(final_mag);
-            if(polarity === 1){
-              svg.append("line")          // attach a line
-                  .attr("class", "testvector")
-                  .attr("marker-end", "url(#testChargeArrow)")
-                  .attr("x1", curX)     // x position of the first end of the line
-                  .attr("y1", height - curY)      // y position of the first end of the line
-                  .attr("x2", curX + final_dx)     // x position of the second end of the line
-                  .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
-              console.log("did this append?");
-            }
+            svg.append("line")          // attach a line
+                .attr("class", "testvector")
+                .attr("marker-end", "url(#testChargeArrow)")
+                .attr("x1", curX)     // x position of the first end of the line
+                .attr("y1", height - curY)      // y position of the first end of the line
+                .attr("x2", curX + final_dx)     // x position of the second end of the line
+                .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
+            console.log("did this append?");
 
     currentTime -= new Date().getTime()
     console.log("redraw_testvector iteration took: " + (-1*currentTime)+"ms." )

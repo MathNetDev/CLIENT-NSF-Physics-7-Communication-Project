@@ -151,6 +151,9 @@ function redraw() {
     d3.selectAll(".name").remove();
     d3.selectAll(".axis").remove();
     d3.selectAll("ellipse").remove();
+    
+    $('.testcharge_options').hide();
+
     // Draw the surfaces - these functions in field_lines.js
     // var currentTime = new Date().getTime();
     
@@ -250,6 +253,15 @@ function redraw_charges() {
 
 function redraw_testcharge(){
     console.log("redraw_testcharge()");
+
+    $('.testcharge_options').show();
+
+    if ($('#testcharge_value').val() === "positive") {
+        testCharge[0].charge = 1;
+    }
+    else if ($('#testcharge_value').val() === "negative") {
+        testCharge[0].charge = -1;
+    }
 
     charge = svg.selectAll("ellipse").data(testCharge);
     charge.enter().append("ellipse");
