@@ -29,6 +29,7 @@ function server_error(error) {
  * @description creates the starting group svgs for the admin view
  */
 function add_class_response(class_id, class_name, group_count) {
+    var $secret_view = $('.secret_view');
     var $create_view = $('.create_view');
     var $manage_view = $('.manage_view');
     var $settings_view = $('.settings_view');
@@ -38,6 +39,7 @@ function add_class_response(class_id, class_name, group_count) {
     sessionStorage.setItem('admin_class_id', class_id);
     $('#error_frame').html('');
 
+    $secret_view.hide();
     $create_view.hide();
     $manage_view.show();
     $settings_view.show();
@@ -89,12 +91,15 @@ function delete_group_response() {
  * @description changes the admin view from a class to the login page
  */
 function leave_class_response(disconnect) {
+    var $secret_view = $('.secret_view');
     var $create_view = $('.create_view');
     var $manage_view = $('.manage_view');
     var $settings_view = $('.settings_view');
+    var $secret = $('.secret');
     
     $('#error_frame').html('');
     
+    $secret_view.hide();
     $create_view.show();
     $manage_view.hide();
     $settings_view.hide();
@@ -102,6 +107,7 @@ function leave_class_response(disconnect) {
     if(!disconnect){
         sessionStorage.removeItem('admin_class_id');
     }
+    socket.get_classes($secret.val().trim());
 }
 
 /**
@@ -162,9 +168,25 @@ function coordinate_change_response(username, class_id, group_id, x, y, info) {
  * @description appends list objects of Classes and their IDs to an unordered list in admin.html
  */
 function get_classes_response(classes){
-    $('#get-classes-head').html("List of Classes: ID");
+    var $secret_view = $('.secret_view');
+    var $create_view = $('.create_view');
+    var $manage_view = $('.manage_view');
+    var $settings_view = $('.settings_view');
+
+    $secret_view.hide();
+    $create_view.show();
+    $manage_view.hide();
+    $settings_view.hide();
+
+    $('#get-classes').html('');
     for (var i = 0; i < classes.length; i++) {
         //console.log(classes[i]);
-        $('#get-classes').append('<li>Class: <b>' + classes[i].class_name + '</b> ID: <b>' + classes[i].hashed_id + '</b></li>');
+        $('#get-classes').append('<div class="list col-md-3 col-lg-3 col-xs-3 col-sm-3" style="padding-bottom: 3px;" onclick=\'join_class("'
+            +classes[i].hashed_id+'")\'>Class: <b>' + classes[i].class_name + '</b> ID: <b>' + classes[i].hashed_id + '</b></div>');
     }
+}
+
+function join_class(class_id){
+    var $secret = $('.secret'); 
+    socket.join_class(class_id, $secret.val().trim());
 }
