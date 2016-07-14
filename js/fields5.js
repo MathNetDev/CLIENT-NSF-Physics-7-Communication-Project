@@ -151,6 +151,9 @@ function redraw() {
     d3.selectAll(".name").remove();
     d3.selectAll(".axis").remove();
     d3.selectAll("ellipse").remove();
+    
+    $('.testcharge_options').hide();
+
     // Draw the surfaces - these functions in field_lines.js
     // var currentTime = new Date().getTime();
     
@@ -250,6 +253,15 @@ function redraw_charges() {
 
 function redraw_testcharge(){
     console.log("redraw_testcharge()");
+
+    $('.testcharge_options').show();
+
+    if ($('#testcharge_value').val() === "positive") {
+        testCharge[0].charge = 1;
+    }
+    else if ($('#testcharge_value').val() === "negative") {
+        testCharge[0].charge = -1;
+    }
 
     charge = svg.selectAll("ellipse").data(testCharge);
     charge.enter().append("ellipse");
@@ -498,12 +510,66 @@ function active_member(other_members, uname) {
 function field_sync_users(other_members) {
     console.log("*** field_sync_users ");
     console.log(other_members);
+    
+    if (other_members == null) {
+        redraw();
+        return;
+    }
 
     // get list of user names we are already tracking
     var known_users = users.map(function(d) {return d.name;});
+//    users = [];
+    other_members.forEach(function(member, index) {
+        var user = {};
 
+        user.name = member.member_name.replace(/&lt;/g,'<').replace(/&gt;/g, '>');
+
+        if (known_users.indexOf(user.name) !== -1) {
+            return;
+        }
+
+        user.x = xScale(member.member_x);
+        user.y = yScale(member.member_y);
+        user.x0 = null;
+        user.y0 = null;
+
+        if ($.isEmptyObject(member.member_info)) {
+            user.charge = startCharge * -1;
+            user.radius = startCharge;
+            user.color = (user.charge < 0.0) ? colors[0] : colors[1];
+        }
+        else {
+            user.charge = parseInt(member.member_info.charge);
+            user.radius = parseInt(member.member_info.radius);
+            user.color = member.member_info.color;
+        }
+        if (user.name === sessionStorage.getItem('username')) {
+            user.active = true;
+            selected = user;
+        
+            if (typeof(socket) !== 'undefined') {
+                var info_object = {
+                    state:"initialized",
+                    charge:user.charge,
+                    radius:user.radius,
+                    color:user.color
+                };
+                socket.coordinate_change(sessionStorage.getItem('username'),
+                                         sessionStorage.getItem('class_id'),
+                                         sessionStorage.getItem('group_id'),
+                                         0,     // dx
+                                         0,     // dy
+                                         info_object
+                                        );
+            } 
+        }
+        else {
+            user.active = false;
+        }   
+        users.push(user);
+    });
     // add any new users 
-    for (var i in other_members) {
+   /* for (var i in other_members) {
         other_members[i].member_name = other_members[i].member_name.replace(/&lt;/g,'<').replace(/&gt;/g, '>');
         // test to see if this member_name is known, if not, add this user to users
         if (known_users.indexOf(other_members[i].member_name) == -1) {
@@ -615,7 +681,7 @@ function field_sync_users(other_members) {
     //     }
     // }
 
-
+*/
     // need to 
     redraw();
 }
@@ -691,7 +757,7 @@ function field_move_users(username, x_coord, y_coord, info) {
         // make any necessary updates to our local information from OTHERs based on member_info
         if (username !== sessionStorage.username) {
 
-            if (typeof info === "object" && info !== null) {
+            if ($.isEmptyObject(info)) {
                 console.log("WARNING: info is null - must have been an arrow push!");
             } else {
                 console.log(info);
