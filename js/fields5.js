@@ -117,7 +117,7 @@ var line = d3.svg.line();
 
 //When changing the value from the combo, change the target charge value
 d3.select("#charge").on("change", function(){
-    var new_charge = d3.select(this).node().value;
+    var new_charge = parseFloat(d3.select(this).node().value);
     
     if (selected && selected.name != "test_charge") { 
         selected.charge = new_charge;
