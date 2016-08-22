@@ -58,6 +58,7 @@ var field_display_settings = {
     'show_labels': true,
     'show_axes': true,
     'show_points': true,
+    'show_drawn_vectors' : false,
     'draw_vectors': false,
     'show_testcharge': false
     };
@@ -107,6 +108,8 @@ var drag = d3.behavior.drag()
     .on("dragend", dragend);
     
 // Vector drawing
+var vector_attribute;
+var vector_attributes = [];
 var drawn_vector;
 var drawn_vectors = [];
 
@@ -179,9 +182,10 @@ function redraw() {
     if (field_display_settings.show_testcharge === true) {
         redraw_testcharge();
     }
-	 if (field_display_settings.show_fieldvectors === true) {
+	if (field_display_settings.show_fieldvectors === true) {
         redraw_fieldvectors();
     }
+    redraw_drawn_vectors();
 
     //checkForZeros();
 }
@@ -284,6 +288,17 @@ function redraw_testcharge(){
 
     charge.exit().remove();
     redraw_testvector();
+}
+
+function redraw_drawn_vectors() {
+    // send vectors to other users' view
+    if (field_display_settings.show_drawn_vectors === true) {
+
+    }
+    // remove vectors from other users' view
+    else {
+
+    }
 }
 
 function remove_drawn_vectors() {
@@ -442,18 +457,26 @@ function changeSelected() {
 function vectorStart() {
     if (field_display_settings.draw_vectors === true) {
 		var coordinates = d3.mouse(this);
+        vector_attribute = {
+            "user" : sessionStorage.getItem("username"),
+            "x1" : coordinates[0] - margin.left,
+            "y1" : coordinates[1] - margin.top,
+            "x2" : coordinates[0] - margin.left,
+            "y2" : coordinates[1] - margin.top,
+        };
 		drawn_vector = svg.append("line")
 			.attr(
 			{
-			"class" : "vectors",
-			"x1" : coordinates[0] - margin.left,
-			"y1" : coordinates[1] - margin.top,
-			"x2" : coordinates[0] - margin.left,
-			"y2" : coordinates[1] - margin.top,
-			"stroke" : "steelblue",
-			"stroke-width" : "4px",
-			"opacity" : 0.4,
-			"marker-end": "url(#testArrow)"
+    			"class" : "vectors",
+                "user" : sessionStorage.getItem("username"),
+    			"x1" : coordinates[0] - margin.left,
+    			"y1" : coordinates[1] - margin.top,
+    			"x2" : coordinates[0] - margin.left,
+    			"y2" : coordinates[1] - margin.top,
+    			"stroke" : "steelblue",
+    			"stroke-width" : "4px",
+    			"opacity" : 0.4,
+    			"marker-end": "url(#testArrow)"
 			})
 			.on("click", function() {this.remove();})
 			.on("touchstart", function() {this.remove();});
@@ -484,6 +507,9 @@ function vectorEnd() {
 			drawn_vector.remove();
 		}
 		else {
+            vector_attribute["x2"] = drawn_vector[0][0].attributes.getNamedItem("x2").value;
+            vector_attribute["y2"] = drawn_vector[0][0].attributes.getNamedItem("y2").value;
+            vector_attributes.push(vector_attribute);
 			drawn_vectors.push(drawn_vector);
 		}
 		
