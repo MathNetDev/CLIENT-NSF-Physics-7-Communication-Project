@@ -682,7 +682,10 @@ function field_sync_users(other_members) {
                     color:user.color
                 };
                 // update vector_attributes
+                console.log(users.length);
+                console.log(users);
                 if (users.length == 0) {
+                    vector_attributes = [];
                     socket.xml_change(sessionStorage.getItem('username'),
                                       sessionStorage.getItem('class_id'),
                                       sessionStorage.getItem('group_id'),
