@@ -58,6 +58,7 @@ var field_display_settings = {
     'show_labels': true,
     'show_axes': true,
     'show_points': true,
+    'show_drawn_vectors' : false,
     'draw_vectors': false,
     'show_testcharge': false
     };
@@ -96,7 +97,7 @@ var svg = d3.select("#field-container")
     .attr("id", "field-svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
-  .append("g")
+    .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 // drag behavior - applied to circles 
@@ -107,6 +108,9 @@ var drag = d3.behavior.drag()
     .on("dragend", dragend);
     
 // Vector drawing
+var vector_attribute;
+var my_vector_attributes = [];
+var vector_attributes = [];
 var drawn_vector;
 var drawn_vectors = [];
 
@@ -117,7 +121,7 @@ var line = d3.svg.line();
 
 //When changing the value from the combo, change the target charge value
 d3.select("#charge").on("change", function(){
-    var new_charge = d3.select(this).node().value;
+    var new_charge = parseFloat(d3.select(this).node().value);
     
     if (selected && selected.name != "test_charge") { 
         selected.charge = new_charge;
@@ -151,6 +155,8 @@ function redraw() {
     d3.selectAll(".name").remove();
     d3.selectAll(".axis").remove();
     d3.selectAll("ellipse").remove();
+
+    d3.selectAll("line").remove();
     
     $('.testcharge_options').hide();
 
@@ -179,8 +185,11 @@ function redraw() {
     if (field_display_settings.show_testcharge === true) {
         redraw_testcharge();
     }
-	 if (field_display_settings.show_fieldvectors === true) {
+	if (field_display_settings.show_fieldvectors === true) {
         redraw_fieldvectors();
+    }
+    if (sessionStorage.getItem("username") !== null) {
+        redraw_drawn_vectors();
     }
 
     //checkForZeros();
@@ -286,12 +295,125 @@ function redraw_testcharge(){
     redraw_testvector();
 }
 
+function redraw_drawn_vectors() {
+    remove_drawn_vectors();
+    // send vectors to other users' view
+    if (field_display_settings.show_drawn_vectors === true) {
+        var attribute;
+        while (attribute = my_vector_attributes.pop()) {
+            vector_attributes.push(attribute);
+        }
+    }
+    // remove vectors from other users' view
+    else {
+        var usr = sessionStorage.getItem("username");
+        my_vector_attributes = my_vector_attributes.concat(vector_attributes.filter(function(attribute) {
+            return usr === attribute["user"];
+        }));
+        vector_attributes = vector_attributes.filter(function(attribute) {
+            return usr !== attribute["user"];
+        });
+    }
+    socket.xml_change(sessionStorage.getItem("username"), 
+                      sessionStorage.getItem("class_id"), 
+                      sessionStorage.getItem("group_id"), 
+                      JSON.stringify(vector_attributes));
+    draw_all_vectors();
+}
+
+function draw_vector(attribute) {
+    var longpress = 750;
+    var start;
+    return svg.append("line")
+        .attr(
+        {
+            "class" : "vectors",
+            "user" : attribute["user"],
+            "x1" : attribute["x1"],
+            "y1" : attribute["y1"],
+            "x2" : attribute["x2"],
+            "y2" : attribute["y2"],
+            "stroke" : "steelblue",
+            "stroke-width" : "4px",
+            "opacity" : 0.4,
+            "marker-end": "url(#testArrow)"
+        })
+        .on('touchstart', function(e) {
+            start = new Date().getTime();
+        })
+        .on('touchmove', function(e) {
+            start = 0;
+        })
+        .on('touchend', function(e) {
+            if (new Date().getTime() >= (start + longpress)) {
+                console.log("longclick");
+                var line = d3.select(this);
+                var label = svg.append("text");
+                var delta_x = Math.abs(parseFloat(line.attr("x1")) - parseFloat(line.attr("x2")));
+                var delta_y = Math.abs(parseFloat(line.attr("y1")) - parseFloat(line.attr("y2")));
+                var x = ((parseFloat(line.attr("x1")) + parseFloat(line.attr("x2"))) / 2);
+                var y = ((parseFloat(line.attr("y1")) + parseFloat(line.attr("y2"))) / 2);
+                var theta = Math.atan2(delta_y, delta_x) * (180.0 / Math.PI);
+                if (theta < 45) {
+                    (y > -19) ? y -= 10 : y += 10;
+                }
+                else {
+                    (x > 612) ? x -= 10 : x += 10;
+                }
+                label.attr("fill", "steelblue")
+                    .attr("x", x)
+                    .attr("y", y)
+                    .attr("font-weight", "bold")
+                    .text(function(d) { return line.attr("user"); });
+                window.setTimeout(function() { label.remove(); } , 2000);
+            }
+        })
+        .on('mousedown', function(e) {
+            start = new Date().getTime();
+        })
+        .on('mousemove', function(e) {
+            start = 0;
+        })
+        .on('mouseup', function(e) {
+            if (new Date().getTime() >= (start + longpress)) {
+                console.log("longclick");
+                var line = d3.select(this);
+                var label = svg.append("text");
+                var delta_x = Math.abs(parseFloat(line.attr("x1")) - parseFloat(line.attr("x2")));
+                var delta_y = Math.abs(parseFloat(line.attr("y1")) - parseFloat(line.attr("y2")));
+                var x = ((parseFloat(line.attr("x1")) + parseFloat(line.attr("x2"))) / 2);
+                var y = ((parseFloat(line.attr("y1")) + parseFloat(line.attr("y2"))) / 2);
+                var theta = Math.atan2(delta_y, delta_x) * (180.0 / Math.PI);
+                if (theta < 45) {
+                    (y > -19) ? y -= 10 : y += 10;
+                }
+                else {
+                    (x > 612) ? x -= 10 : x += 10;
+                }
+                label.attr("fill", "steelblue")
+                    .attr("x", x)
+                    .attr("y", y)
+                    .attr("font-weight", "bold")
+                    .text(function(d) { return line.attr("user"); });
+                window.setTimeout(function() { label.remove(); } , 2000);
+            }
+        });
+}
+
+function draw_all_vectors() {
+    for (i = 0; i < vector_attributes.length; i++) {
+        drawn_vectors.push(draw_vector(vector_attributes[i]));
+    }
+    for (i = 0; i < my_vector_attributes.length; i++) {
+        drawn_vectors.push(draw_vector(my_vector_attributes[i]));
+    }
+}
+
 function remove_drawn_vectors() {
-	$.each(drawn_vectors, function(i, vector) {
-		vector.remove();
-	})
-	
-	drawn_vectors = [];
+    for (var i = 0; i < drawn_vectors.length; i++) {
+        drawn_vectors[i].remove();
+    }
+    drawn_vectors = [];
 }
 
 /*-------------------  Scales ----------------------*/
@@ -442,21 +564,14 @@ function changeSelected() {
 function vectorStart() {
     if (field_display_settings.draw_vectors === true) {
 		var coordinates = d3.mouse(this);
-		drawn_vector = svg.append("line")
-			.attr(
-			{
-			"class" : "vectors",
-			"x1" : coordinates[0] - margin.left,
-			"y1" : coordinates[1] - margin.top,
-			"x2" : coordinates[0] - margin.left,
-			"y2" : coordinates[1] - margin.top,
-			"stroke" : "steelblue",
-			"stroke-width" : "4px",
-			"opacity" : 0.4,
-			"marker-end": "url(#testArrow)"
-			})
-			.on("click", function() {this.remove();})
-			.on("touchstart", function() {this.remove();});
+        vector_attribute = {
+            "user" : sessionStorage.getItem("username"),
+            "x1" : coordinates[0] - margin.left,
+            "y1" : coordinates[1] - margin.top,
+            "x2" : coordinates[0] - margin.left,
+            "y2" : coordinates[1] - margin.top,
+        };
+		drawn_vector = draw_vector(vector_attribute);
 		
 		// Prevent scrolling while drawing lines
 		$('html, body').on('touchmove', function(e){ 
@@ -484,6 +599,18 @@ function vectorEnd() {
 			drawn_vector.remove();
 		}
 		else {
+            vector_attribute["x2"] = drawn_vector.attr("x2");
+            vector_attribute["y2"] = drawn_vector.attr("y2");
+            if (field_display_settings.show_drawn_vectors === true) {
+                vector_attributes.push(vector_attribute);
+                socket.xml_change(sessionStorage.getItem("username"), 
+                                  sessionStorage.getItem("class_id"), 
+                                  sessionStorage.getItem("group_id"), 
+                                  JSON.stringify(vector_attributes));
+            }
+            else {
+                my_vector_attributes.push(vector_attribute);
+            }
 			drawn_vectors.push(drawn_vector);
 		}
 		
@@ -554,6 +681,21 @@ function field_sync_users(other_members) {
                     radius:user.radius,
                     color:user.color
                 };
+                // update vector_attributes
+                console.log(users.length);
+                console.log(users);
+                if (users.length == 0) {
+                    vector_attributes = [];
+                    socket.xml_change(sessionStorage.getItem('username'),
+                                      sessionStorage.getItem('class_id'),
+                                      sessionStorage.getItem('group_id'),
+                                      "[]");
+                }
+                else { 
+                    socket.get_xml(sessionStorage.getItem('username'),
+                                   sessionStorage.getItem('class_id'),
+                                   sessionStorage.getItem('group_id'));
+                }
                 socket.coordinate_change(sessionStorage.getItem('username'),
                                          sessionStorage.getItem('class_id'),
                                          sessionStorage.getItem('group_id'),
@@ -805,11 +947,26 @@ function field_move_users(username, x_coord, y_coord, info) {
     redraw();
 }
 
-function field_remove_user(username) {
+function field_remove_user(username, class_id, group_id) {
     console.log("*** field_remove_user ***");
     username = username.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+
+    // remove username's vector attributes
+    vector_attributes = vector_attributes.filter(function(attribute) {
+        return username !== attribute["user"];
+    });
+
+    // remove username's vectors that are only displayed to self
+    if (username == sessionStorage.getItem("username")) {
+        my_vector_attributes = [];
+    }
+    socket.xml_change(sessionStorage.getItem("username"), 
+                  sessionStorage.getItem("class_id"), 
+                  group_id, 
+                  JSON.stringify(vector_attributes));
+
     // remove user that has left the group - must work backwards in case there are multiple deletes
-    for(var i = users.length; i--;) {
+    for (var i = users.length; i--;) {
         if (users[i].name === username) {
             console.log("field_remove_user: removing " + users[i].name);
             users.splice(i, 1);
@@ -843,6 +1000,15 @@ function notify_group(dx, dy) {
     }
 }
 
+function update_vector_attributes(xml, redraw) {
+    // Note: check if xml is undefined?
+    vector_attributes = eval(JSON.parse(xml));
+    if (redraw === true) {
+        remove_drawn_vectors();
+        draw_all_vectors();
+    }
+}
+
 /*-------------------  Options processing -----------------*/
 
 function update_display_settings () {
@@ -862,5 +1028,4 @@ function update_display_settings () {
 
     console.log(field_display_settings);
     redraw();
-
 }

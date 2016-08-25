@@ -132,8 +132,7 @@ function group_leave_response(username, class_id, group_id, disconnect) {
     if(!disconnect){
         sessionStorage.removeItem('group_id');
     }
-    
-    field_remove_user(username);
+    field_remove_user(username, class_id, group_id);
     //socket.group_info(username, class_id, group_id, false);
 }
 
@@ -170,7 +169,7 @@ function group_info_response(username, class_id, group_id, members, status) {
         var escUsername = username.replace(/&lt;/g,'<').replace(/&gt;/g, '>');
         escUsername = escapeStr(escUsername);
         $("#" + escUsername).remove();
-        field_remove_user(username);
+        field_remove_user(username, class_id, group_id);
         $('#messages').append(username + ' has left the group<br/>');
     }
     field_sync_users(members);
@@ -188,6 +187,14 @@ function coordinate_change_response(username, class_id, group_id, x, y, info) {
                           + x + ', ' + y +')<br/>');
     info = JSON.parse(info);
     field_move_users(username, x, y, info);
+}
+
+function xml_change_response(username, class_id, group_id, xml) {
+    update_vector_attributes(xml, true);  // redraw the drawn vectors
+}
+
+function get_xml_response(username, class_id, group_id, xml){
+    update_vector_attributes(xml, false); // don't redraw the drawn vectors
 }
 
 // updates $class_settings based on settings array
