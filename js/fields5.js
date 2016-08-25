@@ -682,9 +682,17 @@ function field_sync_users(other_members) {
                     color:user.color
                 };
                 // update vector_attributes
-                socket.get_xml(sessionStorage.getItem('username'),
-                               sessionStorage.getItem('class_id'),
-                               sessionStorage.getItem('group_id'));
+                if (users.length == 0) {
+                    socket.xml_change(sessionStorage.getItem('username'),
+                                      sessionStorage.getItem('class_id'),
+                                      sessionStorage.getItem('group_id'),
+                                      "[]");
+                }
+                else { 
+                    socket.get_xml(sessionStorage.getItem('username'),
+                                   sessionStorage.getItem('class_id'),
+                                   sessionStorage.getItem('group_id'));
+                }
                 socket.coordinate_change(sessionStorage.getItem('username'),
                                          sessionStorage.getItem('class_id'),
                                          sessionStorage.getItem('group_id'),
@@ -936,19 +944,23 @@ function field_move_users(username, x_coord, y_coord, info) {
     redraw();
 }
 
-function field_remove_user(username) {
+function field_remove_user(username, class_id, group_id) {
     console.log("*** field_remove_user ***");
     username = username.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 
-    // remove user's vector attributes
-    my_vector_attributes = [];
+    // remove username's vector attributes
     vector_attributes = vector_attributes.filter(function(attribute) {
         return username !== attribute["user"];
     });
+
+    // remove username's vectors that are only displayed to self
+    if (username == sessionStorage.getItem("username")) {
+        my_vector_attributes = [];
+    }
     socket.xml_change(sessionStorage.getItem("username"), 
-                      sessionStorage.getItem("class_id"), 
-                      sessionStorage.getItem("group_id"), 
-                      JSON.stringify(vector_attributes));
+                  sessionStorage.getItem("class_id"), 
+                  group_id, 
+                  JSON.stringify(vector_attributes));
 
     // remove user that has left the group - must work backwards in case there are multiple deletes
     for (var i = users.length; i--;) {

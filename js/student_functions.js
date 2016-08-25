@@ -132,7 +132,7 @@ function group_leave_response(username, class_id, group_id, disconnect) {
     if(!disconnect){
         sessionStorage.removeItem('group_id');
     }
-    field_remove_user(username);
+    field_remove_user(username, class_id, group_id);
     //socket.group_info(username, class_id, group_id, false);
 }
 
@@ -169,7 +169,7 @@ function group_info_response(username, class_id, group_id, members, status) {
         var escUsername = username.replace(/&lt;/g,'<').replace(/&gt;/g, '>');
         escUsername = escapeStr(escUsername);
         $("#" + escUsername).remove();
-        field_remove_user(username);
+        field_remove_user(username, class_id, group_id);
         $('#messages').append(username + ' has left the group<br/>');
     }
     field_sync_users(members);
