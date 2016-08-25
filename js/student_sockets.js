@@ -55,6 +55,20 @@
             socket.emit('coordinate_change', username, class_id, group_id, x, y, info);
         }
 
+        //This function takes a username, class_id, group_id, and XML
+        //It then emits a socket event to change the class's XML in the datastructure
+        //based on the given XML, group_id, and class_id
+        var xml_change = function(username, class_id, group_id, xml) {
+            socket.emit('xml_change', username, class_id, group_id, xml);
+        }
+
+        //This function takes a username, class_id, and group_id
+        //It then emits a socket event to retrieve the group's XML
+        //using the given class_id and group_id
+        var get_xml = function(username, class_id, group_id){
+            socket.emit('get_xml', username, class_id, group_id);
+        }
+
         //This function takes a class_id and group_id
         //It then emits a socket event to retrieve the settings of given group_id
         //in class_id.
@@ -105,6 +119,15 @@
             coordinate_change_response(data.username, data.class_id, 
                                        data.group_id, data.x, data.y, data.info);
         });
+
+        socket.on('xml_change_response', function(data) {
+            xml_change_response(data.username, data.class_id, data.group_id, data.xml);
+        });
+
+        socket.on('get_xml_response', function(data) {
+            get_xml_response(data.username, data.class_id, data.group_id, data.xml);
+        });
+
         socket.on('group_numbers_response', function(data) {
             group_numbers_response(data.username, data.class_id, data.group_id, 
                                 data.status, data.group_size);
@@ -131,6 +154,8 @@
             group_leave: group_leave,
             group_info: group_info,
             coordinate_change: coordinate_change,
+            xml_change: xml_change,
+            get_xml: get_xml,
             get_settings: get_settings,
             disconnect: disconnect
         };
