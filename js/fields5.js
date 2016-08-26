@@ -113,6 +113,7 @@ var my_vector_attributes = [];
 var vector_attributes = [];
 var drawn_vector;
 var drawn_vectors = [];
+var delete_mode = false;
 
 //use d3.svg.line for rendering field lines and equipotential surfaces
 var line = d3.svg.line();
@@ -367,6 +368,29 @@ function draw_vector(attribute) {
                     .text(function(d) { return line.attr("user"); });
                 window.setTimeout(function() { label.remove(); } , 2000);
             }
+            else if (delete_mode === true && $(this).attr("user") == sessionStorage.getItem("username")) {
+                var i;
+                for (i = 0; i < my_vector_attributes.length; i++) {
+                    if ($(this).attr("x1") == my_vector_attributes[i]["x1"] && $(this).attr("x2") == my_vector_attributes[i]["x2"] 
+                        && $(this).attr("y1") == my_vector_attributes[i]["y1"] && $(this).attr("y2") == my_vector_attributes[i]["y2"]) {
+                        my_vector_attributes.splice(i, 1);
+                        this.remove();
+                        return;
+                    }
+                }
+                for (i = 0; i < vector_attributes.length; i++) {
+                    if ($(this).attr("x1") == vector_attributes[i]["x1"] && $(this).attr("x2") == vector_attributes[i]["x2"] 
+                        && $(this).attr("y1") == vector_attributes[i]["y1"] && $(this).attr("y2") == vector_attributes[i]["y2"]) {
+                        vector_attributes.splice(i, 1);
+                        this.remove();
+                        socket.xml_change(sessionStorage.getItem("username"), 
+                                          sessionStorage.getItem("class_id"), 
+                                          sessionStorage.getItem("group_id"), 
+                                          JSON.stringify(vector_attributes));
+                        return;
+                    }
+                }
+            }
         })
         .on('mousedown', function(e) {
             start = new Date().getTime();
@@ -396,6 +420,29 @@ function draw_vector(attribute) {
                     .attr("font-weight", "bold")
                     .text(function(d) { return line.attr("user"); });
                 window.setTimeout(function() { label.remove(); } , 2000);
+            }
+            else if (delete_mode === true && $(this).attr("user") == sessionStorage.getItem("username")) {
+                var i;
+                for (i = 0; i < my_vector_attributes.length; i++) {
+                    if ($(this).attr("x1") == my_vector_attributes[i]["x1"] && $(this).attr("x2") == my_vector_attributes[i]["x2"] 
+                        && $(this).attr("y1") == my_vector_attributes[i]["y1"] && $(this).attr("y2") == my_vector_attributes[i]["y2"]) {
+                        my_vector_attributes.splice(i, 1);
+                        this.remove();
+                        return;
+                    }
+                }
+                for (i = 0; i < vector_attributes.length; i++) {
+                    if ($(this).attr("x1") == vector_attributes[i]["x1"] && $(this).attr("x2") == vector_attributes[i]["x2"] 
+                        && $(this).attr("y1") == vector_attributes[i]["y1"] && $(this).attr("y2") == vector_attributes[i]["y2"]) {
+                        vector_attributes.splice(i, 1);
+                        this.remove();
+                        socket.xml_change(sessionStorage.getItem("username"), 
+                                          sessionStorage.getItem("class_id"), 
+                                          sessionStorage.getItem("group_id"), 
+                                          JSON.stringify(vector_attributes));
+                        return;
+                    }
+                }
             }
         });
 }
@@ -682,8 +729,6 @@ function field_sync_users(other_members) {
                     color:user.color
                 };
                 // update vector_attributes
-                console.log(users.length);
-                console.log(users);
                 if (users.length == 0) {
                     vector_attributes = [];
                     socket.xml_change(sessionStorage.getItem('username'),
@@ -1028,4 +1073,16 @@ function update_display_settings () {
 
     console.log(field_display_settings);
     redraw();
+}
+
+function toggle_delete(btn) {
+    btn.blur();
+    if (delete_mode === false) {
+        $(btn).css("background-color", "#6bb0fa");
+        delete_mode = true;
+    }
+    else {
+        $(btn).css("background-color", "white");
+        delete_mode = false;
+    }
 }
