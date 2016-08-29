@@ -23,6 +23,10 @@ body {
     height:300px; 
     overflow:auto;
 }
+.stop-scrolling {
+  height: 100%;
+  overflow: hidden;
+}
 
 /*** Toggle Switch for Options UI ***/
 .onoffswitch {
