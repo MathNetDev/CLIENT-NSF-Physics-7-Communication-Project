@@ -48,8 +48,8 @@ var verticalBlockHalf = verticalBlock / 2;
 
 // global display variables set with checkboxes in index.html
 var field_display_settings = {
-    'show_particle_charge': false,
-    'show_particle_size': false,
+    'show_particle_charge': true,
+    'show_particle_size': true,
     'show_equipotentials': false,
     'show_fieldlines':false, 
     'show_forcevectors':false,
@@ -59,7 +59,6 @@ var field_display_settings = {
     'show_axes': true,
     'show_points': true,
     'show_drawn_vectors' : false,
-    'draw_vectors': false,
     'show_testcharge': false
     };
 
@@ -113,7 +112,11 @@ var my_vector_attributes = [];
 var vector_attributes = [];
 var drawn_vector;
 var drawn_vectors = [];
-var delete_mode = false;
+
+var draw_vector_settings = {
+    'draw_mode': false,
+    'delete_mode': false
+};
 
 //use d3.svg.line for rendering field lines and equipotential surfaces
 var line = d3.svg.line();
@@ -368,7 +371,7 @@ function draw_vector(attribute) {
                     .text(function(d) { return line.attr("user"); });
                 window.setTimeout(function() { label.remove(); } , 2000);
             }
-            else if (delete_mode === true && $(this).attr("user") == sessionStorage.getItem("username")) {
+            else if (draw_vector_settings.delete_mode === true && $(this).attr("user") == sessionStorage.getItem("username")) {
                 var i;
                 for (i = 0; i < my_vector_attributes.length; i++) {
                     if ($(this).attr("x1") == my_vector_attributes[i]["x1"] && $(this).attr("x2") == my_vector_attributes[i]["x2"] 
@@ -421,7 +424,7 @@ function draw_vector(attribute) {
                     .text(function(d) { return line.attr("user"); });
                 window.setTimeout(function() { label.remove(); } , 2000);
             }
-            else if (delete_mode === true && $(this).attr("user") == sessionStorage.getItem("username")) {
+            else if (draw_vector_settings.delete_mode === true && $(this).attr("user") == sessionStorage.getItem("username")) {
                 var i;
                 for (i = 0; i < my_vector_attributes.length; i++) {
                     if ($(this).attr("x1") == my_vector_attributes[i]["x1"] && $(this).attr("x2") == my_vector_attributes[i]["x2"] 
@@ -549,7 +552,7 @@ function redraw_axes()
 
 function dragmove(d) {
   if((d.name === sessionStorage.getItem('username') || d.name === "test_charge")
-	 && field_display_settings.draw_vectors === false)
+	 && draw_vector_settings.draw_mode === false)
   {
   	d3.select(this)
       		.attr("cx", d.x = Math.max(radius, Math.min(width - radius, d3.event.x)))
@@ -565,7 +568,7 @@ function dragstart(d) {
 
     // record where the drag started
   if((d.name === sessionStorage.getItem('username') || d.name === "test_charge")
-	 && field_display_settings.draw_vectors === false)
+	 && draw_vector_settings.draw_mode === false)
   { 
 
     d.x0 = d.x;
@@ -581,7 +584,7 @@ function dragstart(d) {
 function dragend(d) {
 
   if((d.name === sessionStorage.getItem('username') || d.name === "test_charge")
-	 && field_display_settings.draw_vectors === false)
+	 && draw_vector_settings.draw_mode === false)
   {
 
     var x0_scaled = xScale.invert(d.x0);
@@ -609,7 +612,7 @@ function changeSelected() {
 }
 
 function vectorStart() {
-    if (field_display_settings.draw_vectors === true) {
+    if (draw_vector_settings.draw_mode === true) {
 		var coordinates = d3.mouse(this);
         vector_attribute = {
             "user" : sessionStorage.getItem("username"),
@@ -631,7 +634,7 @@ function vectorStart() {
 }
 
 function vectorMove() {
-    if (field_display_settings.draw_vectors === true) {
+    if (draw_vector_settings.draw_mode === true) {
 		var coordinates = d3.mouse(this);
 		drawn_vector
 			.attr("x2", coordinates[0] - margin.left)
@@ -640,7 +643,7 @@ function vectorMove() {
 }
 
 function vectorEnd() {
-    if (field_display_settings.draw_vectors === true) {
+    if (draw_vector_settings.draw_mode === true) {
 		if ((Math.pow((drawn_vector.attr("y2") - drawn_vector.attr("y1")), 2) +
 			 Math.pow((drawn_vector.attr("x2") - drawn_vector.attr("x1")), 2)) < MIN_VECTOR_LENGTH) {
 			drawn_vector.remove();
@@ -1077,12 +1080,32 @@ function update_display_settings () {
 
 function toggle_delete(btn) {
     btn.blur();
-    if (delete_mode === false) {
-        $(btn).css("background-color", "#6bb0fa");
-        delete_mode = true;
+    if (draw_vector_settings.delete_mode === false) {
+        $('#vector_delete_button').css("background-color", "#6bb0fa");
+        draw_vector_settings.delete_mode = true;
+        if (draw_vector_settings.draw_mode === true) {
+            $('#vector_draw_button').css("background-color", "white");
+            draw_vector_settings.draw_mode = false;
+        }
     }
     else {
-        $(btn).css("background-color", "white");
-        delete_mode = false;
+        $('#vector_delete_button').css("background-color", "white");
+        draw_vector_settings.delete_mode = false;
+    }
+}
+
+function toggle_draw_vectors(btn) {
+    btn.blur();
+    if (draw_vector_settings.draw_mode === false) {
+        $('#vector_draw_button').css("background-color", "#6bb0fa");
+        draw_vector_settings.draw_mode = true;
+        if (draw_vector_settings.delete_mode === true) {
+            $('#vector_delete_button').css("background-color", "white");
+            draw_vector_settings.delete_mode = false;
+        }
+    }
+    else {
+        $('#vector_draw_button').css("background-color", "white");
+        draw_vector_settings.draw_mode = false;
     }
 }
