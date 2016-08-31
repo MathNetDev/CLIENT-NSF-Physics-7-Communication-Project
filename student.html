@@ -4,6 +4,7 @@
 
 <head>
   <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
   <title> Student View </title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
   <link rel="stylesheet" href="stylesheets/style.css"/>
@@ -43,7 +44,7 @@
 
         <div class="group_view">
           <div class="col-md-9">
-            <h2> <span id="number">Group</span> <input style="padding-left: 2em" class="btn btn-default" type="button" value="Leave Group" id="leave_group"/></h2>
+            <h2> <span id="number">Group</span> <input style="margin-left: 2em" class="btn btn-default" type="button" value="Leave Group" id="leave_group"/></h2>
             <!-- add in class name, display buttons based on the class's groups to enter the individual groups  -->
             <!-- foreach group, create a html button with onclick to emit action to a group -->
             <h2 align="center">Electrical field lines and equipotential surfaces</h2>
@@ -61,45 +62,199 @@
             <span style="text-align: right; display:inline-block">Selected point charge: <select id="charge"></select></span>
             </div>
 
-            <div>
-                <button type="button" onclick="toggle_delete(this);" class="btn btn-default btn-sm">
-                    <span style="color:black" class="glyphicon glyphicon-trash"></span>
-                </button>
+
+            <div class="col-md-8 col-sm-8">
+                <div class="tools">
+                    <button id="settings_button" type="button" onclick="this.blur();" class="btn btn-default btn-sm" data-toggle="modal" data-target="#settings_modal">
+                        <span class="glyphicon glyphicon-cog"></span>
+                    </button>
+                    <button id="vector_draw_button" type="button" onclick="toggle_draw_vectors(this);" class="btn btn-default btn-sm">
+                        <span class="glyphicon glyphicon-pencil"></span>
+                    </button>
+                    <button id="vector_delete_button" type="button" onclick="toggle_delete(this);" class="btn btn-default btn-sm">
+                        <span class="glyphicon glyphicon-trash"></span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-4">
+                <input type="button" value="←" class="btn btn-default change_coord" data-x=-1 data-y=0 />
+                <input type="button" value="↑" class="btn btn-default change_coord" data-x=0 data-y=1 />
+                <input type="button" value="↓" class="btn btn-default change_coord" data-x=0 data-y=-1 />
+                <input type="button" value="→" class="btn btn-default change_coord" data-x=1 data-y=0 />
             </div>
 
             <div style="padding:10px; width: 100%;">
                 <span style="display:inline-block">
-                    <form id="display-settings">
-                        <input type="checkbox" id="show_particle_charge">
-                        <span class="checkboxtext">Show particle charge</span>
-                        <input type="checkbox" id="show_particle_size">
-                        <span class="checkboxtext">Show particle size</span>
-                        <input type="checkbox" id="show_equipotentials">
-                        <span class="checkboxtext">Show equipotential lines</span>
-                        <input type="checkbox" id="show_fieldlines">
-                        <span class="checkboxtext">Show field lines</span> 
-                        <input type="checkbox" id="show_forcevectors">
-                        <span class="checkboxtext">Show force vectors</span>
-                        <input type="checkbox" id="show_fieldvectors">
-                        <span class="checkboxtext">Show field vectors</span>
-                        <input type="checkbox" id="show_labels" checked>
-                        <span class="checkboxtext">Show name labels</span>
-                        <input type="checkbox" id="show_axes" checked>
-                        <span class="checkboxtext">Show axes & grid</span>
-                        <input type="checkbox" id="show_points" checked>
-                        <span class="checkboxtext">Show points</span>
-                        <input type="checkbox" id="show_drawn_vectors">
-                        <span class="checkboxtext">Show drawn vectors</span>
-                        <input type="checkbox" id="draw_vectors">
-                        <span class="checkboxtext">Draw vectors</span>
-                        <input type="checkbox" id="show_testcharge">
-                        <span class="checkboxtext">Show test charge</span>
-                        <select id ="testcharge_value" class="testcharge_options">
-                          <option value="positive">+</option>
-                          <option value="negative">-</option>
-                        </select>
-                        <span class="checkboxtext testcharge_options">Select test charge</span>
-                    </form>
+                    <div class="modal fade" id="settings_modal" tabindex="-1" role="dialog" aria-labelledby="modal_settings_label">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div style="border: solid; border-width: 0px 0px 3px 0px; background-color: #4f90c9" class="modal-header"> 
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"> 
+                                    <span aria-hidden="true">×</span></button> 
+                                    <h4 class="modal-title" id="modal_settings_label">Settings</h4> 
+                                </div>
+                                <div class="modal-body"> 
+
+
+                                    <form id="display-settings">
+                                        <div class="row">
+                                            <!-- Left Column -->
+                                            <div class="col-md-6 col-sm-6">
+
+                                                <div class="row">
+                                                    <div class="col-md-2 col-sm-2">
+                                                        <div class="onoffswitch">
+                                                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="show_particle_charge" checked>
+                                                            <label class="onoffswitch-label" for="show_particle_charge"></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-10 col-sm-10">
+                                                        <span class="checkboxtext">Show particle charge</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-md-2 col-sm-2">
+                                                        <div class="onoffswitch">
+                                                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="show_particle_size" checked>
+                                                            <label class="onoffswitch-label" for="show_particle_size"></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-10 col-sm-10">
+                                                        <span class="checkboxtext">Show particle size</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-md-2 col-sm-2">
+                                                        <div class="onoffswitch">
+                                                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="show_labels" checked>
+                                                            <label class="onoffswitch-label" for="show_labels"></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-10 col-sm-10">
+                                                        <span class="checkboxtext">Show name labels</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-md-2 col-sm-2">
+                                                        <div class="onoffswitch">
+                                                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="show_axes" checked>
+                                                            <label class="onoffswitch-label" for="show_axes"></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-10 col-sm-10">
+                                                        <span class="checkboxtext">Show axes & grid</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-md-2 col-sm-2">
+                                                        <div class="onoffswitch">
+                                                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="show_points" checked>
+                                                            <label class="onoffswitch-label" for="show_points"></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-10 col-sm-10">
+                                                        <span class="checkboxtext">Show points</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-md-2 col-sm-2">
+                                                        <div class="onoffswitch">
+                                                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="show_equipotentials">
+                                                            <label class="onoffswitch-label" for="show_equipotentials"></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-10 col-sm-10">
+                                                        <span class="checkboxtext">Show equipotential lines</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Right Column -->
+                                            <div class="col-md-6 col-sm-6">
+
+                                                <div class="row">
+                                                    <div class="col-md-2 col-sm-2">
+                                                        <div class="onoffswitch">
+                                                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="show_fieldlines">
+                                                            <label class="onoffswitch-label" for="show_fieldlines"></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-10 col-sm-10">
+                                                        <span class="checkboxtext">Show field lines</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-md-2 col-sm-2">
+                                                        <div class="onoffswitch">
+                                                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="show_forcevectors">
+                                                            <label class="onoffswitch-label" for="show_forcevectors"></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-10 col-sm-10">
+                                                        <span class="checkboxtext">Show force vectors</span>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="row">
+                                                    <div class="col-md-2 col-sm-2">
+                                                        <div class="onoffswitch">
+                                                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="show_fieldvectors">
+                                                            <label class="onoffswitch-label" for="show_fieldvectors"></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-10 col-sm-10">
+                                                        <span class="checkboxtext">Show field vectors</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-md-2 col-sm-2">
+                                                        <div class="onoffswitch">
+                                                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="show_drawn_vectors">
+                                                            <label class="onoffswitch-label" for="show_drawn_vectors"></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-10 col-sm-10">
+                                                        <span class="checkboxtext">Show drawn vectors</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-md-2 col-sm-2">
+                                                        <div class="onoffswitch">
+                                                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="show_testcharge">
+                                                            <label class="onoffswitch-label" for="show_testcharge"></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-10 col-sm-10">
+                                                        <span class="checkboxtext">Show test charge</span>
+                                                    </div>
+                                                </div>
+                                                <select id ="testcharge_value" class="testcharge_options">
+                                                  <option value="positive">+</option>
+                                                  <option value="negative">-</option>
+                                                </select>
+                                                <span class="checkboxtext testcharge_options">Select test charge</span>
+
+                                            </div>
+                                        </div>
+                                    </form>
+                                    <div id="disabled_settings_message" hidden>
+                                        <h3> Settings Disabled by Administrator </h3>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </span>
             </div>
 
@@ -107,22 +262,8 @@
               <br>
               <script type="text/javascript" src="js/fields5.js"></script>
               <script type="text/javascript" src="js/field_lines.js"></script>
-
           </div>
-          <div class="col-md-3">
-            <h3>People - Coordinates</h3>
-            <ul id="people"></ul>
-            <input type="button" value="←" class="btn btn-default change_coord" data-x=-1 data-y=0 />
-            <input type="button" value="↑" class="btn btn-default change_coord" data-x=0 data-y=1 />
-            <input type="button" value="↓" class="btn btn-default change_coord" data-x=0 data-y=-1 />
-            <input type="button" value="→" class="btn btn-default change_coord" data-x=1 data-y=0 />
-            <br/>
-          
-            
 
-            <ul id="settings"></ul>
-            <div id="messages"></div>
-          </div>
         </div>
       </div>
     </div>
@@ -144,6 +285,8 @@
       var socket = Student.Socket(io(host));
       $(document).ready(function() {
         $('#display-settings').change(update_display_settings);
+        $('body').addClass('stop-scrolling');
+        $('body').bind('touchmove', function(e){e.preventDefault()});
         redraw();
       });
     </script>
