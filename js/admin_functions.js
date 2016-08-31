@@ -44,7 +44,7 @@ function add_class_response(class_id, class_name, group_count) {
     $manage_view.show();
     $settings_view.show();
 
-    $class_name.html(class_name + " ID: " + class_id);
+    $class_name.html(class_name + " <br/>ID: " + class_id);
     var groups_html = "";
     var group_number = parseInt(group_count);
     for (var group=1; group < group_number+1; group++) {

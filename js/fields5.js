@@ -1109,3 +1109,26 @@ function toggle_draw_vectors(btn) {
         draw_vector_settings.draw_mode = false;
     }
 }
+
+function is_default_setting(id) {
+    return (id == 'show_particle_charge'
+         || id == 'show_particle_size'
+         || id == 'show_labels'
+         || id == 'show_axes'
+         || id == 'show_points');
+}
+
+function set_to_default() {
+    $('form#display-settings input').each(function() {
+        var id = $(this).attr("id");
+        if (is_default_setting(id)) {
+            $(this).prop('checked', true);
+            field_display_settings[id] = true;
+        }
+        else {
+            $(this).prop('checked', false);
+            field_display_settings[id] = false;
+        }
+    });
+    update_display_settings();
+}
