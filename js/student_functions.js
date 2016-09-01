@@ -82,9 +82,9 @@ function groups_get_response(username, class_id, groups) {
     var current_class = sessionStorage.getItem('class_id');
     $groups.empty();
     for (var i in groups){
-        var button = '<li><input type="button" id="grp' + groups[i].grp_name + '" value="Group ';
+        var button = '<input type="button" class="btn btn-sm btn-default" style="margin: 0em 0.5em 0.5em 0em" id="grp' + groups[i].grp_name + '" value="Group ';
         button += groups[i].grp_name + ' - '+ groups[i].num;
-        button += '" /></li>';
+        button += '" />';
         $groups.append(button);
     }
 }
@@ -191,10 +191,12 @@ function get_settings_response(class_id, settings) {
         if (setting == "Hide Options" ){
             settings[setting] ? (
                 // $("#settings_button").prop('disabled', true),
+                $("#settings_footer").prop('hidden', true),
                 $("#display-settings").prop('hidden', true),
                 $("#disabled_settings_message").prop('hidden', false)
             ) : (
                 // $("#settings_button").prop('disabled', false),
+                $("#settings_footer").prop('hidden', false),
                 $("#display-settings").prop('hidden', false),
                 $("#disabled_settings_message").prop('hidden', true)
             );//hide display options if certain global is turned on.
@@ -208,13 +210,13 @@ function get_settings_response(class_id, settings) {
 //adds a new group button
 function add_group_response() {
     var $groups = $('#buttons');
-    var group_number = $('#buttons > li:last').index() + 2;
-    var button = '<li><input type="button" id="grp' + group_number + '" value="Group ';
+    var group_number = $groups.children().length + 1;
+    var button = '<input type="button" class="btn btn-sm btn-default" style="margin: 0em 0.5em 0.5em 0em" id="grp' + group_number + '" value="Group ';
     button += group_number + ' - '+ 0;
-    button += '" /></li>';
+    button += '" />';
     $groups.append(button);
 }
 //removes last group button
 function delete_group_response() {
-    $('#buttons > li:last').remove();
+    $('#buttons input').last().remove();
 }
