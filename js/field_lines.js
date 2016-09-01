@@ -1,4 +1,3 @@
-
 K = 9.0e9;
 var forceVectorScale = 20000;
 var gridSpacing = 5;
@@ -246,25 +245,6 @@ function redraw_forcevectors() {
 
             var final_dx = Math.cos(final_theta_rad) * pointVectorScale(final_mag);
             var final_dy = Math.sin(final_theta_rad) * pointVectorScale(final_mag);
-            if (divideByZero == false) {
-                if(polarity == 1){
-                    svg.append("line")          // attach a line
-                      .attr("class", "resultvector")
-                      .attr("marker-end", "url(#arrow)")
-                      .attr("x1", curX)     // x position of the first end of the line
-                      .attr("y1", height - curY)      // y position of the first end of the line
-                      .attr("x2", curX + final_dx)     // x position of the second end of the line
-                      .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
-                } else if (polarity == -1) {
-                    svg.append("line")          // attach a line
-                          .attr("class", "resultvector")
-                          .attr("marker-end", "url(#arrow)")
-                          .attr("x1", curX)     // x position of the first end of the line
-                          .attr("y1", height - curY)      // y position of the first end of the line
-                          .attr("x2", curX + final_dx)     // x position of the second end of the line
-                          .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
-                }
-            }
     // }
 
     // for selected charge
@@ -272,14 +252,16 @@ function redraw_forcevectors() {
 
     var curX = charges[chargeIndex][0];
     var curY = charges[chargeIndex][1];
-    
-    svg.append("line")          // attach a line
-        .attr("class", "resultvector")
-        .attr("marker-end", "url(#arrow)")
-        .attr("x1", curX)     // x position of the first end of the line
-        .attr("y1", curY)      // y position of the first end of the line
-        .attr("x2", curX + forceVectorScale * F[0])     // x position of the second end of the line
-        .attr("y2", curY + forceVectorScale * F[1]);    // y position of the second end of the line
+
+    if (divideByZero === false) {
+        svg.append("line")          // attach a line
+            .attr("class", "resultvector")
+            .attr("marker-end", "url(#arrow)")
+            .attr("x1", curX)     // x position of the first end of the line
+            .attr("y1", curY)      // y position of the first end of the line
+            .attr("x2", curX + forceVectorScale * F[0])     // x position of the second end of the line
+            .attr("y2", curY + forceVectorScale * F[1]);    // y position of the second end of the line
+    }
 
 
     currentTime -= new Date().getTime()
@@ -292,7 +274,8 @@ function redraw_testvector(){
 
     if (selected === null)
         return;
-    
+
+    var charges = users.map(function(d) { return [d.x, d.y, d.charge]; });
 
             var curX = testCharge[0].x;
             var curY = height - testCharge[0].y;
@@ -362,19 +345,24 @@ function redraw_testvector(){
     var E = calculateFieldVectorAtPoint([curX, curY]);
     var F = [testCharge[0].charge*E[0], testCharge[0].charge*E[1]];
 
+    var final_theta_rad = Math.atan2(total_forceY, total_forceX);
+    var final_theta_deg = final_theta_rad * (180.0 / Math.PI);
+    var final_mag = Math.sqrt(total_forceX*total_forceX + total_forceY*total_forceY);
+    console.log("Final forceX: " + total_forceX + " forceY: " + total_forceY + " => " + final_theta_deg, " mag: " + final_mag);
 
-            var final_dx = Math.cos(final_theta_rad) * pointVectorScale(final_mag);
-            var final_dy = Math.sin(final_theta_rad) * pointVectorScale(final_mag);
-            if (divideByZero == false) {
-                svg.append("line")          // attach a line
-                    .attr("class", "testvector")
-                    .attr("marker-end", "url(#testChargeArrow)")
-                    .attr("x1", curX)     // x position of the first end of the line
-                    .attr("y1", height - curY)      // y position of the first end of the line
-                    .attr("x2", curX + final_dx)     // x position of the second end of the line
-                    .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
-                console.log("did this append?");
-            }
+    var final_dx = Math.cos(final_theta_rad) * pointVectorScale(final_mag);
+    var final_dy = Math.sin(final_theta_rad) * pointVectorScale(final_mag);
+
+    if (divideByZero === false) {
+    svg.append("line")          // attach a line
+        .attr("class", "testvector")
+        .attr("marker-end", "url(#testChargeArrow)")
+        .attr("x1", curX)     // x position of the first end of the line
+        .attr("y1", curY)      // y position of the first end of the line
+        .attr("x2", curX + forceVectorScale*F[0])     // x position of the second end of the line
+        .attr("y2", curY + forceVectorScale*F[1]);    // y position of the second end of the line
+    }
+
 
     svg.append("line")          // attach a line
         .attr("class", "testvector")
