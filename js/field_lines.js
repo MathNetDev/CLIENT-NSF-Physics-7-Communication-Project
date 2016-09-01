@@ -461,7 +461,7 @@ function redraw_fieldlines () {
         E_x,
         E_y,
         E_mag;
-    var E_min = .00001;
+    var E_min = .0001;
     var destinationX;
     var destinationY;
     var source1X;
@@ -482,7 +482,6 @@ function redraw_fieldlines () {
         //Number of field lines proportional to charge strength
         numFieldLines = Math.abs(linesPerCharge * Math.floor(charges[chargeIndex][2]));
 
-        //Four lines coming from a charge
         for (pointIndex=0; pointIndex<numFieldLines; pointIndex ++) {
             
             // start uniformly spaced around the charge
