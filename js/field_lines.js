@@ -1,5 +1,6 @@
 
 K = 9.0e9; 
+var forceVectorScale = 20000;
 var gridSpacing = 5;
 var vectorFreq = 2;
 var margin = {top: 40, right: 40, bottom: 40, left: 40},
@@ -72,6 +73,85 @@ defs.append("marker")
   .append("path")
     .attr("d", "M0,0L10,5L0,10");
 
+function calculateFieldVectorAtPoint(p){
+    
+    var charges = users.map(function(d) { return [d.x, d.y, d.charge]; });
+    var E_x = 0;
+    var E_y = 0;
+    var distX,
+        distY,
+        r_squared,
+        r,
+        e,
+        unitX,
+        unitY,
+        e_x,
+        e_y,
+        j;
+
+    for (j = 0; j < charges.length; j++) {
+
+        distX = p[0] - charges[j][0];
+        distY = p[1] - charges[j][1];
+        r_squared = distX*distX + distY*distY;
+        r = Math.sqrt(r_squared);
+
+        e = charges[j][2] / r_squared;
+        unitX = distX/r;
+        unitY = distY/r;
+        e_x = e*unitX;
+        e_y = e*unitY;
+
+        E_x += e_x;
+        E_y += e_y;
+   }
+
+   return [E_x, E_y];
+}
+
+function calculateForceOnCharge(chargeIndex){
+    
+    var charges = users.map(function(d) { return [d.x, d.y, d.charge]; });
+    var curX = charges[chargeIndex][0];
+    var curY = charges[chargeIndex][1];
+    var charge = charges[chargeIndex][2];
+
+    var E_x = 0;
+    var E_y = 0;
+    var distX,
+        distY,
+        r_squared,
+        r,
+        e,
+        unitX,
+        unitY,
+        e_x,
+        e_y,
+        j;
+
+    // calculate E at charge due to all other charges
+    for (j = 0; j < charges.length; j++) {
+        if (j !== chargeIndex) {
+            distX = curX - charges[j][0];
+            distY = curY - charges[j][1];
+            r_squared = distX*distX + distY*distY;
+            r = Math.sqrt(r_squared);
+
+            e = charges[j][2] / r_squared;
+            unitX = distX/r;
+            unitY = distY/r;
+            e_x = e*unitX;
+            e_y = e*unitY;
+
+            E_x += e_x;
+            E_y += e_y;
+        }
+   }
+
+   return [charge*E_x, charge*E_y];
+}
+
+
 function redraw_forcevectors() {
     var currentTime = new Date().getTime();
 
@@ -95,9 +175,6 @@ function redraw_forcevectors() {
         console.log("UNABLE TO FIND selected in users!");
         return;
     }
-    //Iterate for each charge
-    //for (var chargeIndex = 0; chargeIndex < charges.length; chargeIndex++) {
-    
      
             var curX = charges[chargeIndex][0];
             var curY = height - charges[chargeIndex][1];
@@ -170,31 +247,30 @@ function redraw_forcevectors() {
 
             var final_dx = Math.cos(final_theta_rad) * pointVectorScale(final_mag);
             var final_dy = Math.sin(final_theta_rad) * pointVectorScale(final_mag);
-            if (divideByZero == false) {
-                if(polarity == 1){
-                    svg.append("line")          // attach a line
-                      .attr("class", "resultvector")
-                      .attr("marker-end", "url(#arrow)")
-                      .attr("x1", curX)     // x position of the first end of the line
-                      .attr("y1", height - curY)      // y position of the first end of the line
-                      .attr("x2", curX + final_dx)     // x position of the second end of the line
-                      .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
-                } else if (polarity == -1) {
-                    svg.append("line")          // attach a line
-                          .attr("class", "resultvector")
-                          .attr("marker-end", "url(#arrow)")
-                          .attr("x1", curX)     // x position of the first end of the line
-                          .attr("y1", height - curY)      // y position of the first end of the line
-                          .attr("x2", curX + final_dx)     // x position of the second end of the line
-                          .attr("y2", height - (curY + final_dy));    // y position of the second end of the line
-                }
-            }
     // }
+
+    // for selected charge
+    var F = calculateForceOnCharge(chargeIndex);
+
+    var curX = charges[chargeIndex][0];
+    var curY = charges[chargeIndex][1];
+    
+    if (divideByZero === false) {
+        svg.append("line")          // attach a line
+            .attr("class", "resultvector")
+            .attr("marker-end", "url(#arrow)")
+            .attr("x1", curX)     // x position of the first end of the line
+            .attr("y1", curY)      // y position of the first end of the line
+            .attr("x2", curX + forceVectorScale * F[0])     // x position of the second end of the line
+            .attr("y2", curY + forceVectorScale * F[1]);    // y position of the second end of the line
+    }
+
 
     currentTime -= new Date().getTime()
     console.log("redraw_forcevectors iteration took: " + (-1*currentTime)+"ms." )
 
 }
+
 function redraw_testvector(){
   var currentTime = new Date().getTime();
 
@@ -289,6 +365,7 @@ function redraw_testvector(){
     currentTime -= new Date().getTime()
     console.log("redraw_testvector iteration took: " + (-1*currentTime)+"ms." )
 }
+
 function redraw_fieldvectors() {
     var currentTime = new Date().getTime();
     var maxForce = 0;
