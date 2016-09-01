@@ -342,112 +342,64 @@ function draw_vector(attribute) {
             "opacity" : 0.4,
             "marker-end": "url(#testArrow)"
         })
-        .on('touchstart', function(e) {
-            start = new Date().getTime();
-        })
-        .on('touchmove', function(e) {
-            start = 0;
-        })
-        .on('touchend', function(e) {
-            if (new Date().getTime() >= (start + longpress)) {
-                console.log("longclick");
-                var line = d3.select(this);
-                var label = svg.append("text");
-                var delta_x = Math.abs(parseFloat(line.attr("x1")) - parseFloat(line.attr("x2")));
-                var delta_y = Math.abs(parseFloat(line.attr("y1")) - parseFloat(line.attr("y2")));
-                var x = ((parseFloat(line.attr("x1")) + parseFloat(line.attr("x2"))) / 2);
-                var y = ((parseFloat(line.attr("y1")) + parseFloat(line.attr("y2"))) / 2);
-                var theta = Math.atan2(delta_y, delta_x) * (180.0 / Math.PI);
-                if (theta < 45) {
-                    (y > -19) ? y -= 10 : y += 10;
-                }
-                else {
-                    (x > 612) ? x -= 10 : x += 10;
-                }
-                label.attr("fill", "steelblue")
-                    .attr("x", x)
-                    .attr("y", y)
-                    .attr("font-weight", "bold")
-                    .text(function(d) { return line.attr("user"); });
-                window.setTimeout(function() { label.remove(); } , 2000);
+        .on('touchstart', onStart)
+        .on('touchmove', onMove)
+        .on('touchend', onEnd)
+        .on('mousedown', onStart)
+        .on('mousemove', onMove)
+        .on('mouseup', onEnd);
+
+
+    // Call back functions
+    function onStart(e) { start = new Date().getTime(); }
+    function onMove(e)  { start = 0; }
+    function onEnd(e) {
+        if (new Date().getTime() >= (start + longpress)) {
+            console.log("longclick");
+            var line = d3.select(this);
+            var label = svg.append("text");
+            var delta_x = Math.abs(parseFloat(line.attr("x1")) - parseFloat(line.attr("x2")));
+            var delta_y = Math.abs(parseFloat(line.attr("y1")) - parseFloat(line.attr("y2")));
+            var x = ((parseFloat(line.attr("x1")) + parseFloat(line.attr("x2"))) / 2);
+            var y = ((parseFloat(line.attr("y1")) + parseFloat(line.attr("y2"))) / 2);
+            var theta = Math.atan2(delta_y, delta_x) * (180.0 / Math.PI);
+            if (theta < 45) {
+                (y > -19) ? y -= 10 : y += 10;
             }
-            else if (draw_vector_settings.delete_mode === true && $(this).attr("user") == sessionStorage.getItem("username")) {
-                var i;
-                for (i = 0; i < my_vector_attributes.length; i++) {
-                    if ($(this).attr("x1") == my_vector_attributes[i]["x1"] && $(this).attr("x2") == my_vector_attributes[i]["x2"] 
-                        && $(this).attr("y1") == my_vector_attributes[i]["y1"] && $(this).attr("y2") == my_vector_attributes[i]["y2"]) {
-                        my_vector_attributes.splice(i, 1);
-                        this.remove();
-                        return;
-                    }
-                }
-                for (i = 0; i < vector_attributes.length; i++) {
-                    if ($(this).attr("x1") == vector_attributes[i]["x1"] && $(this).attr("x2") == vector_attributes[i]["x2"] 
-                        && $(this).attr("y1") == vector_attributes[i]["y1"] && $(this).attr("y2") == vector_attributes[i]["y2"]) {
-                        vector_attributes.splice(i, 1);
-                        this.remove();
-                        socket.xml_change(sessionStorage.getItem("username"), 
-                                          sessionStorage.getItem("class_id"), 
-                                          sessionStorage.getItem("group_id"), 
-                                          JSON.stringify(vector_attributes));
-                        return;
-                    }
+            else {
+                (x > 612) ? x -= 10 : x += 10;
+            }
+            label.attr("fill", "steelblue")
+                .attr("x", x)
+                .attr("y", y)
+                .attr("font-weight", "bold")
+                .text(function(d) { return line.attr("user"); });
+            window.setTimeout(function() { label.remove(); } , 2000);
+        }
+        else if (draw_vector_settings.delete_mode === true && $(this).attr("user") == sessionStorage.getItem("username")) {
+            var i;
+            for (i = 0; i < my_vector_attributes.length; i++) {
+                if ($(this).attr("x1") == my_vector_attributes[i]["x1"] && $(this).attr("x2") == my_vector_attributes[i]["x2"] 
+                    && $(this).attr("y1") == my_vector_attributes[i]["y1"] && $(this).attr("y2") == my_vector_attributes[i]["y2"]) {
+                    my_vector_attributes.splice(i, 1);
+                    this.remove();
+                    return;
                 }
             }
-        })
-        .on('mousedown', function(e) {
-            start = new Date().getTime();
-        })
-        .on('mousemove', function(e) {
-            start = 0;
-        })
-        .on('mouseup', function(e) {
-            if (new Date().getTime() >= (start + longpress)) {
-                console.log("longclick");
-                var line = d3.select(this);
-                var label = svg.append("text");
-                var delta_x = Math.abs(parseFloat(line.attr("x1")) - parseFloat(line.attr("x2")));
-                var delta_y = Math.abs(parseFloat(line.attr("y1")) - parseFloat(line.attr("y2")));
-                var x = ((parseFloat(line.attr("x1")) + parseFloat(line.attr("x2"))) / 2);
-                var y = ((parseFloat(line.attr("y1")) + parseFloat(line.attr("y2"))) / 2);
-                var theta = Math.atan2(delta_y, delta_x) * (180.0 / Math.PI);
-                if (theta < 45) {
-                    (y > -19) ? y -= 10 : y += 10;
-                }
-                else {
-                    (x > 612) ? x -= 10 : x += 10;
-                }
-                label.attr("fill", "steelblue")
-                    .attr("x", x)
-                    .attr("y", y)
-                    .attr("font-weight", "bold")
-                    .text(function(d) { return line.attr("user"); });
-                window.setTimeout(function() { label.remove(); } , 2000);
-            }
-            else if (draw_vector_settings.delete_mode === true && $(this).attr("user") == sessionStorage.getItem("username")) {
-                var i;
-                for (i = 0; i < my_vector_attributes.length; i++) {
-                    if ($(this).attr("x1") == my_vector_attributes[i]["x1"] && $(this).attr("x2") == my_vector_attributes[i]["x2"] 
-                        && $(this).attr("y1") == my_vector_attributes[i]["y1"] && $(this).attr("y2") == my_vector_attributes[i]["y2"]) {
-                        my_vector_attributes.splice(i, 1);
-                        this.remove();
-                        return;
-                    }
-                }
-                for (i = 0; i < vector_attributes.length; i++) {
-                    if ($(this).attr("x1") == vector_attributes[i]["x1"] && $(this).attr("x2") == vector_attributes[i]["x2"] 
-                        && $(this).attr("y1") == vector_attributes[i]["y1"] && $(this).attr("y2") == vector_attributes[i]["y2"]) {
-                        vector_attributes.splice(i, 1);
-                        this.remove();
-                        socket.xml_change(sessionStorage.getItem("username"), 
-                                          sessionStorage.getItem("class_id"), 
-                                          sessionStorage.getItem("group_id"), 
-                                          JSON.stringify(vector_attributes));
-                        return;
-                    }
+            for (i = 0; i < vector_attributes.length; i++) {
+                if ($(this).attr("x1") == vector_attributes[i]["x1"] && $(this).attr("x2") == vector_attributes[i]["x2"] 
+                    && $(this).attr("y1") == vector_attributes[i]["y1"] && $(this).attr("y2") == vector_attributes[i]["y2"]) {
+                    vector_attributes.splice(i, 1);
+                    this.remove();
+                    socket.xml_change(sessionStorage.getItem("username"), 
+                                      sessionStorage.getItem("class_id"), 
+                                      sessionStorage.getItem("group_id"), 
+                                      JSON.stringify(vector_attributes));
+                    return;
                 }
             }
-        });
+        }
+    }
 }
 
 function draw_all_vectors() {

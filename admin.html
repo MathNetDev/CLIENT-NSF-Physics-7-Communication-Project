@@ -71,23 +71,66 @@
       </div>
 
       <!-- Settings Modal -->
-      <div class="modal fade" id="settings_modal" tabindex="-1" role="dialog" aria-labelledby="modal_settings_label">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div style="border: solid; border-width: 0px 0px 3px 0px; background-color: #4f90c9" class="modal-header"> 
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"> 
-              <span aria-hidden="true">×</span></button> 
-              <h4 class="modal-title" id="modal_settings_label"> Settings </h4> 
-            </div>
-            <div class="modal-body"> 
-              <div class="settings_view">
-                <br>
-                <input class="btn btn-default setting" type="checkbox" name="Hide Options">Hide Options<br>
-                <input class="btn btn-default setting" type="checkbox" name="Test2">Test2<br>
-                <input class="btn btn-default setting" type="checkbox" name="Test3">Test3<br>
-              
+      <div class="settings_view">
+        <div class="modal fade" id="settings_modal" tabindex="-1" role="dialog" aria-labelledby="modal_settings_label">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+
+              <div class="modal-header" style="border: solid; border-width: 0px 0px 3px 0px; background-color: #4f90c9"> 
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"> 
+                <span aria-hidden="true">×</span></button> 
+                <h4 class="modal-title" id="modal_settings_label"> Settings </h4> 
+              </div>
+
+              <div class="modal-body"> 
+                <div class="col-md-12 col-sm-12">
+                  <!-- Left Column -->
+                  <div class="col-md-6 col-sm-6">
+                    <div class="row">
+                      <div class="col-md-2 col-sm-2">
+                        <div class="onoffswitch">
+                            <input type="checkbox" name="Hide Options" class="onoffswitch-checkbox setting" id="hide_options">
+                          <label class="onoffswitch-label" for="hide_options"></label>
+                        </div>
+                      </div>
+                      <div class="col-md-10 col-sm-10">
+                        <span class="checkboxtext">Hide Options</span>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-2 col-sm-2">
+                        <div class="onoffswitch">
+                          <input type="checkbox" name="Test2" class="onoffswitch-checkbox setting" id="test2">
+                          <label class="onoffswitch-label" for="test2"></label>
+                        </div>
+                      </div>
+                      <div class="col-md-10 col-sm-10">
+                        <span class="checkboxtext">Test 2</span>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-2 col-sm-2">
+                        <div class="onoffswitch">
+                          <input type="checkbox" name="Test3" class="onoffswitch-checkbox setting" id="test3">
+                          <label class="onoffswitch-label" for="test3"></label>
+                        </div>
+                      </div>
+                      <div class="col-md-10 col-sm-10">
+                        <span class="checkboxtext">Test 3</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Right Column -->
+                  <div class="col-md-6 col-sm-6">
+                  </div>
+                </div>
+              </div>
+
+              <div class="modal-footer">
                 <input class="btn btn-default save_button" type="button" value="Save Settings">
               </div>
+
             </div>
           </div>
         </div>
