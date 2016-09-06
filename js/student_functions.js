@@ -82,9 +82,9 @@ function groups_get_response(username, class_id, groups) {
     var current_class = sessionStorage.getItem('class_id');
     $groups.empty();
     for (var i in groups){
-        var button = '<li><input type="button" id="grp' + groups[i].grp_name + '" value="Group ';
+        var button = '<input type="button" class="btn btn-sm btn-default" style="margin: 0em 0.5em 0.5em 0em" id="grp' + groups[i].grp_name + '" value="Group ';
         button += groups[i].grp_name + ' - '+ groups[i].num;
-        button += '" /></li>';
+        button += '" />';
         $groups.append(button);
     }
 }
@@ -94,16 +94,12 @@ function group_numbers_response(username, class_id, group_id, status, group_size
     $("#grp" + group_id).val('Group ' + group_id + ' - ' + group_size);
 
 }
-//resets $messages and $people, sets group_id in sessionStorage, then calls group_info
+// sets group_id in sessionStorage, then calls group_info
 // and get_settings
 function group_join_response(username, class_id, group_id) {
     var $login_view = $('.login_view');
     var $class_view = $('.class_view');
     var $group_view = $('.group_view');
-    var $messages = $('#messages');
-
-    $messages.html('');
-    $("#people").html('');
 
     $login_view.hide();
     $class_view.hide();
@@ -160,31 +156,23 @@ function group_info_response(username, class_id, group_id, members, status) {
                 member += ' - (<span class="x">' + members[i].member_x + '</span>, ';
                 member += '<span class="y">' + members[i].member_y + '</span>) </li>';
             }
-            $people.append(member);
-            
         }
-    
-        $('#messages').append(username + ' has joined the group<br/>');
     } else {
         var escUsername = username.replace(/&lt;/g,'<').replace(/&gt;/g, '>');
         escUsername = escapeStr(escUsername);
         $("#" + escUsername).remove();
         field_remove_user(username, class_id, group_id);
-        $('#messages').append(username + ' has left the group<br/>');
     }
     field_sync_users(members);
 }
 
 // set #username.(x/y) with the respective coordinates, and adds relavent message
 function coordinate_change_response(username, class_id, group_id, x, y, info) {
-    var $messages = $('#messages');
     var escUsername = username.replace(/&lt;/g,'<').replace(/&gt;/g, '>');
     escUsername = escapeStr(escUsername);
     $('#' + escUsername + ' .x').html(x);
     $('#' + escUsername + ' .y').html(y);
 
-    $messages.append(username + ' has moved their point to (' 
-                          + x + ', ' + y +')<br/>');
     info = JSON.parse(info);
     field_move_users(username, x, y, info);
 }
@@ -199,21 +187,18 @@ function get_xml_response(username, class_id, group_id, xml){
 
 // updates $class_settings based on settings array
 function get_settings_response(class_id, settings) {
-    var $class_settings = $('#settings');
-    $class_settings.html('');
-
     for (var setting in settings) {
-        var setting_item = "<li>" + setting + ": " + settings[setting] + "</li>";
-        $class_settings.append(setting_item);
         if (setting == "Hide Options" ){
             settings[setting] ? (
-                $("#display-settings").hide(), 
-                $('#messages').append('Admin has turned off options.<br/>'),
-                $("#display-settings input:checkbox").prop('checked', ''),
-                $("#display-settings #show_points").prop('checked', true)
+                // $("#settings_button").prop('disabled', true),
+                $("#settings_footer").prop('hidden', true),
+                $("#display-settings").prop('hidden', true),
+                $("#disabled_settings_message").prop('hidden', false)
             ) : (
-                $("#display-settings").show(),
-                $('#messages').append('Admin has turned on options.<br/>')
+                // $("#settings_button").prop('disabled', false),
+                $("#settings_footer").prop('hidden', false),
+                $("#display-settings").prop('hidden', false),
+                $("#disabled_settings_message").prop('hidden', true)
             );//hide display options if certain global is turned on.
             
             update_display_settings();
@@ -225,13 +210,13 @@ function get_settings_response(class_id, settings) {
 //adds a new group button
 function add_group_response() {
     var $groups = $('#buttons');
-    var group_number = $('#buttons > li:last').index() + 2;
-    var button = '<li><input type="button" id="grp' + group_number + '" value="Group ';
+    var group_number = $groups.children().length + 1;
+    var button = '<input type="button" class="btn btn-sm btn-default" style="margin: 0em 0.5em 0.5em 0em" id="grp' + group_number + '" value="Group ';
     button += group_number + ' - '+ 0;
-    button += '" /></li>';
+    button += '" />';
     $groups.append(button);
 }
 //removes last group button
 function delete_group_response() {
-    $('#buttons > li:last').remove();
+    $('#buttons input').last().remove();
 }

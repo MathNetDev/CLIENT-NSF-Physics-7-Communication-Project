@@ -48,8 +48,8 @@ var verticalBlockHalf = verticalBlock / 2;
 
 // global display variables set with checkboxes in index.html
 var field_display_settings = {
-    'show_particle_charge': false,
-    'show_particle_size': false,
+    'show_particle_charge': true,
+    'show_particle_size': true,
     'show_equipotentials': false,
     'show_fieldlines':false, 
     'show_forcevectors':false,
@@ -59,7 +59,6 @@ var field_display_settings = {
     'show_axes': true,
     'show_points': true,
     'show_drawn_vectors' : false,
-    'draw_vectors': false,
     'show_testcharge': false
     };
 
@@ -113,7 +112,11 @@ var my_vector_attributes = [];
 var vector_attributes = [];
 var drawn_vector;
 var drawn_vectors = [];
-var delete_mode = false;
+
+var draw_vector_settings = {
+    'draw_mode': false,
+    'delete_mode': false
+};
 
 //use d3.svg.line for rendering field lines and equipotential surfaces
 var line = d3.svg.line();
@@ -339,112 +342,64 @@ function draw_vector(attribute) {
             "opacity" : 0.4,
             "marker-end": "url(#testArrow)"
         })
-        .on('touchstart', function(e) {
-            start = new Date().getTime();
-        })
-        .on('touchmove', function(e) {
-            start = 0;
-        })
-        .on('touchend', function(e) {
-            if (new Date().getTime() >= (start + longpress)) {
-                console.log("longclick");
-                var line = d3.select(this);
-                var label = svg.append("text");
-                var delta_x = Math.abs(parseFloat(line.attr("x1")) - parseFloat(line.attr("x2")));
-                var delta_y = Math.abs(parseFloat(line.attr("y1")) - parseFloat(line.attr("y2")));
-                var x = ((parseFloat(line.attr("x1")) + parseFloat(line.attr("x2"))) / 2);
-                var y = ((parseFloat(line.attr("y1")) + parseFloat(line.attr("y2"))) / 2);
-                var theta = Math.atan2(delta_y, delta_x) * (180.0 / Math.PI);
-                if (theta < 45) {
-                    (y > -19) ? y -= 10 : y += 10;
-                }
-                else {
-                    (x > 612) ? x -= 10 : x += 10;
-                }
-                label.attr("fill", "steelblue")
-                    .attr("x", x)
-                    .attr("y", y)
-                    .attr("font-weight", "bold")
-                    .text(function(d) { return line.attr("user"); });
-                window.setTimeout(function() { label.remove(); } , 2000);
+        .on('touchstart', onStart)
+        .on('touchmove', onMove)
+        .on('touchend', onEnd)
+        .on('mousedown', onStart)
+        .on('mousemove', onMove)
+        .on('mouseup', onEnd);
+
+
+    // Call back functions
+    function onStart(e) { start = new Date().getTime(); }
+    function onMove(e)  { start = 0; }
+    function onEnd(e) {
+        if (new Date().getTime() >= (start + longpress)) {
+            console.log("longclick");
+            var line = d3.select(this);
+            var label = svg.append("text");
+            var delta_x = Math.abs(parseFloat(line.attr("x1")) - parseFloat(line.attr("x2")));
+            var delta_y = Math.abs(parseFloat(line.attr("y1")) - parseFloat(line.attr("y2")));
+            var x = ((parseFloat(line.attr("x1")) + parseFloat(line.attr("x2"))) / 2);
+            var y = ((parseFloat(line.attr("y1")) + parseFloat(line.attr("y2"))) / 2);
+            var theta = Math.atan2(delta_y, delta_x) * (180.0 / Math.PI);
+            if (theta < 45) {
+                (y > -19) ? y -= 10 : y += 10;
             }
-            else if (delete_mode === true && $(this).attr("user") == sessionStorage.getItem("username")) {
-                var i;
-                for (i = 0; i < my_vector_attributes.length; i++) {
-                    if ($(this).attr("x1") == my_vector_attributes[i]["x1"] && $(this).attr("x2") == my_vector_attributes[i]["x2"] 
-                        && $(this).attr("y1") == my_vector_attributes[i]["y1"] && $(this).attr("y2") == my_vector_attributes[i]["y2"]) {
-                        my_vector_attributes.splice(i, 1);
-                        this.remove();
-                        return;
-                    }
-                }
-                for (i = 0; i < vector_attributes.length; i++) {
-                    if ($(this).attr("x1") == vector_attributes[i]["x1"] && $(this).attr("x2") == vector_attributes[i]["x2"] 
-                        && $(this).attr("y1") == vector_attributes[i]["y1"] && $(this).attr("y2") == vector_attributes[i]["y2"]) {
-                        vector_attributes.splice(i, 1);
-                        this.remove();
-                        socket.xml_change(sessionStorage.getItem("username"), 
-                                          sessionStorage.getItem("class_id"), 
-                                          sessionStorage.getItem("group_id"), 
-                                          JSON.stringify(vector_attributes));
-                        return;
-                    }
+            else {
+                (x > 612) ? x -= 10 : x += 10;
+            }
+            label.attr("fill", "steelblue")
+                .attr("x", x)
+                .attr("y", y)
+                .attr("font-weight", "bold")
+                .text(function(d) { return line.attr("user"); });
+            window.setTimeout(function() { label.remove(); } , 2000);
+        }
+        else if (draw_vector_settings.delete_mode === true && $(this).attr("user") == sessionStorage.getItem("username")) {
+            var i;
+            for (i = 0; i < my_vector_attributes.length; i++) {
+                if ($(this).attr("x1") == my_vector_attributes[i]["x1"] && $(this).attr("x2") == my_vector_attributes[i]["x2"] 
+                    && $(this).attr("y1") == my_vector_attributes[i]["y1"] && $(this).attr("y2") == my_vector_attributes[i]["y2"]) {
+                    my_vector_attributes.splice(i, 1);
+                    this.remove();
+                    return;
                 }
             }
-        })
-        .on('mousedown', function(e) {
-            start = new Date().getTime();
-        })
-        .on('mousemove', function(e) {
-            start = 0;
-        })
-        .on('mouseup', function(e) {
-            if (new Date().getTime() >= (start + longpress)) {
-                console.log("longclick");
-                var line = d3.select(this);
-                var label = svg.append("text");
-                var delta_x = Math.abs(parseFloat(line.attr("x1")) - parseFloat(line.attr("x2")));
-                var delta_y = Math.abs(parseFloat(line.attr("y1")) - parseFloat(line.attr("y2")));
-                var x = ((parseFloat(line.attr("x1")) + parseFloat(line.attr("x2"))) / 2);
-                var y = ((parseFloat(line.attr("y1")) + parseFloat(line.attr("y2"))) / 2);
-                var theta = Math.atan2(delta_y, delta_x) * (180.0 / Math.PI);
-                if (theta < 45) {
-                    (y > -19) ? y -= 10 : y += 10;
-                }
-                else {
-                    (x > 612) ? x -= 10 : x += 10;
-                }
-                label.attr("fill", "steelblue")
-                    .attr("x", x)
-                    .attr("y", y)
-                    .attr("font-weight", "bold")
-                    .text(function(d) { return line.attr("user"); });
-                window.setTimeout(function() { label.remove(); } , 2000);
-            }
-            else if (delete_mode === true && $(this).attr("user") == sessionStorage.getItem("username")) {
-                var i;
-                for (i = 0; i < my_vector_attributes.length; i++) {
-                    if ($(this).attr("x1") == my_vector_attributes[i]["x1"] && $(this).attr("x2") == my_vector_attributes[i]["x2"] 
-                        && $(this).attr("y1") == my_vector_attributes[i]["y1"] && $(this).attr("y2") == my_vector_attributes[i]["y2"]) {
-                        my_vector_attributes.splice(i, 1);
-                        this.remove();
-                        return;
-                    }
-                }
-                for (i = 0; i < vector_attributes.length; i++) {
-                    if ($(this).attr("x1") == vector_attributes[i]["x1"] && $(this).attr("x2") == vector_attributes[i]["x2"] 
-                        && $(this).attr("y1") == vector_attributes[i]["y1"] && $(this).attr("y2") == vector_attributes[i]["y2"]) {
-                        vector_attributes.splice(i, 1);
-                        this.remove();
-                        socket.xml_change(sessionStorage.getItem("username"), 
-                                          sessionStorage.getItem("class_id"), 
-                                          sessionStorage.getItem("group_id"), 
-                                          JSON.stringify(vector_attributes));
-                        return;
-                    }
+            for (i = 0; i < vector_attributes.length; i++) {
+                if ($(this).attr("x1") == vector_attributes[i]["x1"] && $(this).attr("x2") == vector_attributes[i]["x2"] 
+                    && $(this).attr("y1") == vector_attributes[i]["y1"] && $(this).attr("y2") == vector_attributes[i]["y2"]) {
+                    vector_attributes.splice(i, 1);
+                    this.remove();
+                    socket.xml_change(sessionStorage.getItem("username"), 
+                                      sessionStorage.getItem("class_id"), 
+                                      sessionStorage.getItem("group_id"), 
+                                      JSON.stringify(vector_attributes));
+                    return;
                 }
             }
-        });
+        }
+    }
 }
 
 function draw_all_vectors() {
@@ -549,7 +504,7 @@ function redraw_axes()
 
 function dragmove(d) {
   if((d.name === sessionStorage.getItem('username') || d.name === "test_charge")
-	 && field_display_settings.draw_vectors === false)
+	 && draw_vector_settings.draw_mode === false)
   {
   	d3.select(this)
       		.attr("cx", d.x = Math.max(radius, Math.min(width - radius, d3.event.x)))
@@ -565,7 +520,7 @@ function dragstart(d) {
 
     // record where the drag started
   if((d.name === sessionStorage.getItem('username') || d.name === "test_charge")
-	 && field_display_settings.draw_vectors === false)
+	 && draw_vector_settings.draw_mode === false)
   { 
 
     d.x0 = d.x;
@@ -581,7 +536,7 @@ function dragstart(d) {
 function dragend(d) {
 
   if((d.name === sessionStorage.getItem('username') || d.name === "test_charge")
-	 && field_display_settings.draw_vectors === false)
+	 && draw_vector_settings.draw_mode === false)
   {
 
     var x0_scaled = xScale.invert(d.x0);
@@ -609,7 +564,7 @@ function changeSelected() {
 }
 
 function vectorStart() {
-    if (field_display_settings.draw_vectors === true) {
+    if (draw_vector_settings.draw_mode === true) {
 		var coordinates = d3.mouse(this);
         vector_attribute = {
             "user" : sessionStorage.getItem("username"),
@@ -631,7 +586,7 @@ function vectorStart() {
 }
 
 function vectorMove() {
-    if (field_display_settings.draw_vectors === true) {
+    if (draw_vector_settings.draw_mode === true) {
 		var coordinates = d3.mouse(this);
 		drawn_vector
 			.attr("x2", coordinates[0] - margin.left)
@@ -640,7 +595,7 @@ function vectorMove() {
 }
 
 function vectorEnd() {
-    if (field_display_settings.draw_vectors === true) {
+    if (draw_vector_settings.draw_mode === true) {
 		if ((Math.pow((drawn_vector.attr("y2") - drawn_vector.attr("y1")), 2) +
 			 Math.pow((drawn_vector.attr("x2") - drawn_vector.attr("x1")), 2)) < MIN_VECTOR_LENGTH) {
 			drawn_vector.remove();
@@ -1077,12 +1032,55 @@ function update_display_settings () {
 
 function toggle_delete(btn) {
     btn.blur();
-    if (delete_mode === false) {
-        $(btn).css("background-color", "#6bb0fa");
-        delete_mode = true;
+    if (draw_vector_settings.delete_mode === false) {
+        $('#vector_delete_button').css("background-color", "#6bb0fa");
+        draw_vector_settings.delete_mode = true;
+        if (draw_vector_settings.draw_mode === true) {
+            $('#vector_draw_button').css("background-color", "white");
+            draw_vector_settings.draw_mode = false;
+        }
     }
     else {
-        $(btn).css("background-color", "white");
-        delete_mode = false;
+        $('#vector_delete_button').css("background-color", "white");
+        draw_vector_settings.delete_mode = false;
     }
+}
+
+function toggle_draw_vectors(btn) {
+    btn.blur();
+    if (draw_vector_settings.draw_mode === false) {
+        $('#vector_draw_button').css("background-color", "#6bb0fa");
+        draw_vector_settings.draw_mode = true;
+        if (draw_vector_settings.delete_mode === true) {
+            $('#vector_delete_button').css("background-color", "white");
+            draw_vector_settings.delete_mode = false;
+        }
+    }
+    else {
+        $('#vector_draw_button').css("background-color", "white");
+        draw_vector_settings.draw_mode = false;
+    }
+}
+
+function is_default_setting(id) {
+    return (id == 'show_particle_charge'
+         || id == 'show_particle_size'
+         || id == 'show_labels'
+         || id == 'show_axes'
+         || id == 'show_points');
+}
+
+function set_to_default() {
+    $('form#display-settings input').each(function() {
+        var id = $(this).attr("id");
+        if (is_default_setting(id)) {
+            $(this).prop('checked', true);
+            field_display_settings[id] = true;
+        }
+        else {
+            $(this).prop('checked', false);
+            field_display_settings[id] = false;
+        }
+    });
+    update_display_settings();
 }
