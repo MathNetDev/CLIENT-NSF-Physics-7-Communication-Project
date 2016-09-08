@@ -28,7 +28,7 @@ body {
     stroke-dasharray:0; 
 }
 #forceArrow{
-    fill: mediumseagreen;
+    fill: #1f4705;
     stroke-width:3;
     stroke-dasharray:0; 
 }
@@ -83,7 +83,7 @@ circle, .line {
 }
 .forcevector {
   fill: none;
-  stroke: mediumseagreen;
+  stroke: #1f4705;
   stroke-opacity:0.4;
   stroke-width: 4px;
 }

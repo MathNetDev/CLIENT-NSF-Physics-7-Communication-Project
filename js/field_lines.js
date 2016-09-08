@@ -2,7 +2,7 @@ K = 9.0e9;
 var divide_by_zero;
 var forceVectorScale = 20000;
 var gridSpacing = 5;
-var vectorFreq = 2;
+var vectorFreq = 1;
 var margin = {top: 40, right: 40, bottom: 40, left: 40},
     width = 680 - margin.left - margin.right,
     height = 480 - margin.top - margin.bottom,
@@ -284,10 +284,12 @@ function redraw_fieldvectors() {
       for (var widthLoc = 0; widthLoc <= (width/(10*gridSpacing*vectorFreq)); widthLoc++){
             var curX = widthLoc * 10 * gridSpacing * vectorFreq;
             var curY = height - (heightLoc * 10 * gridSpacing * vectorFreq);
+            // var fields = calculateFieldVectorAtPoint([curX, curY]);
+            // // console.log("---- calc for charge at " + curX + " " + curY );
 
-            console.log("---- calc for charge at " + curX + " " + curY );
 
-
+            // var total_forceX = fields[0];
+            // var total_forceY = fields[1];
             var total_forceX = 0.0;
             var total_forceY = 0.0;
 
@@ -336,7 +338,7 @@ function redraw_fieldvectors() {
                 */
                 
             }
-
+            console.log(total_forceY + '  ' + total_forceX);
             var final_theta_rad = Math.atan2(total_forceY, total_forceX);
             var final_theta_deg = final_theta_rad * (180.0 / Math.PI);
             var final_mag = Math.sqrt(total_forceX*total_forceX + total_forceY*total_forceY);
@@ -356,7 +358,7 @@ function redraw_fieldvectors() {
    for (i= 0; i < calcVectors.length; i++){
         var vector = calcVectors[i];
         var stroke = "";
-        var percentage =  Math.max(vector[5] / maxForce, 0.2);
+        var percentage =  Math.max(Math.cbrt(vector[5] / maxForce), 0.2);
         var dirX = Math.cos(vector[2]) * 35;
         var dirY = Math.sin(vector[2]) * 35;
         svg.append("line")          // attach a line
