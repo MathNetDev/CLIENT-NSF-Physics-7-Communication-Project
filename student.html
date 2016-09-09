@@ -127,14 +127,42 @@
               <button id="settings_button" type="button" onclick="this.blur();" class="btn btn-default btn-sm" data-toggle="modal" data-target="#settings_modal">
                 <span class="glyphicon glyphicon-cog"></span>
               </button>
-              <button id="vector_draw_button" type="button" onclick="toggle_draw_vectors(this);" class="btn btn-default btn-sm">
+              <button id="drop_charges_button" type="button" onclick="toggle_drop_charges_mode(this);" class="btn btn-default btn-sm">
+                <span class="glyphicon glyphicon-plus-sign"></span>
+              </button>
+              <button id="draw_vectors_button" type="button" onclick="toggle_draw_vectors_mode(this);" class="btn btn-default btn-sm">
                 <span class="glyphicon glyphicon-pencil"></span>
               </button>
-              <button id="vector_delete_button" type="button" onclick="toggle_delete(this);" class="btn btn-default btn-sm">
+              <button id="delete_mode_button" type="button" onclick="toggle_delete_mode(this);" class="btn btn-default btn-sm">
                 <span class="glyphicon glyphicon-trash"></span>
+              </button>
+              <button id="clear_vectors_button" type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#confirm_clear_vectors_modal">
+                <span> Clear </span>
               </button>
             </div>
           </div>
+
+          <!-- Confirm Clear Vectors Modal -->
+          <div id="confirm_clear_vectors_modal" class="modal fad" tabindex="-1" role="dialog" aria-labelledby="modal_confirm_clear_vectors_label">
+            <div class="modal-dialog">
+              <div class="modal-content">
+
+                <div class="modal-header">
+                  <h4 class="modal-title" id="modal_confirm_clear_vectors_label"> Are you sure you want to clear your drawn vectors? </h4>
+                </div> <!-- modal-header -->
+
+                <div class="modal-body">
+                  <button type="button" onclick="clear_vectors(this);" class="btn btn-default btn-sm" data-dismiss="modal">
+                    <span> Yes </span>
+                  </button>
+                  <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">
+                    <span> No </span>
+                  </button>
+                </div> <!-- modal-body -->
+
+              </div> <!-- modal-content -->
+            </div> <!-- modal-dialog -->
+          </div> <!-- Confirm Clear Vectors Modal -->
 
           <!-- Coordinate Change Buttons -->
           <div class="col-md-4 col-sm-4">

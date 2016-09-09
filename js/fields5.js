@@ -108,13 +108,14 @@ var drag = d3.behavior.drag()
     
 // Vector drawing
 var vector_attribute;
-var my_vector_attributes = [];
-var vector_attributes = [];
+var my_vector_attributes = []; // holds user's drawn vectors if show_drawn_vectors is false
+var vector_attributes = [];    // holds all vectors including user's drawn vectors if show_drawn_vectors is true
 var drawn_vector;
 var drawn_vectors = [];
 
-var draw_vector_settings = {
-    'draw_mode': false,
+var toolbar_settings = {
+    'drop_charges_mode' : false,
+    'draw_vectors_mode': false,
     'delete_mode': false
 };
 
@@ -228,6 +229,16 @@ function redraw_charges() {
     //console.log("redraw_charges...");
     console.log(users);
 
+    // push current user to end of users array to draw charge last
+    var user; 
+    for (var i = 0; i < users.length; i++) {
+        if (sessionStorage.getItem("username") === users[i]["name"]) {
+            user = users.splice(i, 1)[0];
+            users.push(user);
+            break;
+        }
+    }
+
     var circles = svg.selectAll("circle")
                          .data(users);
 
@@ -322,7 +333,7 @@ function redraw_drawn_vectors() {
                       sessionStorage.getItem("class_id"), 
                       sessionStorage.getItem("group_id"), 
                       JSON.stringify(vector_attributes));
-    draw_all_vectors();
+    draw_drawn_vectors();
 }
 
 function draw_vector(attribute) {
@@ -376,7 +387,7 @@ function draw_vector(attribute) {
                 .text(function(d) { return line.attr("user"); });
             window.setTimeout(function() { label.remove(); } , 2000);
         }
-        else if (draw_vector_settings.delete_mode === true && $(this).attr("user") == sessionStorage.getItem("username")) {
+        else if (toolbar_settings.delete_mode === true && $(this).attr("user") == sessionStorage.getItem("username")) {
             var i;
             for (i = 0; i < my_vector_attributes.length; i++) {
                 if ($(this).attr("x1") == my_vector_attributes[i]["x1"] && $(this).attr("x2") == my_vector_attributes[i]["x2"] 
@@ -402,7 +413,7 @@ function draw_vector(attribute) {
     }
 }
 
-function draw_all_vectors() {
+function draw_drawn_vectors() {
     for (i = 0; i < vector_attributes.length; i++) {
         drawn_vectors.push(draw_vector(vector_attributes[i]));
     }
@@ -504,7 +515,7 @@ function redraw_axes()
 
 function dragmove(d) {
   if((d.name === sessionStorage.getItem('username') || d.name === "test_charge")
-	 && draw_vector_settings.draw_mode === false)
+	 && toolbar_settings.draw_vectors_mode === false)
   {
   	d3.select(this)
       		.attr("cx", d.x = Math.max(radius, Math.min(width - radius, d3.event.x)))
@@ -520,7 +531,7 @@ function dragstart(d) {
 
     // record where the drag started
   if((d.name === sessionStorage.getItem('username') || d.name === "test_charge")
-	 && draw_vector_settings.draw_mode === false)
+	 && toolbar_settings.draw_vectors_mode === false)
   { 
 
     d.x0 = d.x;
@@ -536,7 +547,7 @@ function dragstart(d) {
 function dragend(d) {
 
   if((d.name === sessionStorage.getItem('username') || d.name === "test_charge")
-	 && draw_vector_settings.draw_mode === false)
+	 && toolbar_settings.draw_vectors_mode === false)
   {
 
     var x0_scaled = xScale.invert(d.x0);
@@ -564,7 +575,7 @@ function changeSelected() {
 }
 
 function vectorStart() {
-    if (draw_vector_settings.draw_mode === true) {
+    if (toolbar_settings.draw_vectors_mode === true) {
 		var coordinates = d3.mouse(this);
         vector_attribute = {
             "user" : sessionStorage.getItem("username"),
@@ -586,7 +597,7 @@ function vectorStart() {
 }
 
 function vectorMove() {
-    if (draw_vector_settings.draw_mode === true) {
+    if (toolbar_settings.draw_vectors_mode === true) {
 		var coordinates = d3.mouse(this);
 		drawn_vector
 			.attr("x2", coordinates[0] - margin.left)
@@ -595,7 +606,7 @@ function vectorMove() {
 }
 
 function vectorEnd() {
-    if (draw_vector_settings.draw_mode === true) {
+    if (toolbar_settings.draw_vectors_mode === true) {
 		if ((Math.pow((drawn_vector.attr("y2") - drawn_vector.attr("y1")), 2) +
 			 Math.pow((drawn_vector.attr("x2") - drawn_vector.attr("x1")), 2)) < MIN_VECTOR_LENGTH) {
 			drawn_vector.remove();
@@ -1005,7 +1016,7 @@ function update_vector_attributes(xml, redraw) {
     vector_attributes = eval(JSON.parse(xml));
     if (redraw === true) {
         remove_drawn_vectors();
-        draw_all_vectors();
+        draw_drawn_vectors();
     }
 }
 
@@ -1030,38 +1041,6 @@ function update_display_settings () {
     redraw();
 }
 
-function toggle_delete(btn) {
-    btn.blur();
-    if (draw_vector_settings.delete_mode === false) {
-        $('#vector_delete_button').css("background-color", "#6bb0fa");
-        draw_vector_settings.delete_mode = true;
-        if (draw_vector_settings.draw_mode === true) {
-            $('#vector_draw_button').css("background-color", "white");
-            draw_vector_settings.draw_mode = false;
-        }
-    }
-    else {
-        $('#vector_delete_button').css("background-color", "white");
-        draw_vector_settings.delete_mode = false;
-    }
-}
-
-function toggle_draw_vectors(btn) {
-    btn.blur();
-    if (draw_vector_settings.draw_mode === false) {
-        $('#vector_draw_button').css("background-color", "#6bb0fa");
-        draw_vector_settings.draw_mode = true;
-        if (draw_vector_settings.delete_mode === true) {
-            $('#vector_delete_button').css("background-color", "white");
-            draw_vector_settings.delete_mode = false;
-        }
-    }
-    else {
-        $('#vector_draw_button').css("background-color", "white");
-        draw_vector_settings.draw_mode = false;
-    }
-}
-
 function is_default_setting(id) {
     return (id == 'show_particle_charge'
          || id == 'show_particle_size'
@@ -1083,4 +1062,80 @@ function set_to_default() {
         }
     });
     update_display_settings();
+}
+
+/*-------------------  Toolbar Settings -------------------*/
+
+function activate_button(btn_id, toolbar_id) {
+    $(btn_id).css("background-color", "#6bb0fa");
+    toolbar_settings[toolbar_id] = true;
+}
+
+function deactivate_button(btn_id, toolbar_id) {
+    $(btn_id).css("background-color", "white");
+    toolbar_settings[toolbar_id] = false;
+}
+
+function toggle_drop_charges_mode(btn) {
+    btn.blur();
+    if (toolbar_settings.drop_charges_mode === false) {
+        activate_button("#drop_charges_button", "drop_charges_mode");
+        deactivate_button("#draw_vectors_button", "draw_vectors_mode");
+        deactivate_button("#delete_mode_button", "delete_mode");
+    }
+    else {
+        deactivate_button("#drop_charges_button", "drop_charges_mode");
+    }
+}
+
+function toggle_draw_vectors_mode(btn) {
+    btn.blur();
+    if (toolbar_settings.draw_vectors_mode === false) {
+        activate_button("#draw_vectors_button", "draw_vectors_mode");
+        deactivate_button("#delete_mode_button", "delete_mode");
+        deactivate_button("#drop_charges_button", "drop_charges_mode");
+    }
+    else {
+        deactivate_button("#draw_vectors_button", "draw_vectors_mode");
+    }
+}
+
+function toggle_delete_mode(btn) {
+    btn.blur();
+    if (toolbar_settings.delete_mode === false) {
+        activate_button("#delete_mode_button", "delete_mode");
+        deactivate_button("#draw_vectors_button", "draw_vectors_mode");
+        deactivate_button("#drop_charges_button", "drop_charges_mode");
+    }
+    else {
+        deactivate_button("#delete_mode_button", "delete_mode");
+    }
+}
+
+function clear_vectors(btn) {
+    btn.blur();
+    if (field_display_settings.show_drawn_vectors === true) {
+        var usr = sessionStorage.getItem("username");
+        var my_vectors = vector_attributes.filter(function(attribute) {
+            return usr === attribute["user"];
+        });
+        if (my_vectors !== []) {
+            vector_attributes = vector_attributes.filter(function(attribute) {
+                return usr !== attribute["user"];
+            });
+            remove_drawn_vectors();
+            draw_drawn_vectors();
+            socket.xml_change(sessionStorage.getItem("username"), 
+                              sessionStorage.getItem("class_id"), 
+                              sessionStorage.getItem("group_id"), 
+                              JSON.stringify(vector_attributes));
+        }
+    }
+    else {
+        if (my_vector_attributes !== []) {
+            my_vector_attributes = [];
+            remove_drawn_vectors();
+            draw_drawn_vectors();
+        }
+    }
 }
