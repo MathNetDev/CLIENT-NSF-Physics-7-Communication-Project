@@ -88,6 +88,8 @@ d3.range(-MAX_ABS_CHARGE, MAX_ABS_CHARGE+1, CHARGE_STEP).map(function(i){
 // main svg element assigned to div in html page
 var svg = d3.select("#field-container")
     .append("svg")
+    .on("click", dropCharge)
+    .on("touch", dropCharge)
     .on("mousedown", vectorStart)
     .on("mouseup", vectorEnd)
 	.on("touchstart", vectorStart)
@@ -429,6 +431,29 @@ function remove_drawn_vectors() {
     drawn_vectors = [];
 }
 
+function dropCharge() {
+    if (toolbar_settings.drop_charges_mode === true) {
+        var coordinates = d3.mouse(this);
+        x = coordinates[0] - margin.left;
+        y = coordinates[1] - margin.top;
+        if (x > 580 || x < 20) return;
+        if (y > 380 || y < 20) return; 
+        usr = {
+            active: true,
+            charge: -10,
+            color: "rgba(255, 0, 0, 0.7)",
+            name: sessionStorage.getItem("username"),
+            radius: 10,
+            x: Math.round(x),
+            y: Math.round(y)
+        };
+        selected = usr;
+        changeSelected();
+        users.push(usr);
+        redraw();
+    }
+}
+
 /*-------------------  Scales ----------------------*/
 
 // use d3 linear scales to map 0, 1, 2 ... to actual display pixels
@@ -457,8 +482,7 @@ var yAxis = d3.svg.axis()
 		.outerTickSize(0)
 		.tickPadding(horizontalBlock/gridSpacing);
 
-function redraw_axes()
-{
+function redraw_axes() {
     svg.append("g")
 		.attr("class", "x axis")
 		.attr("transform", "translate(0," + height + ")")
@@ -507,23 +531,22 @@ function redraw_axes()
 	    */
 }
 
-/*
-*/
 
 
 /*-------------------  Drag functions ----------------------*/
 
 function dragmove(d) {
   if((d.name === sessionStorage.getItem('username') || d.name === "test_charge")
-	 && toolbar_settings.draw_vectors_mode === false)
+	 && toolbar_settings.draw_vectors_mode === false && toolbar_settings.delete_mode === false
+     && toolbar_settings.drop_charges_mode === false)
   {
   	d3.select(this)
       		.attr("cx", d.x = Math.max(radius, Math.min(width - radius, d3.event.x)))
       		.attr("cy", d.y = Math.max(radius, Math.min(height - radius, d3.event.y)));
 
 	d3.select('.name .selected')
-		.attr("x", d3.event.x - AVE_DOT_SIZE)
-		.attr("y", d3.event.y - AVE_DOT_SIZE*LABEL_Y_SPACING);
+        .attr("x", function(d) { return field_display_settings.show_particle_size ? (d.x - AVE_DOT_SIZE - (d.radius/2)) : (d.x - AVE_DOT_SIZE); })
+        .attr("y", function(d) { return field_display_settings.show_particle_size ? (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING - (d.radius/2)) : (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING); })
   }
 }
 
@@ -547,7 +570,8 @@ function dragstart(d) {
 function dragend(d) {
 
   if((d.name === sessionStorage.getItem('username') || d.name === "test_charge")
-	 && toolbar_settings.draw_vectors_mode === false)
+	 && toolbar_settings.draw_vectors_mode === false && toolbar_settings.delete_mode === false
+     && toolbar_settings.drop_charges_mode === false)
   {
 
     var x0_scaled = xScale.invert(d.x0);
@@ -658,7 +682,7 @@ function field_sync_users(other_members) {
 
     // get list of user names we are already tracking
     var known_users = users.map(function(d) {return d.name;});
-//    users = [];
+    // users = [];
     other_members.forEach(function(member, index) {
         var user = {};
 
@@ -834,7 +858,7 @@ function field_sync_users(other_members) {
     //     }
     // }
 
-*/
+    */
     // need to 
     redraw();
 }
