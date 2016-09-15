@@ -164,7 +164,7 @@ function calculateForceOnCharge(chargeIndex){
     // calculate E at charge due to all other charges
     for (j = 0; j < charges.length; j++) {
         if (j !== chargeIndex) {
-            component = calculateFieldComponentDueToChargeAtPosition(j, p);
+            component = calculateFieldComponentDueToChargeAtPosition(j, [curX, curY]);
 
             E_x += component[0];
             E_y += component[1];
@@ -619,185 +619,6 @@ function redraw_fieldvectors() {
     console.log("redraw_fieldvectors iteration took: " + (-1*currentTime)+"ms." )
 }
 
-// function redraw_equipotentials() {
-
-//     var currentTime = new Date().getTime();
-
-//     // pull current location data out of users array
-//     var charges = getCharges(); 
-
-//     //Separate the whole field on 10*10 blocks
-//     //If a block DOESN'T have a equipotential surface, create one at its middle.
-
-//     var fieldFilled = d3.range(1,10).map(function(){
-//         return d3.range(1,10).map(function(i){return false;})
-//     });
-
-//     var calculatedFields = [];
-//     var maxForce = 0;
-
-//     for (var i = 0; i < fieldFilled.length; i++) {
-//         var direction = 1;
-//         for (var jj=0; jj< fieldFilled[i].length; jj++) {
-//             if (!fieldFilled[i][jj]) {
-//                //create a path here
-
-//                //Iterate at most 2 times in case the surface gets out of the area
-//                for (var circleTimes = 0; circleTimes < 3; circleTimes+=2) {
-
-//                    //Define the center of the current block as a starting point of the surface
-//                    var curX = i*horizontalBlock + horizontalBlockHalf;
-//                    var curY = jj*verticalBlock + verticalBlockHalf;
-
-//                    var direction = 1-circleTimes;
-//                    var dots = [];
-//                    dots.push([curX, curY]);
-
-//                    //Superposition the fields from all charges, and get the resulting force vector
-//                    var dirX = 0;
-//                    var dirY = 0;
-//                    var totalForce = 0;
-//                    for (var j = 0; j < charges.length; j++) {
-//                        var distX = curX - charges[j][0];
-//                        var distY = curY - charges[j][1];
-//                        var distanceSq = distX*distX + distY*distY;
-//                        var force = (K * 1e-6 * (charges[j][2]*1e-6)) / distanceSq;
-
-//                        var distanceFactor = force/ Math.sqrt(distanceSq);
-
-//                        //Measure the initial force in order to match the equipotential surface points
-//                        totalForce+= force;
-//                        dirX += distX * distanceFactor;
-//                        dirY += distY * distanceFactor;
-//                    }
-
-//                    //Maximum 2000 dots per surface line
-//                    var times = 2000;
-//                    while (times-- > 0) {
-
-//                        var dirTotal = Math.sqrt(dirX*dirX + dirY*dirY);
-//                        var stepX = dirX/dirTotal;
-//                        var stepY = dirY/dirTotal;
-//                        //The equipotential surface moves normal to the force vector
-//                        curX = curX + direction*6*stepY;
-//                        curY = curY - direction*6*stepX;
-
-//                        //Correct the exact point a bit to match the initial force as near it can
-//                        var minForceIndex = -1;
-//                        var minForceDiff = 0;
-//                        var minDirX = 0;
-//                        var minDirY = 0;
-//                        var minCurX = 0;
-//                        var minCurY = 0;
-
-//                        curX -= 3*stepX;
-//                        curY -= 3*stepY;
-
-//                        for (var pointIndex = 0; pointIndex < 7; pointIndex++, curX += stepX, curY += stepY) {
-//                            dirX = 0;
-//                            dirY = 0;
-
-//                            var forceSum = 0;
-//                            for (var j = 0; j < charges.length; j++) {
-//                                var distX = curX - charges[j][0];
-//                                var distY = curY - charges[j][1];
-//                                var distanceSq = distX*distX + distY*distY;
-//                                var force = (K * 1e-6 * (charges[j][2] * 1e-6)) / distanceSq;
-
-//                                var distanceFactor = force / Math.sqrt(distanceSq);
-
-
-//                                //Measure the initial force in order to match the equipotential surface points
-//                                forceSum += force;
-//                                dirX += distX * distanceFactor;
-//                                dirY += distY * distanceFactor;
-//                            }
-
-//                            var forceDiff = Math.abs(forceSum - totalForce);
-
-//                            if (minForceIndex == -1 || forceDiff < minForceDiff) {
-//                                minForceIndex = pointIndex;
-//                                minForceDiff = forceDiff;
-//                                minDirX = dirX;
-//                                minDirY = dirY;
-//                                minCurX = curX;
-//                                minCurY = curY;
-//                            } else {
-//                                break;
-//                            }
-//                        }
-
-//                        //Set the corrected equipotential point
-//                        curX = minCurX;
-//                        curY = minCurY;
-//                        dirX = minDirX;
-//                        dirY = minDirY;
-
-//                        //Mark the containing block as filled with a surface line.
-//                        var indI = parseInt(curX/horizontalBlock);
-//                        var indJ = parseInt(curY/verticalBlock);
-//                        if (indI >= 0 && indI < fieldFilled.length) {
-//                            if (indJ >= 0 && indJ < fieldFilled[indI].length) {
-//                             fieldFilled[indI][indJ] = true;
-//                            }
-//                         }
-
-//                        //Add the dot to the line
-//                        dots.push([curX, curY]);
-
-//                        if (dots.length > 5) {
-//                            //If got to the begining, a full circle has been made, terminate further iterations
-//                            if (indI == i && indJ == jj) {
-//                                distX = dots[0][0] - curX;
-//                                distY = dots[0][1] - curY;
-//                                if (distX*distX + distY*distY <= 49) {
-//                                    dots.push([dots[0][0], dots[0][1]]);
-//                                    times = 0;
-//                                    circleTimes = 3;
-//                                }
-//                            }
-//                            //If got out of the area, terminate furhter iterations for this turn.
-//                            if (curX < 0 || curX > 960 || curY < 0 || curY > 500) {
-//                                times=0;
-//                            }
-//                        }
-//                    }
-
-//                    calculatedFields.push([totalForce, dots]);
-//                    maxForce = Math.max(maxForce, Math.abs(totalForce));
-//                }
-//            }
-//        }
-//     }
-
-
-//     //Iterate through each generated equipotential surface
-//     for (var i=0; i<calculatedFields.length; i++) {
-//         var pair = calculatedFields[i];
-//         var stroke = "";
-//         var percentage = 9 - Math.min(9,parseInt(Math.abs(10 * pair[0])/maxForce ));
-//         //Set the stroke to be proportional to the surface potential
-//         if (pair[0]>=0) {
-//             //positive
-//             stroke = "#" + percentage+"b"+percentage;
-//         } else {
-//             //negative
-//             stroke = "#" + "b"+percentage + "" + percentage;
-//         }
-
-//         //Render the line
-//         svg.append("path")
-//             .datum(pair[1])
-//             .attr("class", "field")
-//             .attr("d", line)
-//             .style("stroke", stroke);
-//     }
-
-//     currentTime -= new Date().getTime()
-//     console.log("redraw_equipotentials iteration took: " + (-1*currentTime)+"ms." )
-
-// }
-
 // different way of drawing equipotentials
 function redraw_equipotentials2() {
     // set range and color scale by the potential nearby the strongest charge
@@ -979,95 +800,310 @@ function redraw_fieldlines () {
 
     // pull current location data out of users array
     var charges = getCharges();
-    var linesPerCharge = 5;
-    var linesToDraw;
+    var linesPerCharge = 3;
+    var numFieldLines;
     var fieldLineStartRadius = 20;
     var start_angle;
     var curX;
     var cury;
     var polarity;
+    var dL = 7;
     var chargeIndex,
         pointIndex,
-        result,
-        chargesHit,
-        direction,
         dots,
-        render;
+        times,
+        E,
+        E_x,
+        E_y,
+        E_mag;
+    var E_min = .00001;
+    var destinationX;
+    var destinationY;
+    var source1X;
+    var source1Y;
+    var source2X;
+    var source2Y;
+    var arrowDots;
+    var j;
 
     //Draw the field lines
     for (chargeIndex = 0; chargeIndex < charges.length; chargeIndex++) {
         charges[chargeIndex].linesDrawn = 0;
-        charges[chargeIndex].numFieldLines = Math.abs(linesPerCharge * Math.floor(charges[chargeIndex][2]));
     }
-
-
-    // find the order of charges from smallest to largest magnitude
-    // var sortedCharges = charges;
-    // var minChargeIndex;
-    // var minCharge;
-
-    // // loop through the charges
-    // for (var j = 0; j < sortedCharges.length; j++) {
-    //   minChargeIndex = j;
-    //   minCharge = charges[j][2];
-    //   for (var k = j + 1; k < sortedCharges.length; k++) {
-    //       if (sortedCharges[k][2] < minCharge) {
-    //         minChargeSoFar = sortedCharges[k][2];
-    //         minChargeIndex = k;
-    //       }
-    //   }
-    // }
-
-    var sortedCharges = charges;
-    function sortFunction(a, b) {
-        if (Math.abs(parseInt(a[2])) === Math.abs(parseInt(b[2]))) {
-            return 0;
-        }
-        else {
-            return (Math.abs(parseInt(a[2])) < Math.abs(parseInt(b[2]))) ? -1 : 1;
-        }
-    }
-    sortedCharges.sort(sortFunction);
-
+    
     //Iterate for each charge
-    //for (chargeIndex = 0; chargeIndex < charges.length; chargeIndex++) {
+    for (chargeIndex = 0; chargeIndex < charges.length; chargeIndex++) {
 
         //Number of field lines proportional to charge strength
-        //linesToDraw = charges[chargeIndex].numFieldLines - charges[chargeIndex].linesDrawn;
+        numFieldLines = Math.abs(linesPerCharge * Math.floor(charges[chargeIndex][2]));
 
-        //for (pointIndex=0; pointIndex<linesToDraw; pointIndex ++) {
+        //Four lines coming from a charge
+        for (pointIndex=0; pointIndex<numFieldLines; pointIndex ++) {
             
-            render = true;
-
-            console.log("DRAWING ", linesToDraw, " LINES FROM CHARGE ", chargeIndex);
-
             // start uniformly spaced around the charge
-            // start_angle = 2*Math.PI*pointIndex/linesToDraw;
-            // curX = charges[chargeIndex][0] + fieldLineStartRadius * Math.cos(start_angle);
-            // curY = charges[chargeIndex][1] + fieldLineStartRadius * Math.sin(start_angle);
-            // polarity = 1;
-            // if (charges[chargeIndex][2] < 0) {
-            //     polarity = -1;
-            // }
-
-            //for (var i = 0; i < )
-            for (direction = -1; direction < 2; direction+=2){
-                result = initiateFieldLineAtPoint([200, 200], direction);
-                chargesHit = result[1];
-                dots = result[0];
-
-                if (render) {
-                 //Render the line
-                  svg.insert("path", "circle")
-                      .datum(dots)
-                      .attr("class", "line")
-                      .attr("d", line);
-                }
+            start_angle = 2*Math.PI*pointIndex/numFieldLines;
+            curX = charges[chargeIndex][0] + fieldLineStartRadius * Math.cos(start_angle);
+            curY = charges[chargeIndex][1] + fieldLineStartRadius * Math.sin(start_angle);
+            polarity = 1;
+            if (charges[chargeIndex][2] < 0) {
+                polarity = -1;
             }
 
-        //}
-    //}
+            dots = [];
+            dots.push([curX, curY]);
+
+            //Maximum of 1000 points per force line
+            times = 1000;
+            while (times-- > 0) {
+
+                E = calculateFieldVectorAtPoint([curX, curY]);
+                E_x = E[0];
+                E_y = E[1];            
+                E_mag = Math.sqrt(E_x*E_x + E_y*E_y);
+
+                // if field value near zero, terminate
+                if( E_mag < E_min ) {
+                    times = 0;
+                }
+
+                //Move the next dot to follow the force vector
+                if(polarity > 0) {
+                    curX = curX + dL*E_x/E_mag;
+                    curY = curY + dL*E_y/E_mag;
+                } else {
+                    curX = curX - dL*E_x/E_mag;
+                    curY = curY - dL*E_y/E_mag;
+                }
+ 
+                dots.push([curX, curY]);
+                if (times%30 == 0) {
+                    //Draw an arrow
+                    if (polarity == 1) {
+                        destinationX = curX;
+                        destinationY = curY;
+                        source1X = dots[dots.length-2][0] + dL*E_y/E_mag;
+                        source1Y = dots[dots.length-2][1] - dL*E_x/E_mag;
+                        source2X = dots[dots.length-2][0] - dL*E_y/E_mag;
+                        source2Y = dots[dots.length-2][1] + dL*E_x/E_mag;
+                    } else {
+                        destinationX = dots[dots.length-2][0];
+                        destinationY = dots[dots.length-2][1];
+                        source1X = curX + dL*E_y/E_mag;
+                        source1Y = curY - dL*E_x/E_mag;
+                        source2X = curX - dL*E_y/E_mag;
+                        source2Y = curY + dL*E_x/E_mag;
+                    }
+                    arrowDots = [];
+                    arrowDots.push([source1X, source1Y]);
+                    arrowDots.push([destinationX, destinationY]);
+                    arrowDots.push([source2X, source2Y]);
+                    svg.insert("path", "circle")
+                            .datum(arrowDots)
+                            .attr("class", "line")
+                            .attr("d", line);
+                }
+
+
+                //If the next dot is inside a circle, terminate further iterations
+                for (j = 0; j < charges.length; j++) {
+                    distX = charges[j][0] - curX;
+                    distY = charges[j][1] - curY;
+                    if (distX*distX + distY*distY <= 16) {
+                        charges[j].linesDrawn += 1;
+                        times=0;
+                    }
+                }
+
+            } // end line
+
+            //Render the line
+            svg.insert("path", "circle")
+                .datum(dots)
+                .attr("class", "line")
+                .attr("d", line);
+        }
+
+    }
 
     currentTime -= new Date().getTime()
     console.log("redraw_fieldlines iteration took: " + (-1*currentTime)+"ms." )
 }
+
+// function redraw_equipotentials_old() {
+
+//     var currentTime = new Date().getTime();
+
+//     // pull current location data out of users array
+//     var charges = getCharges(); 
+
+//     //Separate the whole field on 10*10 blocks
+//     //If a block DOESN'T have a equipotential surface, create one at its middle.
+
+//     var fieldFilled = d3.range(1,10).map(function(){
+//         return d3.range(1,10).map(function(i){return false;})
+//     });
+
+//     var calculatedFields = [];
+//     var maxForce = 0;
+
+//     for (var i = 0; i < fieldFilled.length; i++) {
+//         var direction = 1;
+//         for (var jj=0; jj< fieldFilled[i].length; jj++) {
+//             if (!fieldFilled[i][jj]) {
+//                //create a path here
+
+//                //Iterate at most 2 times in case the surface gets out of the area
+//                for (var circleTimes = 0; circleTimes < 3; circleTimes+=2) {
+
+//                    //Define the center of the current block as a starting point of the surface
+//                    var curX = i*horizontalBlock + horizontalBlockHalf;
+//                    var curY = jj*verticalBlock + verticalBlockHalf;
+
+//                    var direction = 1-circleTimes;
+//                    var dots = [];
+//                    dots.push([curX, curY]);
+
+//                    //Superposition the fields from all charges, and get the resulting force vector
+//                    var dirX = 0;
+//                    var dirY = 0;
+//                    var totalForce = 0;
+//                    for (var j = 0; j < charges.length; j++) {
+//                        var distX = curX - charges[j][0];
+//                        var distY = curY - charges[j][1];
+//                        var distanceSq = distX*distX + distY*distY;
+//                        var force = (K * 1e-6 * (charges[j][2]*1e-6)) / distanceSq;
+
+//                        var distanceFactor = force/ Math.sqrt(distanceSq);
+
+//                        //Measure the initial force in order to match the equipotential surface points
+//                        totalForce+= force;
+//                        dirX += distX * distanceFactor;
+//                        dirY += distY * distanceFactor;
+//                    }
+
+//                    //Maximum 2000 dots per surface line
+//                    var times = 2000;
+//                    while (times-- > 0) {
+
+//                        var dirTotal = Math.sqrt(dirX*dirX + dirY*dirY);
+//                        var stepX = dirX/dirTotal;
+//                        var stepY = dirY/dirTotal;
+//                        //The equipotential surface moves normal to the force vector
+//                        curX = curX + direction*6*stepY;
+//                        curY = curY - direction*6*stepX;
+
+//                        //Correct the exact point a bit to match the initial force as near it can
+//                        var minForceIndex = -1;
+//                        var minForceDiff = 0;
+//                        var minDirX = 0;
+//                        var minDirY = 0;
+//                        var minCurX = 0;
+//                        var minCurY = 0;
+
+//                        curX -= 3*stepX;
+//                        curY -= 3*stepY;
+
+//                        for (var pointIndex = 0; pointIndex < 7; pointIndex++, curX += stepX, curY += stepY) {
+//                            dirX = 0;
+//                            dirY = 0;
+
+//                            var forceSum = 0;
+//                            for (var j = 0; j < charges.length; j++) {
+//                                var distX = curX - charges[j][0];
+//                                var distY = curY - charges[j][1];
+//                                var distanceSq = distX*distX + distY*distY;
+//                                var force = (K * 1e-6 * (charges[j][2] * 1e-6)) / distanceSq;
+
+//                                var distanceFactor = force / Math.sqrt(distanceSq);
+
+
+//                                //Measure the initial force in order to match the equipotential surface points
+//                                forceSum += force;
+//                                dirX += distX * distanceFactor;
+//                                dirY += distY * distanceFactor;
+//                            }
+
+//                            var forceDiff = Math.abs(forceSum - totalForce);
+
+//                            if (minForceIndex == -1 || forceDiff < minForceDiff) {
+//                                minForceIndex = pointIndex;
+//                                minForceDiff = forceDiff;
+//                                minDirX = dirX;
+//                                minDirY = dirY;
+//                                minCurX = curX;
+//                                minCurY = curY;
+//                            } else {
+//                                break;
+//                            }
+//                        }
+
+//                        //Set the corrected equipotential point
+//                        curX = minCurX;
+//                        curY = minCurY;
+//                        dirX = minDirX;
+//                        dirY = minDirY;
+
+//                        //Mark the containing block as filled with a surface line.
+//                        var indI = parseInt(curX/horizontalBlock);
+//                        var indJ = parseInt(curY/verticalBlock);
+//                        if (indI >= 0 && indI < fieldFilled.length) {
+//                            if (indJ >= 0 && indJ < fieldFilled[indI].length) {
+//                             fieldFilled[indI][indJ] = true;
+//                            }
+//                         }
+
+//                        //Add the dot to the line
+//                        dots.push([curX, curY]);
+
+//                        if (dots.length > 5) {
+//                            //If got to the begining, a full circle has been made, terminate further iterations
+//                            if (indI == i && indJ == jj) {
+//                                distX = dots[0][0] - curX;
+//                                distY = dots[0][1] - curY;
+//                                if (distX*distX + distY*distY <= 49) {
+//                                    dots.push([dots[0][0], dots[0][1]]);
+//                                    times = 0;
+//                                    circleTimes = 3;
+//                                }
+//                            }
+//                            //If got out of the area, terminate furhter iterations for this turn.
+//                            if (curX < 0 || curX > 960 || curY < 0 || curY > 500) {
+//                                times=0;
+//                            }
+//                        }
+//                    }
+
+//                    calculatedFields.push([totalForce, dots]);
+//                    maxForce = Math.max(maxForce, Math.abs(totalForce));
+//                }
+//            }
+//        }
+//     }
+
+
+//     //Iterate through each generated equipotential surface
+//     for (var i=0; i<calculatedFields.length; i++) {
+//         var pair = calculatedFields[i];
+//         var stroke = "";
+//         var percentage = 9 - Math.min(9,parseInt(Math.abs(10 * pair[0])/maxForce ));
+//         //Set the stroke to be proportional to the surface potential
+//         if (pair[0]>=0) {
+//             //positive
+//             stroke = "#" + percentage+"b"+percentage;
+//         } else {
+//             //negative
+//             stroke = "#" + "b"+percentage + "" + percentage;
+//         }
+
+//         //Render the line
+//         svg.append("path")
+//             .datum(pair[1])
+//             .attr("class", "field")
+//             .attr("d", line)
+//             .style("stroke", stroke);
+//     }
+
+//     currentTime -= new Date().getTime()
+//     console.log("redraw_equipotentials iteration took: " + (-1*currentTime)+"ms." )
+
+// }
