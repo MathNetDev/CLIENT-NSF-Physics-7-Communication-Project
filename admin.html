@@ -22,23 +22,75 @@
     <br/>
     <div class="col-md-12">
 
-      <div class="secret_view">
+      <!-- Main View Begins-->
+      <div class="username_password_view">
+
+        <!-- Title -->
         <div class="col-md-12 col-sm-12">
           <div class="col-md-4 col-sm-4"></div>
           <div class="col-md-4 col-sm-4">
-            <h3 style="text-align: center"> Enter Secret Code </h3>
+            <h2 style="text-align: center"> Admin Login </h2>
           </div>
           <div class="col-md-4 col-sm-4"></div>
         </div>
+
+        <!-- Text Fields and Login Button -->
         <div class="col-md-12 col-sm-12">
           <div class="col-md-4 col-sm-4"></div>
           <div class="col-md-4 col-sm-4">
-            <input type="password" class="form-control secret" required="" placeholder="Secret"/>
-            <input class="btn btn-lg btn-primary btn-block secret_button" type="button" value="Submit Secret"/><br/>
+            <input type="text" class="form-control username" id="user_id" name="user_id" required="" placeholder="User ID"/><br/>
+            <input type="password" class="form-control password" id="password" name="password" required="" placeholder="Password"/><br/>
+            <input class="btn btn-lg btn-primary btn-block login_button" type="submit" value="Login" id="login"/><br/>
           </div>
           <div class="col-md-4 col-sm-4"></div>
         </div>
+
+        <!-- New To Math Net -->
+        <div class="col-md-12 col-sm-12">
+            <div class="col-md-4 col-sm-4"></div>
+            <div class="col-md-4 col-sm-4">
+              <p style="text-align: center"> New User? </p>
+            </div>
+          <div class="col-md-4 col-sm-4"></div>
+        </div>
+
+        <!-- New user button -->
+        <div class="col-md-12 col-sm-12">
+          <div class="col-md-4 col-sm-4"></div>
+          <div class="col-md-4 col-sm-4" style="text-align: center">
+            <input class="btn btn-default new_user" type="button" value="Click Here" /><br/><br/>
+          </div>
+          <div class="col-md-4 col-sm-4"></div>
+        </div>  
+
       </div>
+
+      <!-- Create User View -->
+      <div class="create_user_view">
+
+        <!-- Title -->
+        <div class="col-md-12 col-sm-12">
+          <div class="col-md-4 col-sm-4"></div>
+          <div class="col-md-4 col-sm-4">
+            <h2 style="text-align: center"> New Admin </h2>
+          </div>
+          <div class="col-md-4 col-sm-4"></div>
+        </div>
+
+        <!-- Text Fields and Create Admin Button -->
+        <div class="col-md-12 col-sm-12">
+          <div class="col-md-4 col-sm-4"></div>
+          <div class="col-md-4 col-sm-4">
+            <input type="text" class="form-control new_username" id="user_id" name="user_id" required="" placeholder="New Username"/><br/>
+            <input type="password" class="form-control new_password" id="password" name="password" required="" placeholder="Password"/><br/>
+            <input type="password" class="form-control re_new_password" id="password" name="password" required="" placeholder="Re-Type Password"/><br/>
+            <input type="password" class="form-control Secret" id="password" name="password" required="" placeholder="Secret Code"/><br/>
+            <input class="btn btn-lg btn-primary btn-block create_admin_button" type="submit" value="Create Admin"/><br/>
+          </div>
+          <div class="col-md-4 col-sm-4"></div>
+        </div>
+        <input class="btn btn-default create_admin_back" type="submit" value="Back"/><br/><br/>
+      </div>      
 
       <!-- This div appears when an admin leaves a class or has not made on yet -->
       <div class="create_view">
@@ -54,9 +106,9 @@
         <br>
 
         <h4>Number of Groups</h4>
-        <input class="group_input" type="number" value="0">
-        <br>
-        <input class="btn btn-default create_button" type="button" value="Create Class">   
+        <input class="group_input" type="number" value="1" min="1"><br>
+        <input class="btn btn-default create_button" type="button" value="Create Class">
+        <input id = "logout_class_button" class="btn btn-default logout_class_button" type="button" value="Logout">
       </div>
 
       <!-- This div appears once an admin has created a class -->

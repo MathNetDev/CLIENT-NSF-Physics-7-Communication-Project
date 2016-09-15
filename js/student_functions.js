@@ -167,14 +167,17 @@ function group_info_response(username, class_id, group_id, members, status) {
 }
 
 // set #username.(x/y) with the respective coordinates, and adds relavent message
-function coordinate_change_response(username, class_id, group_id, x, y, info) {
+function coordinate_change_response(username, class_id, group_id, info) {
     var escUsername = username.replace(/&lt;/g,'<').replace(/&gt;/g, '>');
     escUsername = escapeStr(escUsername);
-    $('#' + escUsername + ' .x').html(x);
-    $('#' + escUsername + ' .y').html(y);
 
     info = JSON.parse(info);
-    field_move_users(username, x, y, info);
+    if (info.remove_charge == true) {
+        field_remove_charge(username, info);
+    }
+    else {
+        field_move_users(username, info);
+    }
 }
 
 function xml_change_response(username, class_id, group_id, xml) {

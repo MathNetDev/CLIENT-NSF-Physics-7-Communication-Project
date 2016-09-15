@@ -51,8 +51,8 @@
         //This function takes a username, class_id, group_id, x, y, and info
         //It then emits a socket event to change the username's coordinates and info in group_id
         //given x, y, and info.
-        var coordinate_change = function(username, class_id, group_id, x, y, info) {
-            socket.emit('coordinate_change', username, class_id, group_id, x, y, info);
+        var coordinate_change = function(username, class_id, group_id, info) {
+            socket.emit('coordinate_change', username, class_id, group_id, info);
         }
 
         //This function takes a username, class_id, group_id, and XML
@@ -117,7 +117,7 @@
 
         socket.on('coordinate_change_response', function(data) {
             coordinate_change_response(data.username, data.class_id, 
-                                       data.group_id, data.x, data.y, data.info);
+                                       data.group_id, data.info);
         });
 
         socket.on('xml_change_response', function(data) {

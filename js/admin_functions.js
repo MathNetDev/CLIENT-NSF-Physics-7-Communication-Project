@@ -29,7 +29,6 @@ function server_error(error) {
  * @description creates the starting group svgs for the admin view
  */
 function add_class_response(class_id, class_name, group_count) {
-    var $secret_view = $('.secret_view');
     var $create_view = $('.create_view');
     var $manage_view = $('.manage_view');
     var $settings_view = $('.settings_view');
@@ -39,7 +38,6 @@ function add_class_response(class_id, class_name, group_count) {
     sessionStorage.setItem('admin_class_id', class_id);
     $('#error_frame').html('');
 
-    $secret_view.hide();
     $create_view.hide();
     $manage_view.show();
     $settings_view.show();
@@ -56,6 +54,29 @@ function add_class_response(class_id, class_name, group_count) {
     for (var group=1; group < group_number+1; group++) {
         draw_mirror(".g"+group);
         users.push([]);
+    }
+}
+
+/**
+ * @function create_admin response
+ * @description adds an admin
+ */
+function create_admin_response( check ){
+
+    $('.new_username').val("");
+    $('.new_password').val("");
+    $('.re_new_password').val("");
+    $('.Secret').val("");
+
+    if (check == 0)
+       alert("Username already exists. Try again");
+
+    else {
+        alert("user created");
+        var $create_user_view = $('.create_user_view'); // Div holding user creation view
+        var $username_password_view = $('.username_password_view'); // Div holding user creation view
+        $create_user_view.hide();
+        $username_password_view.show();
     }
 }
 
@@ -91,15 +112,13 @@ function delete_group_response() {
  * @description changes the admin view from a class to the login page
  */
 function leave_class_response(disconnect) {
-    var $secret_view = $('.secret_view');
     var $create_view = $('.create_view');
     var $manage_view = $('.manage_view');
     var $settings_view = $('.settings_view');
-    var $secret = $('.secret');
+    var $secret = "ucd_247";
     
     $('#error_frame').html('');
     
-    $secret_view.hide();
     $create_view.show();
     $manage_view.hide();
     $settings_view.hide();
@@ -107,7 +126,7 @@ function leave_class_response(disconnect) {
     if(!disconnect){
         sessionStorage.removeItem('admin_class_id');
     }
-    socket.get_classes($secret.val().trim());
+    socket.get_classes($secret);
 }
 
 /**
@@ -168,12 +187,12 @@ function coordinate_change_response(username, class_id, group_id, x, y, info) {
  * @description appends list objects of Classes and their IDs to an unordered list in admin.html
  */
 function get_classes_response(classes){
-    var $secret_view = $('.secret_view');
+    var $username_password_view = $('.username_password_view');
     var $create_view = $('.create_view');
     var $manage_view = $('.manage_view');
     var $settings_view = $('.settings_view');
 
-    $secret_view.hide();
+    $username_password_view.hide();
     $create_view.show();
     $manage_view.hide();
     $settings_view.hide();
@@ -186,7 +205,63 @@ function get_classes_response(classes){
     }
 }
 
+/**
+ * @function check_username response
+ * @param admin id and password
+ * @description logs the user in and creates a session
+ */
+function check_username_response(admin_id, check){
+    
+    if(check == 0)
+        alert("Your username doesn't match any in the database");
+
+    else if (check == -1)
+        alert("Your password doesn't match your username");
+    else
+        {
+            $('.username').val("");
+            $('.password').val("");
+
+            var string = Math.random().toString(36).substr(2, 8).toLowerCase(); 
+            socket.create_session(admin_id, string);
+            localStorage.setItem("check", string);
+            localStorage.setItem("admin_id", admin_id);
+            socket.get_classes("ucd_247", admin_id);
+        }
+
+}
+
+/**
+ * @function check_session response
+ * @param admin id and password
+ * @description checks a session
+ */
+function check_session_response(admin_id, check){
+    
+    if(check == 1){
+        socket.get_classes("ucd_247", admin_id);
+    }
+
+    if(check == -1){
+        socket.delete_session(admin_id);
+        localStorage.setItem('admin_id', '');
+        localStorage.setItem('check', '');
+        sessionStorage.setItem('admin_secret', '');
+    }
+
+    if(check == 0 ){
+        localStorage.setItem('admin_id', '');
+        localStorage.setItem('check', '');
+        sessionStorage.setItem('admin_secret', '');
+    }
+}
+
+/**
+ * @function join_class
+ * @param class_id
+ * @description for letting student join class
+ */
 function join_class(class_id){
-    var $secret = $('.secret'); 
-    socket.join_class(class_id, $secret.val().trim());
+    var $secret = 'ucd_247'; 
+    socket.join_class(class_id, $secret);
 }
