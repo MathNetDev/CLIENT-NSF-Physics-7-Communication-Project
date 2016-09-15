@@ -461,7 +461,7 @@ function redraw_forcevectors() {
     }
 
     if (chargeIndex == -1) {
-        console.log("UNABLE TO FIND selected in users!");
+        // console.log("UNABLE TO FIND selected in users!");
         return;
     }
     
@@ -482,7 +482,7 @@ function redraw_forcevectors() {
     }
 
     currentTime -= new Date().getTime()
-    console.log("redraw_forcevectors iteration took: " + (-1*currentTime)+"ms." )
+    // console.log("redraw_forcevectors iteration took: " + (-1*currentTime)+"ms." )
 
 }
 
@@ -525,7 +525,7 @@ function redraw_testvector(){
     }
 
     currentTime -= new Date().getTime()
-    console.log("redraw_testvector iteration took: " + (-1*currentTime)+"ms." )
+    // console.log("redraw_testvector iteration took: " + (-1*currentTime)+"ms." )
 }
 
 function redraw_fieldvectors() {
@@ -544,7 +544,6 @@ function redraw_fieldvectors() {
             var curX = widthLoc * 10 * gridSpacing * vectorFreq;
             var curY = height - (heightLoc * 10 * gridSpacing * vectorFreq);
             // var fields = calculateFieldVectorAtPoint([curX, curY]);
-            // // console.log("---- calc for charge at " + curX + " " + curY );
 
 
             // var total_forceX = fields[0];
@@ -556,11 +555,11 @@ function redraw_fieldvectors() {
             for (var j = 0; j < charges.length; j++) {                
                 var othX = charges[j][0];
                 var othY = height - charges[j][1];
-                console.log("---- against charge at " + othX + " " + othY);
+                // console.log("---- against charge at " + othX + " " + othY);
                 var othpolarity = (charges[j][2] > 0) ? 1 : -1;
                 var distX = (((curX - othX) / 115.0) * .0254);  // to convert from pixels to inches to meters
                 var distY = (((curY - othY) / 115.0) * .0254);  // this assumes a screen dpi of 115 (19" 1920x1080 screen)
-                console.log("distX: " + distX + " distY: " + distY);
+                // console.log("distX: " + distX + " distY: " + distY);
                 var distXSq = distX * distX;
                 var distYSq = distY * distY;
                 var distanceSq = distXSq + distYSq;
@@ -570,18 +569,18 @@ function redraw_fieldvectors() {
 
                 var theta_rad = Math.atan2(othY - curY, othX - curX);
                 var theta_deg = theta_rad * (180.0 / Math.PI);
-                console.log("** " + j + " (" + othX + "," + othY + ") d^2: " + distanceSq + " theta: " + theta_deg + " F: " + force);
+                // console.log("** " + j + " (" + othX + "," + othY + ") d^2: " + distanceSq + " theta: " + theta_deg + " F: " + force);
 
                 var forceX = force * Math.cos(theta_rad);
                 var forceY = force * Math.sin(theta_rad);
-                console.log("raw forceX: " + forceX + " raw forceY: " + forceY);
+                // console.log("raw forceX: " + forceX + " raw forceY: " + forceY);
 
                 if (othpolarity == 1) {
                     forceX *= -1;
                     forceY *= -1;
                 }
 
-                console.log("forceX: " + forceX + " forceY: " + forceY);
+                // console.log("forceX: " + forceX + " forceY: " + forceY);
 
                 total_forceX += forceX;
                 total_forceY += forceY;
@@ -597,17 +596,17 @@ function redraw_fieldvectors() {
                 */
                 
             }
-            console.log(total_forceY + '  ' + total_forceX);
+            // console.log(total_forceY + '  ' + total_forceX);
             var final_theta_rad = Math.atan2(total_forceY, total_forceX);
             var final_theta_deg = final_theta_rad * (180.0 / Math.PI);
             var final_mag = Math.sqrt(total_forceX*total_forceX + total_forceY*total_forceY);
             if(!isNaN(final_mag)){
               maxForce = Math.max(maxForce, Math.abs(final_mag));
-              console.log("Final forceX: " + total_forceX + " forceY: " + total_forceY + " => " + final_theta_deg, " mag: " + final_mag);
+              // console.log("Final forceX: " + total_forceX + " forceY: " + total_forceY + " => " + final_theta_deg, " mag: " + final_mag);
 
               var final_dx = Math.cos(final_theta_rad) * pointVectorScale(final_mag);
               var final_dy = Math.sin(final_theta_rad) * pointVectorScale(final_mag);
-              console.log(" ** final_dx : " + final_dx + "  final_dy: " + final_dy + "  ");
+              // console.log(" ** final_dx : " + final_dx + "  final_dy: " + final_dy + "  ");
             
               calcVectors.push([final_dx, final_dy, final_theta_rad, curX, curY, final_mag]);
             }
@@ -632,7 +631,7 @@ function redraw_fieldvectors() {
    }
 
     currentTime -= new Date().getTime()
-    console.log("redraw_fieldvectors iteration took: " + (-1*currentTime)+"ms." )
+    // console.log("redraw_fieldvectors iteration took: " + (-1*currentTime)+"ms." )
 }
 
 // different way of drawing equipotentials
@@ -807,7 +806,7 @@ function redraw_equipotentials() {
     }
 
     currentTime -= new Date().getTime()
-    console.log("redraw_equipotentials iteration took: " + (-1*currentTime)+"ms." )
+    // console.log("redraw_equipotentials iteration took: " + (-1*currentTime)+"ms." )
 
 }
 
@@ -942,7 +941,7 @@ function redraw_fieldlines () {
     }
 
     currentTime -= new Date().getTime()
-    console.log("redraw_fieldlines iteration took: " + (-1*currentTime)+"ms." )
+    // console.log("redraw_fieldlines iteration took: " + (-1*currentTime)+"ms." )
 }
 
 // function redraw_equipotentials_old() {
@@ -1120,6 +1119,6 @@ function redraw_fieldlines () {
 //     }
 
 //     currentTime -= new Date().getTime()
-//     console.log("redraw_equipotentials iteration took: " + (-1*currentTime)+"ms." )
+//     // console.log("redraw_equipotentials iteration took: " + (-1*currentTime)+"ms." )
 
 // }
