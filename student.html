@@ -127,14 +127,17 @@
               <button id="settings_button" type="button" onclick="this.blur();" class="btn btn-default btn-sm" data-toggle="modal" data-target="#settings_modal">
                 <span class="glyphicon glyphicon-cog"></span>
               </button>
-              <button id="drop_charges_button" type="button" onclick="toggle_drop_charges_mode(this);" class="btn btn-default btn-sm">
-                <span class="glyphicon glyphicon-plus-sign"></span>
-              </button>
               <button id="draw_vectors_button" type="button" onclick="toggle_draw_vectors_mode(this);" class="btn btn-default btn-sm">
                 <span class="glyphicon glyphicon-pencil"></span>
               </button>
               <button id="delete_mode_button" type="button" onclick="toggle_delete_mode(this);" class="btn btn-default btn-sm">
                 <span class="glyphicon glyphicon-trash"></span>
+              </button>
+              <button id="add_charge_button" type="button" onclick="add_charge(this);" class="btn btn-default btn-sm">
+                <span class="glyphicon glyphicon-plus"></span>
+              </button>
+              <button id="remove_charge_button" type="button" onclick="remove_charge(this);" class="btn btn-default btn-sm">
+                <span class="glyphicon glyphicon-minus"></span>
               </button>
               <button id="clear_vectors_button" type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#confirm_clear_vectors_modal">
                 <span> Clear </span>

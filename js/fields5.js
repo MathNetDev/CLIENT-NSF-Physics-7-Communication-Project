@@ -14,6 +14,7 @@ var testCharge = [{"name" : "test_charge", "x":300, "y":200, "x0":null,
 // currently selected charge
 var selected = null;
 var startCharge = 10;
+var MAX_CHARGES = 5;
 
 var MIN_DOT_SIZE = 10;
 var MAX_DOT_SIZE = 20;
@@ -88,8 +89,6 @@ d3.range(-MAX_ABS_CHARGE, MAX_ABS_CHARGE+1, CHARGE_STEP).map(function(i){
 // main svg element assigned to div in html page
 var svg = d3.select("#field-container")
     .append("svg")
-    .on("click", dropCharge)
-    .on("touch", dropCharge)
     .on("mousedown", vectorStart)
     .on("mouseup", vectorEnd)
 	.on("touchstart", vectorStart)
@@ -116,7 +115,6 @@ var drawn_vector;
 var drawn_vectors = [];
 
 var toolbar_settings = {
-    'drop_charges_mode' : false,
     'draw_vectors_mode': false,
     'delete_mode': false
 };
@@ -129,14 +127,14 @@ var line = d3.svg.line();
 //When changing the value from the combo, change the target charge value
 d3.select("#charge").on("change", function(){
     var new_charge = parseFloat(d3.select(this).node().value);
-    
+
     if (selected && selected.name != "test_charge") { 
         selected.charge = new_charge;
         selected.radius = Math.abs(new_charge);
         selected.color = (new_charge < 0.0) ? colors[0] : colors[1];
         console.log(selected);
         // charge didn't move, but we do need to let other know about any change
-        notify_group(0, 0);
+        notify_group(selected.index);
     } else {
         //alert("Nothing selected");
     }
@@ -213,18 +211,21 @@ function checkForZeros() {
 function redraw_labels() {
     // Add name labels to circles
     // Note: Not actually grouped with circle, just placed relative, so probably not best implementation but works for now
-    var labels = svg.append("g")
-	    .attr("class", "name")
-        .selectAll(".name")
-	    .data(users)
-        .enter().append("text")
-	    .classed("selected", function(d) { return d === selected; })
-        .attr("name", function (d) { return d.name; })
-        .attr("charge", function (d) { return d.charge})
-	    .attr("x", function(d) { return field_display_settings.show_particle_size ? (d.x - AVE_DOT_SIZE - (d.radius/2)) : (d.x - AVE_DOT_SIZE); })
-	    .attr("y", function(d) { return field_display_settings.show_particle_size ? (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING - (d.radius/2)) : (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING); })
-	    .text(function(d) { return d.name; });
-	    //.call(drag);
+    for (var i = 0; i < users.length; i++) {
+        var labels = svg.append("g")
+    	    .attr("class", "name")
+            .selectAll(".name")
+    	    .data(users[i].charges)
+            .enter().append("text")
+            .attr("class", function(d, i) { return d.name + "_L" + (i+1)})
+    	    .classed("selected", function(d) { return d === selected; })
+            .attr("name", function (d) { return d.name; })
+            .attr("charge", function (d) { return d.charge})
+    	    .attr("x", function(d) { return field_display_settings.show_particle_size ? (d.x - AVE_DOT_SIZE - (d.radius/2)) : (d.x - AVE_DOT_SIZE); })
+    	    .attr("y", function(d) { return field_display_settings.show_particle_size ? (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING - (d.radius/2)) : (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING); })
+    	    .text(function(d) { return d.name; });
+    	    //.call(drag);
+    }
 }
 
 function redraw_charges() {
@@ -241,40 +242,49 @@ function redraw_charges() {
         }
     }
 
-    var circles = svg.selectAll("circle")
-                         .data(users);
+    var all_charges = [];
+    for (i = 0; i < users.length; i++) {
+        users[i].charges.forEach(function(charge, index) {
+            all_charges.push(charge);
+        });
+    }
+    for (i = 0; i < all_charges.length; i++) {
+        var circles = svg.selectAll("circle")
+                             .data(all_charges);
 
-    circles.enter()
-            .append("circle");
+        circles.enter()
+                .append("circle");
 
-    var circleAttributes = circles
-                    .classed("selected", function(d) { return d === selected; })
-                    .attr("name", function (d) { return d.name; })
-                    .attr("cx", function (d) { return d.x; })
-                    .attr("cy", function (d) { return d.y; })
-                    .attr("x0", function (d) { return d.x0; })
-                    .attr("y0", function (d) { return d.y0; })
-                    .attr("charge", function (d) { return d.charge; })
-                    .attr("r", function (d) { return field_display_settings.show_particle_size ? partSizeScale(d.radius) : AVE_DOT_SIZE; })
-                    .attr("active", function(d) { return d.active; })
-                    .style("fill", function(d) { return field_display_settings.show_particle_charge ? d.color : "LightGray"; });
+        var circleAttributes = circles
+                        .classed("selected", function(d) { return d === selected; })
+                        .attr("index", function(d) { return d.index; })
+                        .attr("name", function (d) { return d.name; })
+                        .attr("cx", function (d) { return d.x; })
+                        .attr("cy", function (d) { return d.y; })
+                        .attr("x0", function (d) { return d.x0; })
+                        .attr("y0", function (d) { return d.y0; })
+                        .attr("charge", function (d) { return d.charge; })
+                        .attr("r", function (d) { return field_display_settings.show_particle_size ? partSizeScale(d.radius) : AVE_DOT_SIZE; })
+                        .attr("active", function(d) { return d.active; })
+                        .style("fill", function(d) { return field_display_settings.show_particle_charge ? d.color : "LightGray"; });
 
-    /* Two modes of use:
-        Offline, single user, in which case user can create multiple points, sessionStorage("username") won't be set
-        Online as part of group, sessionStorage("username") will be set by login routines.
+        /* Two modes of use:
+            Offline, single user, in which case user can create multiple points, sessionStorage("username") won't be set
+            Online as part of group, sessionStorage("username") will be set by login routines.
 
-        Offline: can only move charges that are active
-        Online:
-            at most one charge can be dragged by this user:
-            1. name has to match the name I gave when logging in
-            2. I have to be in an active state 
-    */
-    circles
-        .filter(function(d) { return d.active == true && 
-            (d.name === sessionStorage.getItem('username') /*|| sessionStorage.getItem("username") === null*/ )})
-        .call(drag);
+            Offline: can only move charges that are active
+            Online:
+                at most one charge can be dragged by this user:
+                1. name has to match the name I gave when logging in
+                2. I have to be in an active state 
+        */
+        circles
+            .filter(function(d) { return d.active == true && 
+                (d.name === sessionStorage.getItem('username') /*|| sessionStorage.getItem("username") === null*/ )})
+            .call(drag);
 
-    circles.exit().remove();
+        circles.exit().remove();
+    }
 }
 
 function redraw_testcharge(){
@@ -431,29 +441,6 @@ function remove_drawn_vectors() {
     drawn_vectors = [];
 }
 
-function dropCharge() {
-    if (toolbar_settings.drop_charges_mode === true) {
-        var coordinates = d3.mouse(this);
-        x = coordinates[0] - margin.left;
-        y = coordinates[1] - margin.top;
-        if (x > 580 || x < 20) return;
-        if (y > 380 || y < 20) return; 
-        usr = {
-            active: true,
-            charge: -10,
-            color: "rgba(255, 0, 0, 0.7)",
-            name: sessionStorage.getItem("username"),
-            radius: 10,
-            x: Math.round(x),
-            y: Math.round(y)
-        };
-        selected = usr;
-        changeSelected();
-        users.push(usr);
-        redraw();
-    }
-}
-
 /*-------------------  Scales ----------------------*/
 
 // use d3 linear scales to map 0, 1, 2 ... to actual display pixels
@@ -535,26 +522,25 @@ function redraw_axes() {
 
 /*-------------------  Drag functions ----------------------*/
 
-function dragmove(d) {
+function dragmove(d, i) {
   if((d.name === sessionStorage.getItem('username') || d.name === "test_charge")
-	 && toolbar_settings.draw_vectors_mode === false && toolbar_settings.delete_mode === false
-     && toolbar_settings.drop_charges_mode === false)
+	 && toolbar_settings.draw_vectors_mode === false && toolbar_settings.delete_mode === false)
   {
   	d3.select(this)
       		.attr("cx", d.x = Math.max(radius, Math.min(width - radius, d3.event.x)))
       		.attr("cy", d.y = Math.max(radius, Math.min(height - radius, d3.event.y)));
 
-	d3.select('.name .selected')
+	d3.select('.name .' + d.name + "_L" + (i+1))
         .attr("x", function(d) { return field_display_settings.show_particle_size ? (d.x - AVE_DOT_SIZE - (d.radius/2)) : (d.x - AVE_DOT_SIZE); })
         .attr("y", function(d) { return field_display_settings.show_particle_size ? (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING - (d.radius/2)) : (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING); })
   }
 }
 
-function dragstart(d) {
+function dragstart(d, i) {
 
     // record where the drag started
   if((d.name === sessionStorage.getItem('username') || d.name === "test_charge")
-	 && toolbar_settings.draw_vectors_mode === false)
+	 && toolbar_settings.draw_vectors_mode === false && toolbar_settings.delete_mode === false)
   { 
 
     d.x0 = d.x;
@@ -567,26 +553,22 @@ function dragstart(d) {
   }
 }
 
-function dragend(d) {
+function dragend(d, i) {
 
   if((d.name === sessionStorage.getItem('username') || d.name === "test_charge")
-	 && toolbar_settings.draw_vectors_mode === false && toolbar_settings.delete_mode === false
-     && toolbar_settings.drop_charges_mode === false)
+	 && toolbar_settings.draw_vectors_mode === false && toolbar_settings.delete_mode === false)
   {
 
-    var x0_scaled = xScale.invert(d.x0);
-    var y0_scaled = yScale.invert(d.y0);
-    var x_scaled = xScale.invert(d.x);
-    var y_scaled = yScale.invert(d.y);
-    var delta_x = Math.round(x_scaled - x0_scaled);
-    var delta_y = Math.round(y_scaled - y0_scaled);
-    console.log("delta_x: " + delta_x + " delta_y: " + delta_y);
-    if(d.name === "test_charge"){
-        testCharge[0].x += delta_x;
-        testCharge[0].y += delta_y;
-    }
+    d3.select(this)
+            .attr("cx", d.x = Math.max(radius, Math.min(width - radius, Math.round(d.x/10)*10)))
+            .attr("cy", d.y = Math.max(radius, Math.min(height - radius, Math.round(d.y/10)*10)));
+
+    d3.select('.name .' + d.name + "_L" + (i+1))
+        .attr("x", function(d) { return field_display_settings.show_particle_size ? (d.x - AVE_DOT_SIZE - (d.radius/2)) : (d.x - AVE_DOT_SIZE); })
+        .attr("y", function(d) { return field_display_settings.show_particle_size ? (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING - (d.radius/2)) : (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING); })
+
     if(d.name === sessionStorage.getItem('username')){
-        notify_group(delta_x, delta_y);
+        notify_group(i);
     }
 
     redraw();
@@ -685,39 +667,43 @@ function field_sync_users(other_members) {
     // users = [];
     other_members.forEach(function(member, index) {
         var user = {};
-
+        user.charges = member.member_info.charges;
         user.name = member.member_name.replace(/&lt;/g,'<').replace(/&gt;/g, '>');
 
         if (known_users.indexOf(user.name) !== -1) {
             return;
         }
 
-        user.x = xScale(member.member_x);
-        user.y = yScale(member.member_y);
-        user.x0 = null;
-        user.y0 = null;
+        if (user.charges.length === 1 && user.charges[0].charge === undefined) {
+            user.charges[0].charge = startCharge * -1;
+            user.charges[0].radius = startCharge;
+            user.charges[0].color = (user.charges[0].charge < 0.0) ? colors[0] : colors[1];
+            user.charges[0].x = xScale(0);
+            user.charges[0].y = yScale(0);
+            if (user.name === sessionStorage.getItem('username')) {
+                selected = user.charges[0];
+            }
+        }
 
-        if ($.isEmptyObject(member.member_info)) {
-            user.charge = startCharge * -1;
-            user.radius = startCharge;
-            user.color = (user.charge < 0.0) ? colors[0] : colors[1];
-        }
-        else {
-            user.charge = parseInt(member.member_info.charge);
-            user.radius = parseInt(member.member_info.radius);
-            user.color = member.member_info.color;
-        }
+        user.charges.forEach(function(charge, i) {
+            user.charges[i].x0 = null;
+            user.charges[i].y0 = null;
+            user.charges[i].index = i;
+        });
+
         if (user.name === sessionStorage.getItem('username')) {
-            user.active = true;
-            selected = user;
+
+            user.charges.forEach(function(charge, i) {
+                user.charges[i].active = true;
+            });
+            // selected = user;
         
             if (typeof(socket) !== 'undefined') {
                 var info_object = {
-                    state:"initialized",
-                    charge:user.charge,
-                    radius:user.radius,
-                    color:user.color
+                    remove_charge: false,
+                    state: "initialized"
                 };
+                info_object.charges = user.charges;
                 // update vector_attributes
                 if (users.length == 0) {
                     vector_attributes = [];
@@ -731,17 +717,20 @@ function field_sync_users(other_members) {
                                    sessionStorage.getItem('class_id'),
                                    sessionStorage.getItem('group_id'));
                 }
-                socket.coordinate_change(sessionStorage.getItem('username'),
-                                         sessionStorage.getItem('class_id'),
-                                         sessionStorage.getItem('group_id'),
-                                         0,     // dx
-                                         0,     // dy
-                                         info_object
-                                        );
+                user.charges.forEach(function(charge, i) {
+                    info_object.index = i;
+                    socket.coordinate_change(sessionStorage.getItem('username'),
+                                             sessionStorage.getItem('class_id'),
+                                             sessionStorage.getItem('group_id'),
+                                             info_object
+                                            );
+                });
             } 
         }
         else {
-            user.active = false;
+            user.charges.forEach(function(charge, i) {
+                user.charges[i].active = false;
+            });
         }   
         users.push(user);
     });
@@ -920,9 +909,8 @@ function find_user(user_name) {
 }
 
 
-// this function gets called each time any single user moves their point
-// data is an object containing the user's name, and new x_coord and y_coord.
-function field_move_users(username, x_coord, y_coord, info) {
+// this function gets called each time any single user moves their point or removes their point
+function field_move_users(username, info) {
     console.log("field_move_users called.");
     username = username.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
     console.log(username);
@@ -930,6 +918,10 @@ function field_move_users(username, x_coord, y_coord, info) {
     console.log(user_data);
     if (user_data) {
         console.log("updating user_data for user: " + username);
+
+        if (user_data.charges.length <= info.index) {
+            user_data.charges.push({});
+        }
 
         // make any necessary updates to our local information from OTHERs based on member_info
         if (username !== sessionStorage.username) {
@@ -940,26 +932,25 @@ function field_move_users(username, x_coord, y_coord, info) {
                 console.log(info);
                 console.log("typeof(info) = " + typeof(info) + " converting to obj");
 
-                var info_obj = info;
-                console.log(info_obj);
+                console.log(info);
 
-                if (info_obj.hasOwnProperty('charge')) {
+                if (info.charges[info.index].hasOwnProperty('charge')) {
                     console.log("Found'charge' property in info_obj");
-                    user_data.charge = info_obj.charge;
+                    user_data.charges[info.index].charge = info.charges[info.index].charge;
                 } else {
                     console.log("ERROR: Did not find 'charge' property in info_obj");
                 }
 
-                if (info_obj.hasOwnProperty('radius')) {
+                if (info.charges[info.index].hasOwnProperty('radius')) {
                     console.log("Found'radius' property in info_obj");
-                    user_data.radius = info_obj.radius;
+                    user_data.charges[info.index].radius = info.charges[info.index].radius;
                 } else {
                     console.log("ERROR: Did not find 'radius' property in info_obj");
                 }
 
-                if (info_obj.hasOwnProperty('color')) {
+                if (info.charges[info.index].hasOwnProperty('color')) {
                     console.log("Found'color' property in info_obj");
-                    user_data.color = info_obj.color;
+                    user_data.charges[info.index].color = info.charges[info.index].color;
                 } else {
                     console.log("ERROR: Did not find 'color' property in info_obj");
                 }
@@ -969,10 +960,10 @@ function field_move_users(username, x_coord, y_coord, info) {
             console.log("Don't need to update charge from coord_change for SELF.");
         }
 
-        // also update the coordinates
-        user_data.x = xScale(x_coord);
-        user_data.y = yScale(y_coord);
-
+        user_data.charges[info.index].name = info.charges[info.index].name;
+        user_data.charges[info.index].index = info.charges[info.index].index;
+        user_data.charges[info.index].x = info.charges[info.index].x;
+        user_data.charges[info.index].y = info.charges[info.index].y;
 
     } else {
         console.log("ERROR: Oh, oh: got a move_user message about somebody we don't know: " + username);
@@ -980,6 +971,14 @@ function field_move_users(username, x_coord, y_coord, info) {
     }
 
     redraw();
+}
+
+function field_remove_charge(username, info) {
+    if (username !== sessionStorage.getItem("username")) {
+        var user_data = find_user(username);
+        user_data.charges.pop();
+        redraw();
+    }
 }
 
 function field_remove_user(username, class_id, group_id) {
@@ -1009,16 +1008,16 @@ function field_remove_user(username, class_id, group_id) {
     }
 }
 
-function notify_group(dx, dy) {
+function notify_group(index) {
 
     var user_obj = find_user(sessionStorage.getItem('username'));
 
     var info_object = {
         state:"active",
-        charge:user_obj.charge,
-        radius:user_obj.radius,
-        color:user_obj.color
+        remove_charge: false,
+        index: index
     };
+    info_object.charges = user_obj.charges;
     
     // this code is also used by standalone, single user app,
     // in which case socket will not be defined.
@@ -1028,8 +1027,6 @@ function notify_group(dx, dy) {
         socket.coordinate_change(sessionStorage.getItem('username'),
                                  sessionStorage.getItem('class_id'),
                                  sessionStorage.getItem('group_id'),
-                                 dx,
-                                 dy,
                                  info_object
                                 );
     }
@@ -1090,6 +1087,61 @@ function set_to_default() {
 
 /*-------------------  Toolbar Settings -------------------*/
 
+function add_charge(btn) {
+    btn.blur();
+
+    var usr = find_user(sessionStorage.getItem("username"));
+    if (usr.charges.length >= MAX_CHARGES) return;
+    var charge = {
+        active: true,
+        charge: -10,
+        color: "rgba(255, 0, 0, 0.7)",
+        name: usr.name,
+        radius: 10,
+        x: xScale(0),
+        y: yScale(0),
+        x0: null,
+        y0: null
+    };
+    charge.index = usr.charges.length;
+    usr.charges.push(charge);
+
+    selected = charge;
+    changeSelected();
+    info = { 
+        remove_charge: false,
+        index: charge.index 
+    };
+    info.charges = usr.charges;
+    socket.coordinate_change(sessionStorage.getItem('username'),
+                             sessionStorage.getItem('class_id'),
+                             sessionStorage.getItem('group_id'),
+                             info
+                            );
+    redraw();
+}
+
+function remove_charge(btn) {
+    btn.blur();
+
+    var usr = find_user(sessionStorage.getItem("username"));
+    if (usr.charges.length <= 1) return;
+    if (selected == usr.charges[usr.charges.length-1]) {
+        selected = usr.charges[usr.charges.length-2];
+        changeSelected();
+    }
+    usr.charges.pop();
+    info = {remove_charge: true};
+    info.charges = usr.charges;
+    socket.coordinate_change(sessionStorage.getItem('username'),
+                             sessionStorage.getItem('class_id'),
+                             sessionStorage.getItem('group_id'),
+                             info
+                            );
+
+    redraw();
+}
+
 function activate_button(btn_id, toolbar_id) {
     $(btn_id).css("background-color", "#6bb0fa");
     toolbar_settings[toolbar_id] = true;
@@ -1100,24 +1152,11 @@ function deactivate_button(btn_id, toolbar_id) {
     toolbar_settings[toolbar_id] = false;
 }
 
-function toggle_drop_charges_mode(btn) {
-    btn.blur();
-    if (toolbar_settings.drop_charges_mode === false) {
-        activate_button("#drop_charges_button", "drop_charges_mode");
-        deactivate_button("#draw_vectors_button", "draw_vectors_mode");
-        deactivate_button("#delete_mode_button", "delete_mode");
-    }
-    else {
-        deactivate_button("#drop_charges_button", "drop_charges_mode");
-    }
-}
-
 function toggle_draw_vectors_mode(btn) {
     btn.blur();
     if (toolbar_settings.draw_vectors_mode === false) {
         activate_button("#draw_vectors_button", "draw_vectors_mode");
         deactivate_button("#delete_mode_button", "delete_mode");
-        deactivate_button("#drop_charges_button", "drop_charges_mode");
     }
     else {
         deactivate_button("#draw_vectors_button", "draw_vectors_mode");
@@ -1129,7 +1168,6 @@ function toggle_delete_mode(btn) {
     if (toolbar_settings.delete_mode === false) {
         activate_button("#delete_mode_button", "delete_mode");
         deactivate_button("#draw_vectors_button", "draw_vectors_mode");
-        deactivate_button("#drop_charges_button", "drop_charges_mode");
     }
     else {
         deactivate_button("#delete_mode_button", "delete_mode");
