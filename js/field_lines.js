@@ -488,12 +488,28 @@ function redraw_forcevectors() {
 
 function redraw_testvector(){
   var currentTime = new Date().getTime();
+  var charges = getCharges();
 
     if (selected === null)
         return;
     
     var curX = testCharge[0].x;
     var curY = testCharge[0].y;
+
+    // draw component force vectors
+    for (var i = 0; i < charges.length; i++) {
+        var component_vec = calculateFieldComponentDueToChargeAtPosition(i, [curX, curY]);
+        var component_F = [testCharge[0].charge*component_vec[0], testCharge[0].charge*component_vec[1]];
+        if (!isNaN(component_F[0]) && !isNaN(component_F[1])) {
+            svg.append("line")          // attach a line
+              .attr("class", "testvectorcomp")
+              .attr("marker-end", "url(#testChargeArrowComp)")
+              .attr("x1", curX)     // x position of the first end of the line
+              .attr("y1", curY)      // y position of the first end of the line
+              .attr("x2", curX + forceVectorScale*component_F[0])     // x position of the second end of the line
+              .attr("y2", curY + forceVectorScale*component_F[1]);    // y position of the second end of the line
+        }
+    }
 
     var E = calculateFieldVectorAtPoint([curX, curY]);
     var F = [testCharge[0].charge*E[0], testCharge[0].charge*E[1]];
