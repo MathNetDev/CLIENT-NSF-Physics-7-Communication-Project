@@ -1152,8 +1152,7 @@ function deactivate_button(btn_id, toolbar_id) {
     toolbar_settings[toolbar_id] = false;
 }
 
-function toggle_draw_vectors_mode(btn) {
-    btn.blur();
+function toggle_draw_vectors_mode() {
     if (toolbar_settings.draw_vectors_mode === false) {
         activate_button("#draw_vectors_button", "draw_vectors_mode");
         deactivate_button("#delete_mode_button", "delete_mode");
@@ -1163,8 +1162,7 @@ function toggle_draw_vectors_mode(btn) {
     }
 }
 
-function toggle_delete_mode(btn) {
-    btn.blur();
+function toggle_delete_mode() {
     if (toolbar_settings.delete_mode === false) {
         activate_button("#delete_mode_button", "delete_mode");
         deactivate_button("#draw_vectors_button", "draw_vectors_mode");
@@ -1174,8 +1172,7 @@ function toggle_delete_mode(btn) {
     }
 }
 
-function clear_vectors(btn) {
-    btn.blur();
+function clear_vectors() {
     if (field_display_settings.show_drawn_vectors === true) {
         var usr = sessionStorage.getItem("username");
         var my_vectors = vector_attributes.filter(function(attribute) {

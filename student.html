@@ -124,24 +124,24 @@
           <!-- Glyphicons (Settings, Draw, Delete) -->
           <div class="col-md-8 col-sm-8">
             <div class="tools">
-              <button id="settings_button" type="button" onclick="this.blur();" class="btn btn-default btn-sm" data-toggle="modal" data-target="#settings_modal">
+              <label id="settings_button" type="button" onclick="this.blur();" class="btn btn-default btn-sm" data-toggle="modal" data-target="#settings_modal">
                 <span class="glyphicon glyphicon-cog"></span>
-              </button>
-              <button id="draw_vectors_button" type="button" onclick="toggle_draw_vectors_mode(this);" class="btn btn-default btn-sm">
+              </label>
+              <label id="draw_vectors_button" type="button" onclick="toggle_draw_vectors_mode(this);" class="btn btn-default btn-sm">
                 <span class="glyphicon glyphicon-pencil"></span>
-              </button>
-              <button id="delete_mode_button" type="button" onclick="toggle_delete_mode(this);" class="btn btn-default btn-sm">
+              </label>
+              <label id="delete_mode_button" type="button" onclick="toggle_delete_mode(this);" class="btn btn-default btn-sm">
                 <span class="glyphicon glyphicon-trash"></span>
-              </button>
-              <button id="add_charge_button" type="button" onclick="add_charge(this);" class="btn btn-default btn-sm">
+              </label>
+              <label id="add_charge_button" type="button" onclick="add_charge(this);" class="btn btn-default btn-sm">
                 <span class="glyphicon glyphicon-plus"></span>
-              </button>
-              <button id="remove_charge_button" type="button" onclick="remove_charge(this);" class="btn btn-default btn-sm">
+              </label>
+              <label id="remove_charge_button" type="button" onclick="remove_charge(this);" class="btn btn-default btn-sm">
                 <span class="glyphicon glyphicon-minus"></span>
-              </button>
-              <button id="clear_vectors_button" type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#confirm_clear_vectors_modal">
+              </label>
+              <label id="clear_vectors_button" type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#confirm_clear_vectors_modal">
                 <span> Clear </span>
-              </button>
+              </label>
             </div>
           </div>
 
@@ -383,14 +383,6 @@
       
       var socket = Student.Socket(io(host));
       $(document).ready(function() {
-        $('#settings_modal').on('hidden.bs.modal', function (e) {
-          $('#settings_button').classed("active", false)
-            .attr("aria-pressed", false);
-        });
-        $('#confirm_clear_vectors_modal').on('hidden.bs.modal', function (e) {
-          $('#clear_vectors_button').classed("active", false)
-            .attr("aria-pressed", false);
-        });
         $('#display-settings').change(update_display_settings);
         $('body').addClass('stop-scrolling');
         $('body').bind('touchmove', function(e){e.preventDefault()});

@@ -436,7 +436,9 @@ function initiateFieldLineAtPoint(p, direction) {
     return [dots, chargesHit];
 }
 
-
+//
+// REPRESENTATIONS REDRAW FUNCTIONS
+//
 
 function redraw_forcevectors() {
     var currentTime = new Date().getTime();
@@ -450,13 +452,15 @@ function redraw_forcevectors() {
     if (charges.length === 0)
         return;
 
+    var count = 0;
     var chargeIndex = -1;
     for (var i=0; i < users.length; i++) {
         user_charges = users[i].charges;
         for (var j=0; j < user_charges.length; j++) {
             if (user_charges[j] == selected) {
-                chargeIndex = i+j;
+                chargeIndex = count;
             }
+            ++count;
         }
     }
 
