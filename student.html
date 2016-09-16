@@ -383,6 +383,14 @@
       
       var socket = Student.Socket(io(host));
       $(document).ready(function() {
+        $('#settings_modal').on('hidden.bs.modal', function (e) {
+          $('#settings_button').classed("active", false)
+            .attr("aria-pressed", false);
+        });
+        $('#confirm_clear_vectors_modal').on('hidden.bs.modal', function (e) {
+          $('#clear_vectors_button').classed("active", false)
+            .attr("aria-pressed", false);
+        });
         $('#display-settings').change(update_display_settings);
         $('body').addClass('stop-scrolling');
         $('body').bind('touchmove', function(e){e.preventDefault()});
