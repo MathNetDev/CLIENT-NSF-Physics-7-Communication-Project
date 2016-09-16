@@ -104,39 +104,51 @@ function redraw_axes(svg)
 function redraw_labels(svg, users) {
     // Add name labels to circles
     // Note: Not actually grouped with circle, just placed relative, so probably not best implementation but works for now
-    var labels = svg.append("g")
-        .attr("class", "name")
-        .selectAll(".name")
-        .data(users)
-        .enter().append("text")
-        .attr("name", function (d) { return d.name; })
-        .attr("charge", function (d) { return d.charge})
-        .attr("x", function(d) { return d.x - AVE_DOT_SIZE - (d.radius/2); })
-        .attr("y", function(d) { return d.y - AVE_DOT_SIZE*LABEL_Y_SPACING - (d.radius/2); })
-        .text(function(d) { return d.name; });
-        //.call(drag);
+    for (var i = 0; i < users.length; i++) {
+        var labels = svg.append("g")
+            .attr("class", "name")
+            .selectAll(".name")
+            .data(users[i].charges)
+            .enter().append("text")
+            .attr("class", function(d, i) { return d.name + "_L" + (i+1)})
+            .attr("name", function (d) { return d.name; })
+            .attr("charge", function (d) { return d.charge})
+            .attr("x", function(d) { return (d.x - AVE_DOT_SIZE - (d.radius/2)); })
+            .attr("y", function(d) { return (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING - (d.radius/2)); })
+            .text(function(d) { return d.name; });
+            //.call(drag);
+    }
 }
 
 function redraw_charges(svg, users) {
 
-    var circles = svg.selectAll("circle")
-                         .data(users);
+    var all_charges = [];
+    for (i = 0; i < users.length; i++) {
+        users[i].charges.forEach(function(charge, index) {
+            all_charges.push(charge);
+        });
+    }
+    for (i = 0; i < all_charges.length; i++) {
+        var circles = svg.selectAll("circle")
+                             .data(all_charges);
 
-    circles.enter()
-            .append("circle");
+        circles.enter()
+                .append("circle");
 
-    var circleAttributes = circles
-                    .attr("name", function (d) { return d.name; })
-                    .attr("cx", function (d) { return d.x; })
-                    .attr("cy", function (d) { return d.y; })
-                    .attr("x0", function (d) { return d.x0; })
-                    .attr("y0", function (d) { return d.y0; })
-                    .attr("charge", function (d) { return d.charge; })
-                    .attr("r", function (d) { return  partSizeScale(d.radius) /*: AVE_DOT_SIZE*/; })
-                    .attr("active", function(d) { return d.active; })
-                    .style("fill", function(d) { return  d.color /*: "LightGray"*/; });
+        var circleAttributes = circles
+                        .attr("index", function(d) { return d.index; })
+                        .attr("name", function (d) { return d.name; })
+                        .attr("cx", function (d) { return d.x; })
+                        .attr("cy", function (d) { return d.y; })
+                        .attr("x0", function (d) { return d.x0; })
+                        .attr("y0", function (d) { return d.y0; })
+                        .attr("charge", function (d) { return d.charge; })
+                        .attr("r", function (d) { return partSizeScale(d.radius); })
+                        .attr("active", function(d) { return d.active; })
+                        .style("fill", function(d) { return d.color; });
 
-    circles.exit().remove();
+        circles.exit().remove();
+    }
 }
 
 function checkForZeros(svg) {
@@ -155,68 +167,70 @@ function field_sync_users(group, other_members) {
     
         // add any new users 
         for (var i in other_members) {
+            var info = JSON.parse(other_members[i].member_info);
             other_members[i].member_name = other_members[i].member_name.replace(/&lt;/g,'<').replace(/&gt;/g, '>');
             // test to see if this member_name is known, if not, add this user to users
             if (known_users.indexOf(other_members[i].member_name) == -1) {
     
-                var user_obj = {"name":other_members[i].member_name, 
-                        "x":xScale(other_members[i].member_x),
-                        "y":yScale(other_members[i].member_y),
-                        "x0":null, "y0":null,
-                        "charge":null, "radius":null, "active":false, "color":null};
+                var user = {};
+                user.name = other_members[i].member_name;
+                user.charges = info.charges;
     
-                users[group-1].push(user_obj);
+                if (user.charges.length === 1 && user.charges[0].charge === undefined) {
+                    user.charges[0].charge = -10;
+                    user.charges[0].radius = 10;
+                    user.charges[0].color = (user.charges[0].charge < 0.0) ? colors[0] : colors[1];
+                    user.charges[0].x = xScale(0);
+                    user.charges[0].y = yScale(0);
+                }
     
                 // check various cases of where this user is in initialization
                 // 1) Is this me?
-                
-                
-                if (other_members[i].member_info !== "" || other_members[i].member_info !== null) {
+
+                if ((other_members[i].member_info !== "" || other_members[i].member_info !== null) && info.index !== undefined) {
                     console.log("Got expected member_info !== ''");
 
-                    var info_obj = JSON.parse(other_members[i].member_info);
-                    console.log(user_obj);
-                    console.log(info_obj);
+                    console.log(user);
+                    console.log(info);
 
-                    if (info_obj.hasOwnProperty('charge')) {
+
+                    if (info.charges[info.index].hasOwnProperty('charge')) {
                         console.log("Found'charge' property in info_obj");
-                        user_obj.charge = info_obj.charge;
+                        user.charges[info.index].charge = info.charges[info.index].charge;
                     } else {
                         console.log("ERROR: Did not find 'charge' property in info_obj");
                     }
 
-                    if (info_obj.hasOwnProperty('radius')) {
+                    if (info.charges[info.index].hasOwnProperty('radius')) {
                         console.log("Found'radius' property in info_obj");
-                        user_obj.radius = info_obj.radius;
+                        user.charges[info.index].radius = info.charges[info.index].radius;
                     } else {
                         console.log("ERROR: Did not find 'radius' property in info_obj");
                     }
 
-                    if (info_obj.hasOwnProperty('color')) {
+                    if (info.charges[info.index].hasOwnProperty('color')) {
                         console.log("Found'color' property in info_obj");
-                        user_obj.color = info_obj.color;
+                        user.charges[info.index].color = info.charges[info.index].color;
                     } else {
                         console.log("ERROR: Did not find 'color' property in info_obj");
                     }
-
-                } else {
-                    console.log("*** Adding OTHER but there is no member_info - is this okay?");
-                    user_obj.charge = 10;
-                    user_obj.radius = 10;
-                    user_obj.color = colors[1];
                 }
+
+                users[group-1].push(user);
     
             } else {
-                //update info in case
-                console.log("Username " + other_members[i].member_name + " already in users list!");
+                var user = find_user(other_members[i].member_name, group);
+                user.name = other_members[i].member_name;
+                user.charges = info.charges;
             }
     
         }
     
         // need to 
         redraw(group, users);
-    }
-    function find_user(user_name, group) {
+}
+
+function find_user(user_name, group) {
     for (var i in users[group-1]) {
         if (users[group-1][i].name === user_name) {
             return users[group-1][i];
@@ -224,56 +238,49 @@ function field_sync_users(group, other_members) {
     }
     return null;
 }
-    function field_move_users(username, group_id, x_coord, y_coord, info) {
+
+function field_move_users(username, group_id, info) {
     console.log("field_move_users called.");
     username = username.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
     var user_data = find_user(username, group_id);
     if (user_data) {
         console.log("updating user_data for user: " + username);
 
-        // make any necessary updates to our local information from OTHERs based on member_info
-        if (username !== sessionStorage.username) {
-
-            if (info === "" || info === null || info == "null") {
-                console.log("WARNING: info is null - must have been an arrow push!");
-            } else {
-                console.log(info);
-                console.log("typeof(info) = " + typeof(info) + " converting to obj");
-
-                var info_obj = JSON.parse(info);
-                console.log(info_obj);
-
-                if (info_obj.hasOwnProperty('charge')) {
-                    console.log("Found'charge' property in info_obj");
-                    user_data.charge = info_obj.charge;
-                } else {
-                    console.log("ERROR: Did not find 'charge' property in info_obj");
-                }
-
-                if (info_obj.hasOwnProperty('radius')) {
-                    console.log("Found'radius' property in info_obj");
-                    user_data.radius = info_obj.radius;
-                } else {
-                    console.log("ERROR: Did not find 'radius' property in info_obj");
-                }
-
-                if (info_obj.hasOwnProperty('color')) {
-                    console.log("Found'color' property in info_obj");
-                    user_data.color = info_obj.color;
-                } else {
-                    console.log("ERROR: Did not find 'color' property in info_obj");
-                }
-            } 
-
-        } else {
-            console.log("Don't need to update charge from coord_change for SELF.");
+        if (user_data.charges.length <= info.index) {
+            user_data.charges.push({});
         }
 
-        // also update the coordinates
-        user_data.x = xScale(x_coord);
-        user_data.y = yScale(y_coord);
-        console.log(find_user(username, group_id));
-        console.log(yScale(y_coord)); //updates properly
+        if (info === "" || info === null || info == "null") {
+            console.log("WARNING: info is null - must have been an arrow push!");
+        } else {
+            
+
+            if (info.charges[info.index].hasOwnProperty('charge')) {
+                console.log("Found'charge' property in info");
+                user_data.charges[info.index].charge = info.charges[info.index].charge;
+            } else {
+                console.log("ERROR: Did not find 'charge' property in info");
+            }
+
+            if (info.charges[info.index].hasOwnProperty('radius')) {
+                console.log("Found'radius' property in info");
+                user_data.charges[info.index].radius = info.charges[info.index].radius;
+            } else {
+                console.log("ERROR: Did not find 'radius' property in info");
+            }
+
+            if (info.charges[info.index].hasOwnProperty('color')) {
+                console.log("Found'color' property in info");
+                user_data.charges[info.index].color = info.charges[info.index].color;
+            } else {
+                console.log("ERROR: Did not find 'color' property in info");
+            }
+        } 
+
+        user_data.charges[info.index].name = info.charges[info.index].name;
+        user_data.charges[info.index].index = info.charges[info.index].index;
+        user_data.charges[info.index].x = info.charges[info.index].x;
+        user_data.charges[info.index].y = info.charges[info.index].y;
 
 
     } else {
@@ -283,6 +290,13 @@ function field_sync_users(group, other_members) {
 
     redraw(group_id, users);
 }
+
+function field_remove_charge(username, group_id, info) {
+    var user_data = find_user(username, group_id);
+    user_data.charges.pop();
+    redraw(group_id, users);
+}
+
 function field_remove_user(username, group_id) {
     console.log("*** field_remove_user ***");
     username = username.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
