@@ -91,7 +91,7 @@ function add_group_response() {
     var new_group = "";
     var group_number = $('.groups > li:last').index() + 2;
     new_group += "<li>Group " + group_number;
-    new_group += "<ul class='g" + group_number + "'></ul></li>";
+    new_group += "<div class='g" + group_number + "'></div></li>";
     $groups.append(new_group);
     draw_mirror(".g"+group_number);
     users.push([]);
@@ -143,14 +143,14 @@ function group_info_response(username, class_id, group_id, group, status) {
     //$people.html('');
     
     if (status) {
-        for (var i in group) {
-            var member = '<li id="' + group[i].member_name +'">';
-            member += group[i].member_name;
-            member += ' - (<span class="x">' + group[i].member_x + '</span>, ' 
-            member += '<span class="y">' + group[i].member_y + '</span>)';
-            member += '</li>';
-            $people.append(member);
-        }
+        // for (var i in group) {
+        //     var member = '<li id="' + group[i].member_name +'">';
+        //     member += group[i].member_name;
+        //     member += ' - (<span class="x">' + group[i].member_x + '</span>, ' 
+        //     member += '<span class="y">' + group[i].member_y + '</span>)';
+        //     member += '</li>';
+        //     $people.append(member);
+        // }
         field_sync_users(group_id, group);
     }
     else {
@@ -168,17 +168,19 @@ function group_info_response(username, class_id, group_id, group, status) {
  * @param {string} username username of person whose point has moved
  * @param {number} class_id id of class being updated
  * @param {number} group_id id of group being updated
- * @param {number} x the x coordinate of the point
- * @param {number} y the y coordinate of the point
  * @param {object} info JSON object holding any extra user info 
  * @description updates points on the view every time a user moves one
  */
-function coordinate_change_response(username, class_id, group_id, x, y, info) {
+function coordinate_change_response(username, class_id, group_id, info) {
     username = username.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
     username = escapeStr(username);
-    $('li[id="' + username + '"] .x').html(x);
-    $('li[id="' + username + '"] .y').html(y);
-    field_move_users(username, group_id, x, y, info);
+    var info = JSON.parse(info);
+    if (info.remove_charge == true) {
+        field_remove_charge(username, group_id, info);
+    }
+    else {
+        field_move_users(username, group_id, info);
+    }
 }
 
 /**
@@ -200,8 +202,8 @@ function get_classes_response(classes){
     $('#get-classes').html('');
     for (var i = 0; i < classes.length; i++) {
         //console.log(classes[i]);
-        $('#get-classes').append('<div class="list col-md-3 col-lg-3 col-xs-3 col-sm-3" style="padding-bottom: 3px;" onclick=\'join_class("'
-            +classes[i].hashed_id+'")\'>Class: <b>' + classes[i].class_name + '</b> ID: <b>' + classes[i].hashed_id + '</b></div>');
+        $('#get-classes').append('<button class="btn btn-md btn-primary" style="margin: 0em 1em 0em 1em;" onclick=\'join_class("'
+            + classes[i].hashed_id+'")\'> Class: ' + classes[i].class_name + '</button>');
     }
 }
 

@@ -38,10 +38,35 @@ body {
     stroke-width:3;
     stroke-dasharray:0; 
 }
+#testArrowComp{
+    fill: grey;
+    stroke-width:2;
+    stroke-dasharray:0; 
+}
+
 #testChargeArrow{
     fill: rgb(187, 96, 187);
     stroke-width:3;
     stroke-dasharray:0; 
+}
+
+#testChargeArrowComp {
+    fill: rgb(100,100,100);
+    stroke-width:2;
+    stroke-dasharray:0; 
+}
+
+.testvectorcomp {
+   fill: none;
+   stroke: rgb(100,100,100);
+   stroke-opacity: 0.4;
+   stroke-width: 2px;
+}
+.testvector {
+  fill: none;
+  stroke: rgb(187, 96, 187);
+  stroke-opacity:0.4;
+  stroke-width: 4px;
 }
 
 ellipse {
@@ -68,12 +93,6 @@ circle, .line {
   stroke: orange;
   stroke-opacity:0.4;
   stroke-width: 2px;
-}
-.testvector {
-  fill: none;
-  stroke: rgb(187, 96, 187);
-  stroke-opacity:0.4;
-  stroke-width: 4px;
 }
 .resultvector {
   fill: none;

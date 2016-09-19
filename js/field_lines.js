@@ -164,7 +164,7 @@ function calculateForceOnCharge(chargeIndex){
     // calculate E at charge due to all other charges
     for (j = 0; j < charges.length; j++) {
         if (j !== chargeIndex) {
-            component = calculateFieldComponentDueToChargeAtPosition(j, p);
+            component = calculateFieldComponentDueToChargeAtPosition(j, [curX, curY]);
 
             E_x += component[0];
             E_y += component[1];
@@ -436,7 +436,9 @@ function initiateFieldLineAtPoint(p, direction) {
     return [dots, chargesHit];
 }
 
-
+//
+// REPRESENTATIONS REDRAW FUNCTIONS
+//
 
 function redraw_forcevectors() {
     var currentTime = new Date().getTime();
@@ -450,18 +452,20 @@ function redraw_forcevectors() {
     if (charges.length === 0)
         return;
 
+    var count = 0;
     var chargeIndex = -1;
     for (var i=0; i < users.length; i++) {
         user_charges = users[i].charges;
         for (var j=0; j < user_charges.length; j++) {
             if (user_charges[j] == selected) {
-                chargeIndex = i+j;
+                chargeIndex = count;
             }
+            ++count;
         }
     }
 
     if (chargeIndex == -1) {
-        console.log("UNABLE TO FIND selected in users!");
+        // console.log("UNABLE TO FIND selected in users!");
         return;
     }
     
@@ -482,18 +486,34 @@ function redraw_forcevectors() {
     }
 
     currentTime -= new Date().getTime()
-    console.log("redraw_forcevectors iteration took: " + (-1*currentTime)+"ms." )
+    // console.log("redraw_forcevectors iteration took: " + (-1*currentTime)+"ms." )
 
 }
 
 function redraw_testvector(){
   var currentTime = new Date().getTime();
+  var charges = getCharges();
 
     if (selected === null)
         return;
     
     var curX = testCharge[0].x;
     var curY = testCharge[0].y;
+
+    // draw component force vectors
+    for (var i = 0; i < charges.length; i++) {
+        var component_vec = calculateFieldComponentDueToChargeAtPosition(i, [curX, curY]);
+        var component_F = [testCharge[0].charge*component_vec[0], testCharge[0].charge*component_vec[1]];
+        if (!isNaN(component_F[0]) && !isNaN(component_F[1])) {
+            svg.append("line")          // attach a line
+              .attr("class", "testvectorcomp")
+              .attr("marker-end", "url(#testChargeArrowComp)")
+              .attr("x1", curX)     // x position of the first end of the line
+              .attr("y1", curY)      // y position of the first end of the line
+              .attr("x2", curX + forceVectorScale*component_F[0])     // x position of the second end of the line
+              .attr("y2", curY + forceVectorScale*component_F[1]);    // y position of the second end of the line
+        }
+    }
 
     var E = calculateFieldVectorAtPoint([curX, curY]);
     var F = [testCharge[0].charge*E[0], testCharge[0].charge*E[1]];
@@ -509,117 +529,383 @@ function redraw_testvector(){
     }
 
     currentTime -= new Date().getTime()
-    console.log("redraw_testvector iteration took: " + (-1*currentTime)+"ms." )
+    // console.log("redraw_testvector iteration took: " + (-1*currentTime)+"ms." )
 }
 
 function redraw_fieldvectors() {
     var currentTime = new Date().getTime();
-    var maxForce = 0;
-    var calcVectors = [];
+    var vectorLength = 25;
+
     // pull current location data out of users array
-    var charges = getCharges(); 
+    var charges = getCharges();
+    var curX,
+        curY,
+        E,
+        mag,
+        heightLoc,
+        widthLoc,
+        maxChargeIndex = 0,
+        maxCharge = charges[0][2],
+        maxField,
+        maxFieldMag;
 
     if (charges.length === 0)
         return;
 
-    //Iterate for each charge
-    for (var heightLoc = 0; heightLoc <= (height/(10*gridSpacing*vectorFreq)); heightLoc++){
-      for (var widthLoc = 0; widthLoc <= (width/(10*gridSpacing*vectorFreq)); widthLoc++){
-            var curX = widthLoc * 10 * gridSpacing * vectorFreq;
-            var curY = height - (heightLoc * 10 * gridSpacing * vectorFreq);
-            // var fields = calculateFieldVectorAtPoint([curX, curY]);
-            // // console.log("---- calc for charge at " + curX + " " + curY );
+    for (i = 0; i < charges.length; i++) {
+      if (Math.abs(charges[i][2]) > maxCharge) {
+        maxCharge = Math.abs(charges[i][2]);
+        maxChargeIndex = i;
+      }
+    }
 
+    // get field near max charge to use as cutoff for scaling. 20 pixels away is arbitrary "nearby".
+    maxField = calculateFieldVectorAtPoint([charges[maxChargeIndex][0] + 20, charges[maxChargeIndex][1] + 20]);
+    maxFieldMag = Math.sqrt(maxField[0]*maxField[0] + maxField[1]*maxField[1]);
+    console.log("maxFieldMag: ", maxFieldMag, " around charge ", maxCharge, " at:  ", charges[maxChargeIndex][0], charges[maxChargeIndex][1]);
 
-            // var total_forceX = fields[0];
-            // var total_forceY = fields[1];
-            var total_forceX = 0.0;
-            var total_forceY = 0.0;
-
-            //Superposition the force vector at the current point
-            for (var j = 0; j < charges.length; j++) {                
-                var othX = charges[j][0];
-                var othY = height - charges[j][1];
-                console.log("---- against charge at " + othX + " " + othY);
-                var othpolarity = (charges[j][2] > 0) ? 1 : -1;
-                var distX = (((curX - othX) / 115.0) * .0254);  // to convert from pixels to inches to meters
-                var distY = (((curY - othY) / 115.0) * .0254);  // this assumes a screen dpi of 115 (19" 1920x1080 screen)
-                console.log("distX: " + distX + " distY: " + distY);
-                var distXSq = distX * distX;
-                var distYSq = distY * distY;
-                var distanceSq = distXSq + distYSq;
-                //var distance = Math.sqrt(distanceSq);
-
-                var force = Math.abs((K * 1e-6 *(charges[j][2] * 1.0e-6)) / distanceSq);
-
-                var theta_rad = Math.atan2(othY - curY, othX - curX);
-                var theta_deg = theta_rad * (180.0 / Math.PI);
-                console.log("** " + j + " (" + othX + "," + othY + ") d^2: " + distanceSq + " theta: " + theta_deg + " F: " + force);
-
-                var forceX = force * Math.cos(theta_rad);
-                var forceY = force * Math.sin(theta_rad);
-                console.log("raw forceX: " + forceX + " raw forceY: " + forceY);
-
-                if (othpolarity == 1) {
-                    forceX *= -1;
-                    forceY *= -1;
-                }
-
-                console.log("forceX: " + forceX + " forceY: " + forceY);
-
-                total_forceX += forceX;
-                total_forceY += forceY;
-
-                /*
-                // draw a line from center out to other charge
-                svg.append("line")          // attach a line
-                    .attr("class", "pointvector")
-                    .attr("x1", curX)     // x position of the first end of the line
-                    .attr("y1", height - curY)      // y position of the first end of the line
-                    .attr("x2", othX)     // x position of the second end of the line
-                    .attr("y2", height - othY);    // y position of the second end of the line
-                */
-                
-            }
-            console.log(total_forceY + '  ' + total_forceX);
-            var final_theta_rad = Math.atan2(total_forceY, total_forceX);
-            var final_theta_deg = final_theta_rad * (180.0 / Math.PI);
-            var final_mag = Math.sqrt(total_forceX*total_forceX + total_forceY*total_forceY);
-            if(!isNaN(final_mag)){
-              maxForce = Math.max(maxForce, Math.abs(final_mag));
-              console.log("Final forceX: " + total_forceX + " forceY: " + total_forceY + " => " + final_theta_deg, " mag: " + final_mag);
-
-              var final_dx = Math.cos(final_theta_rad) * pointVectorScale(final_mag);
-              var final_dy = Math.sin(final_theta_rad) * pointVectorScale(final_mag);
-              console.log(" ** final_dx : " + final_dx + "  final_dy: " + final_dy + "  ");
+    // Draw each vector in the grid
+    for (heightLoc = 0; heightLoc <= (height/(10*gridSpacing*vectorFreq)); heightLoc++){
+        for (widthLoc = 0; widthLoc <= (width/(10*gridSpacing*vectorFreq)); widthLoc++){
             
-              calcVectors.push([final_dx, final_dy, final_theta_rad, curX, curY, final_mag]);
+            curX = widthLoc * 10 * gridSpacing * vectorFreq;
+            curY = height - (heightLoc * 10 * gridSpacing * vectorFreq);
+
+            E =  calculateFieldVectorAtPoint([curX, curY]);
+            mag = Math.sqrt(E[0]*E[0] + E[1]*E[1]);
+
+            // don't draw a vector if magnitude is zero. If opacity is scaled directly very few arrows show up, so multiply
+            // by factor of 10 to ensure that nearby arrows are drawn at max opacity. 10 is a fudge factor, can be adjusted
+            // to look "good".
+            if (mag) {
+              svg.append("line")          // attach a line
+              .attr("class", "forcevector")
+              .attr("marker-end", "url(#forceArrow)")
+              .style("opacity", 10*mag/maxFieldMag)
+              .attr("x1", curX - vectorLength*(E[0]/2)/mag)     // x position of the first end of the line
+              .attr("y1", curY - vectorLength*(E[1]/2)/mag)     // y position of the first end of the line
+              .attr("x2", curX + vectorLength*(E[0]/2)/mag)     // x position of the second end of the line
+              .attr("y2", curY + vectorLength*(E[1]/2)/mag);    // y position of the second end of the line
             }
-            
       }
    } 
-   for (i= 0; i < calcVectors.length; i++){
-        var vector = calcVectors[i];
-        var stroke = "";
-        var percentage =  Math.max(Math.cbrt(vector[5] / maxForce), 0.2);
-        var dirX = Math.cos(vector[2]) * 35;
-        var dirY = Math.sin(vector[2]) * 35;
-        svg.append("line")          // attach a line
-          .attr("class", "forcevector")
-          .attr("marker-end", "url(#forceArrow)")
-          .style("opacity", percentage)
-          .attr("x1", vector[3] - (dirX/2))     // x position of the first end of the line
-          .attr("y1", height - (vector[4] - (dirY/2)))      // y position of the first end of the line
-          .attr("x2", vector[3] + (dirX/2))     // x position of the second end of the line
-          .attr("y2", height - (vector[4] + (dirY/2)));    // y position of the second end of the line
-        
-   }
 
     currentTime -= new Date().getTime()
     console.log("redraw_fieldvectors iteration took: " + (-1*currentTime)+"ms." )
+
 }
 
-// function redraw_equipotentials() {
+// different way of drawing equipotentials
+function redraw_equipotentials2() {
+    // set range and color scale by the potential nearby the strongest charge
+    var charges = getCharges();
+
+    var maxChargeIndex = 0;
+    var maxCharge = charges[0][2];
+    for (var i = 0; i < charges.length; i++) {
+      if (Math.abs(charges[i][2]) > maxCharge) {
+        maxCharge = Math.abs(charges[i][2]);
+        maxChargeIndex = i;
+      }
+    }
+    var x = charges[maxChargeIndex][0];
+    var y = charges[maxChargeIndex][1];
+    var cutoff = Math.abs(calculatePotentialAtPoint([x + 40, y + 40]));
+    var color_scale = d3.scale.linear().domain([-1*cutoff, 0, cutoff]).range(['red', 'purple', 'blue']);
+
+    // set target potentials and tolerance (how close to target potential do you need to be to be drawn)
+    var numEquipotentials = 6;
+    var interval = 2 * cutoff/numEquipotentials;
+      var tolerance = cutoff / 15;
+
+      var target_potentials = [];
+      for(i = 0; i < numEquipotentials; i++){
+        target_potentials[i] = -cutoff + i * interval;
+      }
+
+      var dots = getPointsNearPotentials(target_potentials, tolerance, color_scale);
+      renderDots(dots);
+}
+
+function redraw_equipotentials() {
+
+    var currentTime = new Date().getTime();
+
+    // pull current location data out of users array
+    var charges = getCharges();
+
+    // define a range of potential to divide up into evenly spaced "target" equipotentials
+    var maxChargeIndex = 0;
+    var minChargeIndex = 0;
+    var maxCharge = charges[0][2];
+    var minCharge = charges[0][2];
+    for (var i = 0; i < charges.length; i++) {
+      if (charges[i][2] > maxCharge) {
+        maxCharge = charges[i][2];
+        maxChargeIndex = i;
+      } if (charges[i][2] < minCharge) {
+        minCharge = charges[i][2];
+        minChargeIndex = i;
+      }
+    }
+
+    var cutoff_high,
+        cutoff_low;
+
+    // if charges both positive, .35 to zero.
+    if(maxCharge >=0 && minCharge >=0) {
+      cutoff_high = .20;
+      cutoff_low = 0;
+    } else if (maxCharge <=0 && minCharge <=0) {
+      cutoff_high = 0;
+      cutoff_low = -.20;
+    } else if (maxCharge >=0 && minCharge <=0) {
+      cutoff_high = .20;
+      cutoff_low = -.20;
+    } 
+   
+    // find "target" values of potential
+    var dots = [];
+    var equipotentials = [];
+    var crossing;
+    var numEquipotentials = 9;
+    var interval = (cutoff_high - cutoff_low)/(numEquipotentials-1);
+
+    var target_potentials = [];
+    for(i = 0; i < numEquipotentials; i++){
+      target_potentials.push(cutoff_low + i * interval);
+    }
+
+    var x_boxes = 24;
+    var y_boxes = 12;
+    var boxWidth = width/x_boxes;
+    var boxHeight = height/y_boxes;
+
+    // calculate potentials on corners of a grid
+    var potentials = zeros([x_boxes + 1, y_boxes + 1]);
+    for (var i = 0; i < (x_boxes + 1); i++) {
+        for (var j = 0; j < (y_boxes + 1); j++) {
+            potentials[i][j] = calculatePotentialAtPoint([i*boxWidth, j*boxHeight]);
+        }
+    }
+
+    // loop through grid and determine whether target equipotential will cross through box
+    for (var i = 0; i < x_boxes -1; i++) {
+        for (var j = 1; j < y_boxes; j++) {
+            for (var k = 0; k < target_potentials.length; k++){
+                target = target_potentials[k];
+                dots = [];
+
+                    // does equipotential cross box top? right side? bottom? left?
+                    if (isBetween(target, potentials[i][j], potentials[i+1][j])) {
+                        // if so, find point of crossing
+                        crossing = findCrossingPoint(target, [i*boxWidth, j*boxHeight], [(i+1)*boxWidth, j*boxHeight]);
+                        var render = 1;
+
+                        // check whether that equipotential has already been drawn
+                        for (var eq = 0; eq < equipotentials.length; eq++) {
+                            for (var kk = 0; kk < equipotentials[eq][1].length; kk++) {
+                                var dx = crossing[0] - equipotentials[eq][1][kk][0];
+                                var dy = crossing[1] - equipotentials[eq][1][kk][1];
+                                if (Math.hypot(dx, dy) < 5) {
+                                   render = 0;
+                                }
+                            }
+                        }
+                            
+                        if(render) {
+                            // if equipotential hasn't already been drawn, initiate equipotential at the crossing point
+                            for (var direction = -1; direction < 2; direction+=2) {
+                                dots = initiateEquipotentialAtPoint(crossing, direction);
+                                equipotentials.push([target, dots]);
+                            }
+                        }
+                    } else if (isBetween(target, potentials[i+1][j], potentials[i+1][j+1])){
+                        crossing = findCrossingPoint(target, [(i+1)*boxWidth, j*boxHeight], [(i+1)*boxWidth, (j+1)*boxHeight]);
+                        var render = 1;
+                        for (var eq = 0; eq < equipotentials.length; eq++) {
+                            for (var kk = 0; kk < equipotentials[eq][1].length; kk++) {
+                                var dx = crossing[0] - equipotentials[eq][1][kk][0];
+                                var dy = crossing[1] - equipotentials[eq][1][kk][1];
+                                if (Math.hypot(dx, dy) < 5) {
+                                   render = 0;
+                                }
+                            }
+                        }
+                            
+                        if(render) {
+                            for (var direction = -1; direction < 2; direction+=2) {
+                                dots = initiateEquipotentialAtPoint(crossing, direction);
+                                equipotentials.push([target, dots]);
+                            }
+                        }               
+                    } 
+            }
+        }
+    }
+
+    //Iterate through each generated equipotential surface
+    for (var i=0; i < equipotentials.length; i++) {
+        var pair = equipotentials[i];
+        var stroke = "";
+        //var percentage = 9 - Math.min(9,parseInt(Math.abs(10 * pair[0])/maxForce ));
+        //Set the stroke to be proportional to the surface potential
+        if (pair[0]>=0) {
+            //positive
+            stroke = "green"; // "#" + percentage+"b"+percentage;
+        } else {
+            //negative
+            stroke = "red"; //"#" + "b"+percentage + "" + percentage;
+        }
+
+        //Render the line
+        svg.append("path")
+            .datum(pair[1])
+            .attr("class", "field")
+            .attr("d", line)
+            .style("stroke", stroke);
+    }
+
+    currentTime -= new Date().getTime()
+    // console.log("redraw_equipotentials iteration took: " + (-1*currentTime)+"ms." )
+
+}
+
+function redraw_fieldlines () {
+    var currentTime = new Date().getTime();
+
+    // pull current location data out of users array
+    var charges = getCharges();
+    var linesPerCharge = 3;
+    var numFieldLines;
+    var fieldLineStartRadius = 20;
+    var start_angle;
+    var curX;
+    var cury;
+    var polarity;
+    var dL = 7;
+    var chargeIndex,
+        pointIndex,
+        dots,
+        times,
+        E,
+        E_x,
+        E_y,
+        E_mag;
+    var E_min = .00001;
+    var destinationX;
+    var destinationY;
+    var source1X;
+    var source1Y;
+    var source2X;
+    var source2Y;
+    var arrowDots;
+    var j;
+
+    //Draw the field lines
+    for (chargeIndex = 0; chargeIndex < charges.length; chargeIndex++) {
+        charges[chargeIndex].linesDrawn = 0;
+    }
+    
+    //Iterate for each charge
+    for (chargeIndex = 0; chargeIndex < charges.length; chargeIndex++) {
+
+        //Number of field lines proportional to charge strength
+        numFieldLines = Math.abs(linesPerCharge * Math.floor(charges[chargeIndex][2]));
+
+        //Four lines coming from a charge
+        for (pointIndex=0; pointIndex<numFieldLines; pointIndex ++) {
+            
+            // start uniformly spaced around the charge
+            start_angle = 2*Math.PI*pointIndex/numFieldLines;
+            curX = charges[chargeIndex][0] + fieldLineStartRadius * Math.cos(start_angle);
+            curY = charges[chargeIndex][1] + fieldLineStartRadius * Math.sin(start_angle);
+            polarity = 1;
+            if (charges[chargeIndex][2] < 0) {
+                polarity = -1;
+            }
+
+            dots = [];
+            dots.push([curX, curY]);
+
+            //Maximum of 1000 points per force line
+            times = 1000;
+            while (times-- > 0) {
+
+                E = calculateFieldVectorAtPoint([curX, curY]);
+                E_x = E[0];
+                E_y = E[1];            
+                E_mag = Math.sqrt(E_x*E_x + E_y*E_y);
+
+                // if field value near zero, terminate
+                if( E_mag < E_min ) {
+                    times = 0;
+                }
+
+                //Move the next dot to follow the force vector
+                if(polarity > 0) {
+                    curX = curX + dL*E_x/E_mag;
+                    curY = curY + dL*E_y/E_mag;
+                } else {
+                    curX = curX - dL*E_x/E_mag;
+                    curY = curY - dL*E_y/E_mag;
+                }
+ 
+                dots.push([curX, curY]);
+                if (times%30 == 0) {
+                    //Draw an arrow
+                    if (polarity == 1) {
+                        destinationX = curX;
+                        destinationY = curY;
+                        source1X = dots[dots.length-2][0] + dL*E_y/E_mag;
+                        source1Y = dots[dots.length-2][1] - dL*E_x/E_mag;
+                        source2X = dots[dots.length-2][0] - dL*E_y/E_mag;
+                        source2Y = dots[dots.length-2][1] + dL*E_x/E_mag;
+                    } else {
+                        destinationX = dots[dots.length-2][0];
+                        destinationY = dots[dots.length-2][1];
+                        source1X = curX + dL*E_y/E_mag;
+                        source1Y = curY - dL*E_x/E_mag;
+                        source2X = curX - dL*E_y/E_mag;
+                        source2Y = curY + dL*E_x/E_mag;
+                    }
+                    arrowDots = [];
+                    arrowDots.push([source1X, source1Y]);
+                    arrowDots.push([destinationX, destinationY]);
+                    arrowDots.push([source2X, source2Y]);
+                    svg.insert("path", "circle")
+                            .datum(arrowDots)
+                            .attr("class", "line")
+                            .attr("d", line);
+                }
+
+
+                //If the next dot is inside a circle, terminate further iterations
+                for (j = 0; j < charges.length; j++) {
+                    distX = charges[j][0] - curX;
+                    distY = charges[j][1] - curY;
+                    if (distX*distX + distY*distY <= 16) {
+                        charges[j].linesDrawn += 1;
+                        times=0;
+                    }
+                }
+
+            } // end line
+
+            //Render the line
+            svg.insert("path", "circle")
+                .datum(dots)
+                .attr("class", "line")
+                .attr("d", line);
+        }
+
+    }
+
+    currentTime -= new Date().getTime()
+    // console.log("redraw_fieldlines iteration took: " + (-1*currentTime)+"ms." )
+}
+
+// function redraw_equipotentials_old() {
 
 //     var currentTime = new Date().getTime();
 
@@ -794,280 +1080,6 @@ function redraw_fieldvectors() {
 //     }
 
 //     currentTime -= new Date().getTime()
-//     console.log("redraw_equipotentials iteration took: " + (-1*currentTime)+"ms." )
+//     // console.log("redraw_equipotentials iteration took: " + (-1*currentTime)+"ms." )
 
 // }
-
-// different way of drawing equipotentials
-function redraw_equipotentials2() {
-    // set range and color scale by the potential nearby the strongest charge
-    var charges = getCharges();
-
-    var maxChargeIndex = 0;
-    var maxCharge = charges[0][2];
-    for (var i = 0; i < charges.length; i++) {
-      if (Math.abs(charges[i][2]) > maxCharge) {
-        maxCharge = Math.abs(charges[i][2]);
-        maxChargeIndex = i;
-      }
-    }
-    var x = charges[maxChargeIndex][0];
-    var y = charges[maxChargeIndex][1];
-    var cutoff = Math.abs(calculatePotentialAtPoint([x + 40, y + 40]));
-    var color_scale = d3.scale.linear().domain([-1*cutoff, 0, cutoff]).range(['red', 'purple', 'blue']);
-
-    // set target potentials and tolerance (how close to target potential do you need to be to be drawn)
-    var numEquipotentials = 6;
-    var interval = 2 * cutoff/numEquipotentials;
-      var tolerance = cutoff / 15;
-
-      var target_potentials = [];
-      for(i = 0; i < numEquipotentials; i++){
-        target_potentials[i] = -cutoff + i * interval;
-      }
-
-      var dots = getPointsNearPotentials(target_potentials, tolerance, color_scale);
-      renderDots(dots);
-}
-
-function redraw_equipotentials() {
-
-    var currentTime = new Date().getTime();
-
-    // pull current location data out of users array
-    var charges = getCharges();
-
-    // define a range of potential to divide up into evenly spaced "target" equipotentials
-    var maxChargeIndex = 0;
-    var minChargeIndex = 0;
-    var maxCharge = charges[0][2];
-    var minCharge = charges[0][2];
-    for (var i = 0; i < charges.length; i++) {
-      if (charges[i][2] > maxCharge) {
-        maxCharge = charges[i][2];
-        maxChargeIndex = i;
-      } if (charges[i][2] < minCharge) {
-        minCharge = charges[i][2];
-        minChargeIndex = i;
-      }
-    }
-
-    var cutoff_high,
-        cutoff_low;
-
-    // if charges both positive, .35 to zero.
-    if(maxCharge >=0 && minCharge >=0) {
-      cutoff_high = .20;
-      cutoff_low = 0;
-    } else if (maxCharge <=0 && minCharge <=0) {
-      cutoff_high = 0;
-      cutoff_low = -.20;
-    } else if (maxCharge >=0 && minCharge <=0) {
-      cutoff_high = .20;
-      cutoff_low = -.20;
-    } 
-   
-    // find "target" values of potential
-    var dots = [];
-    var equipotentials = [];
-    var crossing;
-    var numEquipotentials = 9;
-    var interval = (cutoff_high - cutoff_low)/(numEquipotentials-1);
-
-    var target_potentials = [];
-    for(i = 0; i < numEquipotentials; i++){
-      target_potentials.push(cutoff_low + i * interval);
-    }
-
-    var x_boxes = 24;
-    var y_boxes = 12;
-    var boxWidth = width/x_boxes;
-    var boxHeight = height/y_boxes;
-
-    // calculate potentials on corners of a grid
-    var potentials = zeros([x_boxes + 1, y_boxes + 1]);
-    for (var i = 0; i < (x_boxes + 1); i++) {
-        for (var j = 0; j < (y_boxes + 1); j++) {
-            potentials[i][j] = calculatePotentialAtPoint([i*boxWidth, j*boxHeight]);
-        }
-    }
-
-    // loop through grid and determine whether target equipotential will cross through box
-    for (var i = 0; i < x_boxes -1; i++) {
-        for (var j = 1; j < y_boxes; j++) {
-            for (var k = 0; k < target_potentials.length; k++){
-                target = target_potentials[k];
-                dots = [];
-
-                    // does equipotential cross box top? right side? bottom? left?
-                    if (isBetween(target, potentials[i][j], potentials[i+1][j])) {
-                        // if so, find point of crossing
-                        crossing = findCrossingPoint(target, [i*boxWidth, j*boxHeight], [(i+1)*boxWidth, j*boxHeight]);
-                        var render = 1;
-
-                        // check whether that equipotential has already been drawn
-                        for (var eq = 0; eq < equipotentials.length; eq++) {
-                            for (var kk = 0; kk < equipotentials[eq][1].length; kk++) {
-                                var dx = crossing[0] - equipotentials[eq][1][kk][0];
-                                var dy = crossing[1] - equipotentials[eq][1][kk][1];
-                                if (Math.hypot(dx, dy) < 5) {
-                                   render = 0;
-                                }
-                            }
-                        }
-                            
-                        if(render) {
-                            // if equipotential hasn't already been drawn, initiate equipotential at the crossing point
-                            for (var direction = -1; direction < 2; direction+=2) {
-                                dots = initiateEquipotentialAtPoint(crossing, direction);
-                                equipotentials.push([target, dots]);
-                            }
-                        }
-                    } else if (isBetween(target, potentials[i+1][j], potentials[i+1][j+1])){
-                        crossing = findCrossingPoint(target, [(i+1)*boxWidth, j*boxHeight], [(i+1)*boxWidth, (j+1)*boxHeight]);
-                        var render = 1;
-                        for (var eq = 0; eq < equipotentials.length; eq++) {
-                            for (var kk = 0; kk < equipotentials[eq][1].length; kk++) {
-                                var dx = crossing[0] - equipotentials[eq][1][kk][0];
-                                var dy = crossing[1] - equipotentials[eq][1][kk][1];
-                                if (Math.hypot(dx, dy) < 5) {
-                                   render = 0;
-                                }
-                            }
-                        }
-                            
-                        if(render) {
-                            for (var direction = -1; direction < 2; direction+=2) {
-                                dots = initiateEquipotentialAtPoint(crossing, direction);
-                                equipotentials.push([target, dots]);
-                            }
-                        }               
-                    } 
-            }
-        }
-    }
-
-    //Iterate through each generated equipotential surface
-    for (var i=0; i < equipotentials.length; i++) {
-        var pair = equipotentials[i];
-        var stroke = "";
-        //var percentage = 9 - Math.min(9,parseInt(Math.abs(10 * pair[0])/maxForce ));
-        //Set the stroke to be proportional to the surface potential
-        if (pair[0]>=0) {
-            //positive
-            stroke = "green"; // "#" + percentage+"b"+percentage;
-        } else {
-            //negative
-            stroke = "red"; //"#" + "b"+percentage + "" + percentage;
-        }
-
-        //Render the line
-        svg.append("path")
-            .datum(pair[1])
-            .attr("class", "field")
-            .attr("d", line)
-            .style("stroke", stroke);
-    }
-
-    currentTime -= new Date().getTime()
-    console.log("redraw_equipotentials iteration took: " + (-1*currentTime)+"ms." )
-
-}
-
-function redraw_fieldlines () {
-    var currentTime = new Date().getTime();
-
-    // pull current location data out of users array
-    var charges = getCharges();
-    var linesPerCharge = 5;
-    var linesToDraw;
-    var fieldLineStartRadius = 20;
-    var start_angle;
-    var curX;
-    var cury;
-    var polarity;
-    var chargeIndex,
-        pointIndex,
-        result,
-        chargesHit,
-        direction,
-        dots,
-        render;
-
-    //Draw the field lines
-    for (chargeIndex = 0; chargeIndex < charges.length; chargeIndex++) {
-        charges[chargeIndex].linesDrawn = 0;
-        charges[chargeIndex].numFieldLines = Math.abs(linesPerCharge * Math.floor(charges[chargeIndex][2]));
-    }
-
-
-    // find the order of charges from smallest to largest magnitude
-    // var sortedCharges = charges;
-    // var minChargeIndex;
-    // var minCharge;
-
-    // // loop through the charges
-    // for (var j = 0; j < sortedCharges.length; j++) {
-    //   minChargeIndex = j;
-    //   minCharge = charges[j][2];
-    //   for (var k = j + 1; k < sortedCharges.length; k++) {
-    //       if (sortedCharges[k][2] < minCharge) {
-    //         minChargeSoFar = sortedCharges[k][2];
-    //         minChargeIndex = k;
-    //       }
-    //   }
-    // }
-
-    var sortedCharges = charges;
-    function sortFunction(a, b) {
-        if (Math.abs(parseInt(a[2])) === Math.abs(parseInt(b[2]))) {
-            return 0;
-        }
-        else {
-            return (Math.abs(parseInt(a[2])) < Math.abs(parseInt(b[2]))) ? -1 : 1;
-        }
-    }
-    sortedCharges.sort(sortFunction);
-
-    //Iterate for each charge
-    //for (chargeIndex = 0; chargeIndex < charges.length; chargeIndex++) {
-
-        //Number of field lines proportional to charge strength
-        //linesToDraw = charges[chargeIndex].numFieldLines - charges[chargeIndex].linesDrawn;
-
-        //for (pointIndex=0; pointIndex<linesToDraw; pointIndex ++) {
-            
-            render = true;
-
-            console.log("DRAWING ", linesToDraw, " LINES FROM CHARGE ", chargeIndex);
-
-            // start uniformly spaced around the charge
-            // start_angle = 2*Math.PI*pointIndex/linesToDraw;
-            // curX = charges[chargeIndex][0] + fieldLineStartRadius * Math.cos(start_angle);
-            // curY = charges[chargeIndex][1] + fieldLineStartRadius * Math.sin(start_angle);
-            // polarity = 1;
-            // if (charges[chargeIndex][2] < 0) {
-            //     polarity = -1;
-            // }
-
-            //for (var i = 0; i < )
-            for (direction = -1; direction < 2; direction+=2){
-                result = initiateFieldLineAtPoint([200, 200], direction);
-                chargesHit = result[1];
-                dots = result[0];
-
-                if (render) {
-                 //Render the line
-                  svg.insert("path", "circle")
-                      .datum(dots)
-                      .attr("class", "line")
-                      .attr("d", line);
-                }
-            }
-
-        //}
-    //}
-
-    currentTime -= new Date().getTime()
-    console.log("redraw_fieldlines iteration took: " + (-1*currentTime)+"ms." )
-}

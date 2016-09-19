@@ -142,7 +142,7 @@
 
         socket.on('coordinate_change_response', function(data) {
             coordinate_change_response(data.username, data.class_id, 
-                                       data.group_id, data.x, data.y, data.info);
+                                       data.group_id, data.info);
         });
         socket.on('get-classes-response', function(data){
             get_classes_response(data.classes);
