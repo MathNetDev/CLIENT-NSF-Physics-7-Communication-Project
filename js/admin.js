@@ -55,6 +55,10 @@ $(function() {
             socket.check_session(localStorage.getItem('admin_id'), localStorage.getItem('check'));
         }
     }
+    else {
+        $('.username_password_view').show();
+    }
+    $('body').show();
 
     //
     // SECRET INPUT

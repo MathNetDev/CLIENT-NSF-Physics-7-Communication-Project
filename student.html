@@ -19,13 +19,13 @@
     
 </script>
 
-<body>
-  <div id="main" class="container" style="margin-top:-1em">
+<body hidden>
+  <div id="main" class="container">
     <div id="page" class="row">
     
 
       <!-- ***** Login View ***** -->
-      <div class="login_view">
+      <div class="login_view" hidden>
 
         <!-- Title -->
         <div class="col-md-12 col-sm-12">
@@ -61,7 +61,7 @@
 
 
       <!-- ***** Class View ***** -->
-      <div class="class_view" style="text-align: center">
+      <div class="class_view" style="text-align: center" hidden>
 
         <!-- Title -->
         <div class="col-md-12 col-sm-12">
@@ -97,7 +97,7 @@
 
 
       <!-- ***** Group View ***** -->
-      <div class="group_view">
+      <div class="group_view" hidden>
         <div class="col-md-9">
 
           <!-- Title, Leave Group Button -->
@@ -384,8 +384,8 @@
       var socket = Student.Socket(io(host));
       $(document).ready(function() {
         $('#display-settings').change(update_display_settings);
-        $('body').addClass('stop-scrolling');
-        $('body').bind('touchmove', function(e){e.preventDefault()});
+        $('body').addClass('stop-scrolling')
+          .bind('touchmove', function(e){e.preventDefault()});
         redraw();
       });
     </script>

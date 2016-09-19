@@ -14,7 +14,7 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js" charset="utf-8"></script>
 </head>
 
-<body>
+<body hidden>
   <div class="container">
     <div class="col-md-4">
       <h3 id="error_frame"></h3>
@@ -23,7 +23,7 @@
     <div class="col-md-12">
 
       <!-- Main View Begins-->
-      <div class="username_password_view">
+      <div class="username_password_view" hidden>
 
         <!-- Title -->
         <div class="col-md-12 col-sm-12">
@@ -66,7 +66,7 @@
       </div>
 
       <!-- Create User View -->
-      <div class="create_user_view">
+      <div class="create_user_view" hidden>
 
         <!-- Title -->
         <div class="col-md-12 col-sm-12">
@@ -93,26 +93,59 @@
       </div>      
 
       <!-- This div appears when an admin leaves a class or has not made on yet -->
-      <div class="create_view">
-        <h3>Click To Join A Past Class</h3>
+      <div class="create_view" hidden>
+        <!-- Heading for classes view -->
+        <div class="col-md-12 col-sm-12" style="margin: -1em 0em 1em 0em">
+          <div class="col-md-4 col-sm-4"></div>
+            <div class="col-md-4 col-sm-4">
+              <h2 style="text-align: center"> Click To Join A Class </h2></div>
+            <div class="col-md-4 col-sm-4"></div>
+        </div>
         <div>
           <h3 id="get-classes-head"></h3>
-          <div class="col-md-12 col-lg-12 col-xs-12 col-sm-12" id="get-classes"></div>
+          <div class="col-md-12 col-lg-12 col-xs-12 col-sm-12" id="get-classes" style="text-align: center"></div>
         </div>
-        <h3> or Create a new Class</h3>
-        <h4>Class Name</h4>
 
-        <input class="class_input" type="text" placeholder="Class Name">
-        <br>
+        <div></div>
+        <!-- Line Break -->
+        <table width="100%">
+          <td><hr/></td>
+            <td style="width:1px; padding: 0px 10px; white-space: nowrap;">OR</td>
+          <td><hr /></td>
+        </table>​
 
-        <h4>Number of Groups</h4>
-        <input class="group_input" type="number" value="1" min="1"><br>
-        <input class="btn btn-default create_button" type="button" value="Create Class">
-        <input id = "logout_class_button" class="btn btn-default logout_class_button" type="button" value="Logout">
+        <!-- New Class heading -->
+        <div class="col-md-12 col-sm-12">
+          <div class="col-md-4 col-sm-4"></div>
+            <div class="col-md-4 col-sm-4">
+              <h3 style="text-align: center"> Create New Class</h3></div>
+            <div class="col-md-4 col-sm-4"></div>
+        </div>
+
+        <!-- New Class -->
+        <div class="col-md-12 col-sm-12">
+          <div class="col-md-4 col-sm-4"></div>
+          <div class="col-md-4 col-sm-4">
+            <input type="text" class="form-control class_input" id="class_input" name="class_input" required="" placeholder="Class Name"/> 
+            <p class = "error error_class_input" hidden> Class Name Already Exists </p> <br/>
+            <input type="number" class="form-control group_input" id="group_input" name="group_input" min="0" required="" placeholder="Number Of Groups"/><br/>
+          </div>
+          <div class="col-md-4 col-sm-4"></div>
+        </div>    
+        <!-- The buttons -->
+        <div class="col-md-12 col-sm-12">
+          <div class="col-md-4 col-sm-4"></div>
+          <div class="col-md-4 col-sm-4" style="text-align: center">
+            <input class="btn btn-primary btn-block create_button" type="button" value="Create Class" /><br/>
+            <input id = "logout_class_button" class="btn btn-default logout_class_button" type="button" value="Logout">
+          </div>
+          <div class="col-md-4 col-sm-4"></div>
+        </div>  
+        <!-- End Of Buttons -->
       </div>
 
       <!-- This div appears once an admin has created a class -->
-      <div class="manage_view">
+      <div class="manage_view" hidden>
         <header>
           <h3 class="class_name"></h3>
         </header>

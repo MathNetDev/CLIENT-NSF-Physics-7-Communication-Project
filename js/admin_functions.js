@@ -91,7 +91,7 @@ function add_group_response() {
     var new_group = "";
     var group_number = $('.groups > li:last').index() + 2;
     new_group += "<li>Group " + group_number;
-    new_group += "<ul class='g" + group_number + "'></ul></li>";
+    new_group += "<div class='g" + group_number + "'></div></li>";
     $groups.append(new_group);
     draw_mirror(".g"+group_number);
     users.push([]);
@@ -202,8 +202,8 @@ function get_classes_response(classes){
     $('#get-classes').html('');
     for (var i = 0; i < classes.length; i++) {
         //console.log(classes[i]);
-        $('#get-classes').append('<div class="list col-md-3 col-lg-3 col-xs-3 col-sm-3" style="padding-bottom: 3px;" onclick=\'join_class("'
-            +classes[i].hashed_id+'")\'>Class: <b>' + classes[i].class_name + '</b> ID: <b>' + classes[i].hashed_id + '</b></div>');
+        $('#get-classes').append('<button class="btn btn-md btn-primary" style="margin: 0em 1em 0em 1em;" onclick=\'join_class("'
+            + classes[i].hashed_id+'")\'> Class: ' + classes[i].class_name + '</button>');
     }
 }
 

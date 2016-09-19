@@ -19,6 +19,10 @@ $(function() {
                               sessionStorage.getItem('group_id'));          
         }//emit group_join if there is an group_id
     }//emit login if there is a class_id 
+    else {
+        $login_view.show();
+    }
+    $('body').show();
 
     $login_button.bind('click', function() {
         socket.login($username.val().trim(), $class_id.val().trim());
