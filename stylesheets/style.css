@@ -7,11 +7,61 @@
     border-radius: 10px;
     background-color: #FFFFFF;
 }
+
 body {
     padding: 15px;
     background-color: #AABBCC;
     overflow-y:scroll;
 }
+
+#legend{
+    margin-top:-1em; 
+    padding:5px 0px 5px 10px; 
+    width: 100%; 
+    display: inline-block;
+}
+
+#legend > span:first-child{
+    width: 40%; 
+    text-align: left; 
+    display:inline-block;
+    font-weight: bold;
+}
+
+#legend_text_positive{
+    color: seagreen;
+}
+#legend_text_negative{
+    color: indianred;
+}
+#legend_text_forcelines{
+    color: steelblue;
+}
+#legend_text_selectedcharge{
+    color: #ff7f0e;
+}
+
+#select_point_charge{
+    text-align: right; 
+    display: inline-block;
+}
+
+#groupview_title{
+    margin-top:0.5em;
+}
+
+#container_title{
+    margin-top: 0em;
+}
+
+#leavegroup{
+    margin-left: 2em;
+}
+
+#logout{
+    margin-bottom: 1em;
+}
+
 #error_frame:not(:empty){
     color:red;
     border: 2px solid rgba(0, 0, 0, 0.12);
@@ -19,13 +69,27 @@ body {
     background-color: rgba(200, 192, 192, 0.38);
     padding: 5px;
 }
+
 #messages{
     height:300px; 
     overflow:auto;
 }
+
+.modal-header{
+    border: solid; border-width: 0px 0px 3px 0px; background-color: #4f90c9;
+}
+.modal-footer{
+    margin-left: 1em;
+}
 .stop-scrolling {
-  height: 100%;
-  overflow: hidden;
+    height: 100%;
+    overflow: hidden;
+}
+.class_view{
+    text-align: center;
+}
+.section_title{
+    text-align: center;
 }
 
 /*** Toggle Switch for Options UI ***/

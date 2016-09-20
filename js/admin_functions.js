@@ -202,7 +202,7 @@ function get_classes_response(classes){
     $('#get-classes').html('');
     for (var i = 0; i < classes.length; i++) {
         //console.log(classes[i]);
-        $('#get-classes').append('<button class="btn btn-md btn-primary" style="margin: 0em 1em 0em 1em;" onclick=\'join_class("'
+        $('#get-classes').append('<button class="btn btn-md btn-primary" onclick=\'join_class("'
             + classes[i].hashed_id+'")\'> Class: ' + classes[i].class_name + '</button>');
     }
 }

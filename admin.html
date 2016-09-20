@@ -29,7 +29,7 @@
         <div class="col-md-12 col-sm-12">
           <div class="col-md-4 col-sm-4"></div>
           <div class="col-md-4 col-sm-4">
-            <h2 style="text-align: center"> Admin Login </h2>
+            <h2 class="section_title"> Admin Login </h2>
           </div>
           <div class="col-md-4 col-sm-4"></div>
         </div>
@@ -45,19 +45,11 @@
           <div class="col-md-4 col-sm-4"></div>
         </div>
 
-        <!-- New To Math Net -->
-        <div class="col-md-12 col-sm-12">
-            <div class="col-md-4 col-sm-4"></div>
-            <div class="col-md-4 col-sm-4">
-              <p style="text-align: center"> New User? </p>
-            </div>
-          <div class="col-md-4 col-sm-4"></div>
-        </div>
-
         <!-- New user button -->
         <div class="col-md-12 col-sm-12">
           <div class="col-md-4 col-sm-4"></div>
-          <div class="col-md-4 col-sm-4" style="text-align: center">
+          <div class="col-md-4 col-sm-4" id="newuser_div">
+            <p class="section_title"> New User? </p>
             <input class="btn btn-default new_user" type="button" value="Click Here" /><br/><br/>
           </div>
           <div class="col-md-4 col-sm-4"></div>
@@ -72,7 +64,7 @@
         <div class="col-md-12 col-sm-12">
           <div class="col-md-4 col-sm-4"></div>
           <div class="col-md-4 col-sm-4">
-            <h2 style="text-align: center"> New Admin </h2>
+            <h2 class="section_title"> New Admin </h2>
           </div>
           <div class="col-md-4 col-sm-4"></div>
         </div>
@@ -95,15 +87,15 @@
       <!-- This div appears when an admin leaves a class or has not made on yet -->
       <div class="create_view" hidden>
         <!-- Heading for classes view -->
-        <div class="col-md-12 col-sm-12" style="margin: -1em 0em 1em 0em">
+        <div class="col-md-12 col-sm-12">
           <div class="col-md-4 col-sm-4"></div>
-            <div class="col-md-4 col-sm-4">
-              <h2 style="text-align: center"> Click To Join A Class </h2></div>
+            <div class="col-md-4 col-sm-4" id="joinclass_div">
+              <h2 class="section_title"> Click To Join A Class </h2></div>
             <div class="col-md-4 col-sm-4"></div>
         </div>
         <div>
           <h3 id="get-classes-head"></h3>
-          <div class="col-md-12 col-lg-12 col-xs-12 col-sm-12" id="get-classes" style="text-align: center"></div>
+          <div class="col-md-12 col-lg-12 col-xs-12 col-sm-12" id="get-classes"></div>
         </div>
 
         <div></div>
@@ -118,7 +110,7 @@
         <div class="col-md-12 col-sm-12">
           <div class="col-md-4 col-sm-4"></div>
             <div class="col-md-4 col-sm-4">
-              <h3 style="text-align: center"> Create New Class</h3></div>
+              <h3 class="section_title"> Create New Class</h3></div>
             <div class="col-md-4 col-sm-4"></div>
         </div>
 
@@ -135,9 +127,9 @@
         <!-- The buttons -->
         <div class="col-md-12 col-sm-12">
           <div class="col-md-4 col-sm-4"></div>
-          <div class="col-md-4 col-sm-4" style="text-align: center">
+          <div class="col-md-4 col-sm-4" id="logout_div">
             <input class="btn btn-primary btn-block create_button" type="button" value="Create Class" /><br/>
-            <input id = "logout_class_button" class="btn btn-default logout_class_button" type="button" value="Logout">
+            <input id = "logout_class_button" class="btn btn-danger logout_class_button" type="button" value="Logout">
           </div>
           <div class="col-md-4 col-sm-4"></div>
         </div>  
@@ -164,13 +156,13 @@
           <div class="modal-dialog" role="document">
             <div class="modal-content">
 
-              <div class="modal-header" style="border: solid; border-width: 0px 0px 3px 0px; background-color: #4f90c9"> 
+              <div class="modal-header"> 
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"> 
                 <span aria-hidden="true">×</span></button> 
                 <h4 class="modal-title" id="modal_settings_label"> Settings </h4> 
               </div>
 
-              <div class="modal-body"> 
+              <div class="modal-body row"> 
                 <div class="col-md-12 col-sm-12">
                   <!-- Left Column -->
                   <div class="col-md-6 col-sm-6">

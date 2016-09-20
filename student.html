@@ -31,7 +31,7 @@
         <div class="col-md-12 col-sm-12">
           <div class="col-md-4 col-sm-4"></div>
           <div class="col-md-4 col-sm-4">
-            <h2 style="text-align: center"> Student Login </h2>
+            <h2 class="section_title"> Student Login </h2>
           </div>
           <div class="col-md-4 col-sm-4"></div>
         </div>
@@ -61,7 +61,7 @@
 
 
       <!-- ***** Class View ***** -->
-      <div class="class_view" style="text-align: center" hidden>
+      <div class="class_view" hidden>
 
         <!-- Title -->
         <div class="col-md-12 col-sm-12">
@@ -87,7 +87,7 @@
           <div class="col-md-4 col-sm-4"></div>
           <div class="col-md-4 col-sm-4">
             <!-- foreach group, create a html button with onclick to emit action to a group -->
-            <input type="button" class="btn btn-danger" style="margin-bottom: 1em" value="Log Out" id="logout" />
+            <input type="button" class="btn btn-danger" value="Log Out" id="logout" />
           </div>
           <div class="col-md-4 col-sm-4"></div>
         </div>
@@ -101,24 +101,27 @@
         <div class="col-md-9">
 
           <!-- Title, Leave Group Button -->
-          <h2 style="margin-top:0.5em"> 
+          <h2 id="groupview_title"> 
             <span id="number">Group</span> 
-            <input style="margin-left: 2em" class="btn btn-danger" type="button" value="Leave Group" id="leave_group"/>
+            <input class="btn btn-danger" type="button" value="Leave Group" id="leave_group"/>
           </h2>
-          <h2 style="margin-top: 0em">Electrical field lines and equipotential surfaces</h2>
+          <h2 id="container_title">Electrical field lines and equipotential surfaces</h2>
           
           <!-- Field Container -->
           <div id="field-container"></div>
 
           <!-- Legend -->
-          <div style="margin-top:-1em; padding:5px 0px 5px 10px; width: 100%; display: inline-block">
-          <span style="width: 40%; text-align: left; display:inline-block">
-          Legend: <span style="font-weight: bold; color: seagreen">positive</span>,
-              <span style="font-weight: bold; color: indianred">negative</span>,
-              <span style="font-weight: bold; color: steelblue">force lines</span>,
-              <span style="font-weight: bold; color: #ff7f0e">selected charge</span>.
+          <div id="legend">
+          <span>
+              Legend: 
+              <span id="legend_text_positive">positive</span>,
+              <span id="legend_text_negative">negative</span>,
+              <span id="legend_text_forcelines">force lines</span>,
+              <span id="legend_text_selectedcharge">selected charge</span>.
           </span>
-          <span style="text-align: right; display:inline-block">Selected point charge: <select id="charge"></select></span>
+          <span id="select_point_charge">
+              Selected point charge: <select id="charge"></select>
+          </span>
           </div>
 
           <!-- Glyphicons (Settings, Draw, Delete) -->
@@ -180,7 +183,7 @@
             <div class="modal-dialog" role="document">
               <div class="modal-content">
 
-                <div class="modal-header" style="border: solid; border-width: 0px 0px 3px 0px; background-color: #4f90c9"> 
+                <div class="modal-header"> 
                   <button type="button" class="close" data-dismiss="modal" aria-label="Close"> 
                   <span aria-hidden="true">×</span></button> 
                   <h4 class="modal-title" id="modal_settings_label"> Settings </h4> 
@@ -350,7 +353,7 @@
 
                 <div class="modal-footer">
                   <div id="settings_footer">
-                    <input type="button" style="margin-left: 1em" value="Set to Default" onclick="set_to_default();" class="btn btn-default btn-sm outline"/>
+                    <input type="button" value="Set to Default" onclick="set_to_default();" class="btn btn-default btn-sm outline"/>
                   </div>
                 </div> <!-- End of modal-footer -->
 
