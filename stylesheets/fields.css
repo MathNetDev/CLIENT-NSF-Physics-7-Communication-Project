@@ -1,5 +1,3 @@
-
-
 html {
     width: 100%;
     height: 100%;
@@ -28,45 +26,29 @@ body {
     stroke-dasharray:0; 
 }
 #forceArrow{
-    fill: #1f4705;
+    fill: mediumseagreen;
     stroke-width:3;
     stroke-dasharray:0; 
 }
-
 #testArrow{
-    fill: steelblue;
+    fill: red;
     stroke-width:3;
     stroke-dasharray:0; 
 }
 #testArrowComp{
-    fill: grey;
+    fill: rgb(187, 96, 187);
     stroke-width:2;
     stroke-dasharray:0; 
 }
-
 #testChargeArrow{
-    fill: rgb(187, 96, 187);
+    fill: red;
     stroke-width:3;
     stroke-dasharray:0; 
 }
-
-#testChargeArrowComp {
-    fill: rgb(100,100,100);
+#testChargeArrowComp{
+    fill: rgb(187, 96, 187);
     stroke-width:2;
     stroke-dasharray:0; 
-}
-
-.testvectorcomp {
-   fill: none;
-   stroke: rgb(100,100,100);
-   stroke-opacity: 0.4;
-   stroke-width: 2px;
-}
-.testvector {
-  fill: none;
-  stroke: rgb(187, 96, 187);
-  stroke-opacity:0.4;
-  stroke-width: 4px;
 }
 
 ellipse {
@@ -87,10 +69,21 @@ circle, .line {
     stroke-opacity:0.4;
     stroke-width: 2.5px;
 }
-
 .pointvector {
   fill: none;
   stroke: orange;
+  stroke-opacity:0.4;
+  stroke-width: 2px;
+}
+.testvector {
+  fill: none;
+  stroke: red;
+  stroke-opacity:0.4;
+  stroke-width: 4px;
+}
+.testvectorcomp {
+  fill: none;
+  stroke: rgb(187, 96, 187);
   stroke-opacity:0.4;
   stroke-width: 2px;
 }
@@ -102,10 +95,11 @@ circle, .line {
 }
 .forcevector {
   fill: none;
-  stroke: #1f4705;
+  stroke: mediumseagreen;
   stroke-opacity:0.4;
   stroke-width: 4px;
 }
+
 circle {
   fill: #fff;
   cursor: move;
@@ -159,4 +153,3 @@ input[type=checkbox]
 .tick line{
   opacity: 0.2;
 }
-
