@@ -7,7 +7,6 @@ var margin = {top: 40, right: 40, bottom: 40, left: 40},
     height = 480 - margin.top - margin.bottom,
     radius = MAX_DOT_SIZE,
     axisPadding = 10;
-
 // see this site for validation: http://www.ilectureonline.com/lectures/subject/PHYSICS/5/47/699
 
 var boxSize = 5;
@@ -66,18 +65,6 @@ defs.append("marker")
     .attr("d", "M0,0L10,5L0,10");
 defs.append("marker")
   .attr({
-    "id":"testChargeArrowComp",
-    "viewBox":"0 0 10 10",
-    "refX":0,
-    "refY":5,
-    "markerWidth":3,
-    "markerHeight":4,
-    "orient":"auto"
-  })
-  .append("path")
-    .attr("d", "M0,0L10,5L0,10");    
-defs.append("marker")
-  .attr({
     "id":"forceArrow",
     "viewBox":"0 0 10 10",
     "refX":0,
@@ -88,10 +75,6 @@ defs.append("marker")
   })
   .append("path")
     .attr("d", "M0,0L10,5L0,10");
-
-// 
-// GET LIST OF CHARGES
-//
 
 function getCharges() {
     var charges = [];
@@ -453,7 +436,6 @@ function initiateFieldLineAtPoint(p, direction, charges) {
     return [dots, charges];
 }
 
-
 //
 // REPRESENTATIONS REDRAW FUNCTIONS
 //
@@ -461,63 +443,52 @@ function initiateFieldLineAtPoint(p, direction, charges) {
 function redraw_forcevectors() {
     var currentTime = new Date().getTime();
 
-    // if (selected === null)
-    //     return;
+    if (selected === null)
+        return;
 
     // pull current location data out of users array
-    var charges = getCharges();
+    var charges = getCharges(); 
 
-    // error handling stuff
     if (charges.length === 0)
         return;
 
-    // var chargeIndex = -1;
-    // for (var i=0; i < users.length; i++) {
-    //     if (users[i] === selected) {
-    //         chargeIndex = i;
-    //     }
-    // }
+    var count = 0;
+    var chargeIndex = -1;
+    for (var i=0; i < users.length; i++) {
+        user_charges = users[i].charges;
+        for (var j=0; j < user_charges.length; j++) {
+            if (user_charges[j] == selected) {
+                chargeIndex = count;
+            }
+            ++count;
+        }
+    }
 
-    // if (chargeIndex == -1) {
-    //     console.log("UNABLE TO FIND selected in users!");
-    //     return;
-    // }
+    if (chargeIndex == -1) {
+        // console.log("UNABLE TO FIND selected in users!");
+        return;
+    }
     
-    for (var chargeIndex = 0; chargeIndex < charges.length; chargeIndex++) {
-      // get force on selected charge
-      var F = calculateForceOnCharge(chargeIndex);
-      var curX = charges[chargeIndex][0];
-      var curY = charges[chargeIndex][1];
-      
-      svg.append("line")          // attach a line
-          .attr("class", "resultvector")
-          .attr("marker-end", "url(#arrow)")
-          .attr("x1", curX)     // x position of the first end of the line
-          .attr("y1", curY)      // y position of the first end of the line
-          .attr("x2", curX + forceVectorScale * F[0])     // x position of the second end of the line
-          .attr("y2", curY + forceVectorScale * F[1]);    // y position of the second end of the line
+    // for selected charge
+    var F = calculateForceOnCharge(chargeIndex);
+
+    var curX = charges[chargeIndex][0];
+    var curY = charges[chargeIndex][1];
+    
+    if (!isNaN(F[0]) && !isNaN(F[1])) {
+        svg.append("line")          // attach a line
+            .attr("class", "resultvector")
+            .attr("marker-end", "url(#arrow)")
+            .attr("x1", curX)     // x position of the first end of the line
+            .attr("y1", curY)      // y position of the first end of the line
+            .attr("x2", curX + forceVectorScale * F[0])     // x position of the second end of the line
+            .attr("y2", curY + forceVectorScale * F[1]);    // y position of the second end of the line
     }
 
     currentTime -= new Date().getTime()
     // console.log("redraw_forcevectors iteration took: " + (-1*currentTime)+"ms." )
 
 }
-
-
-function redraw_testChargeEnergy(){
-    if (selected === null)
-        return;
-    
-    var curX = testCharge[0].x;
-    var curY = testCharge[0].y;
-
-    var potential = calculatePotentialAtPoint([curX, curY]);
-    var energy = Math.floor(100*potential*testCharge[0].charge);
-
-    // console.log("Test Charge Energy: ", energy, " J");
-    return energy;
-}
-
 
 function redraw_testvector(){
   var currentTime = new Date().getTime();
@@ -533,7 +504,6 @@ function redraw_testvector(){
     for (var i = 0; i < charges.length; i++) {
         var component_vec = calculateFieldComponentDueToChargeAtPosition(i, [curX, curY]);
         var component_F = [testCharge[0].charge*component_vec[0], testCharge[0].charge*component_vec[1]];
-
         if (!isNaN(component_F[0]) && !isNaN(component_F[1])) {
             svg.append("line")          // attach a line
               .attr("class", "testvectorcomp")
@@ -558,7 +528,6 @@ function redraw_testvector(){
             .attr("y2", curY + forceVectorScale*F[1]);    // y position of the second end of the line
     }
 
-    redraw_testChargeEnergy();
     currentTime -= new Date().getTime()
     // console.log("redraw_testvector iteration took: " + (-1*currentTime)+"ms." )
 }
@@ -569,9 +538,6 @@ function redraw_fieldvectors() {
 
     // pull current location data out of users array
     var charges = getCharges();
-    if (charges.length === 0)
-        return;
-
     var curX,
         curY,
         E,
@@ -627,55 +593,6 @@ function redraw_fieldvectors() {
     currentTime -= new Date().getTime()
     console.log("redraw_fieldvectors iteration took: " + (-1*currentTime)+"ms." )
 
-}
-
-
-function redraw_potential() {
-    // set range and color scale by the potential nearby the strongest charge
-    var currentTime = new Date().getTime();
-    var charges = getCharges();
-    if (charges.length === 0)
-        return;
-
-    var maxChargeIndex = 0;
-    var maxCharge = charges[0][2];
-    var i,
-        j,
-        x,
-        y,
-        cutoff,
-        color_scale,
-        potential,
-        dots;
-
-    for (i = 0; i < charges.length; i++) {
-      if (Math.abs(charges[i][2]) > maxCharge) {
-        maxCharge = Math.abs(charges[i][2]);
-        maxChargeIndex = i;
-      }
-    }
-    x = charges[maxChargeIndex][0];
-    y = charges[maxChargeIndex][1];
-    cutoff = Math.abs(calculatePotentialAtPoint([x + 40, y + 40]));
-    color_scale = d3.scale.linear().domain([-1*cutoff, 0, cutoff]).range(['red', 'purple', 'blue']);
-    potential;
-
-    // find potential of each box in the grid
-    dots = [];
-    for (i = 0; i < numberOfBoxes_X; i++) {
-
-      for (j = 0; j < numberOfBoxes_Y; j++) {
-         x = i*boxSize + boxSize/2;
-         y = j*boxSize + boxSize/2;
-
-         potential = calculatePotentialAtPoint([x, y]);
-         dots.push([x, y, color_scale(potential)]);
-      }
-    }
-    renderDots(dots);
-
-    currentTime -= new Date().getTime()
-    // console.log("redraw_potential iteration took: " + (-1*currentTime)+"ms." )
 }
 
 // different way of drawing equipotentials
@@ -963,5 +880,5 @@ function redraw_fieldlines () {
     }
 
     currentTime -= new Date().getTime()
-    // console.log("redraw_fieldlines iteration took: " + (-1*currentTime)+"ms." )
+    console.log("redraw_fieldlines iteration took: " + (-1*currentTime)+"ms." )
 }
