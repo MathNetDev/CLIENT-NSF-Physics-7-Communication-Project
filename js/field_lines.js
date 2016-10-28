@@ -55,7 +55,7 @@ defs.append("marker")
   .attr({
     "id":"testChargeArrow",
     "viewBox":"0 0 10 10",
-    "refX”:0,.
+    "refX":0,
     "refY":5,
     "markerWidth":3,
     "markerHeight":4,
@@ -101,7 +101,7 @@ function calculatePotentialAtPoint(p){
         var distY = p[1] - charges[j][1];
         var r_squared = distX*distX + distY*distY;
         var r = Math.sqrt(r_squared);
-
+        if (r == 0) continue;
         V += charges[j][2] / r;
    }
 

@@ -21,7 +21,8 @@ var MAX_DOT_SIZE = 20;
 var AVE_DOT_SIZE = Math.floor((MIN_DOT_SIZE + MAX_DOT_SIZE) / 2.0);
 console.log(AVE_DOT_SIZE);
 
-var LABEL_Y_SPACING = 1.2;
+var LABEL_Y_SPACING = 2.3;
+var ENERGY_LABEL_Y_SPACING = 1.2;
 
 var MAX_ABS_CHARGE = 10;
 var CHARGE_STEP = 5;
@@ -51,6 +52,8 @@ var verticalBlockHalf = verticalBlock / 2;
 var field_display_settings = {
     'show_particle_charge': true,
     'show_particle_size': true,
+    'show_energy': false,
+    'show_potential': false,
     'show_equipotentials': false,
     'show_fieldlines':false, 
     'show_forcevectors':false,
@@ -149,6 +152,7 @@ function redraw() {
 
     //Clear all the lines
     //TODO: needs to be refactored as a pool of available lines/paths
+    d3.selectAll(".dot").remove();
     d3.selectAll(".line").remove();
     d3.selectAll(".field").remove();
     d3.selectAll(".pointvector").remove();
@@ -158,6 +162,7 @@ function redraw() {
 
     d3.selectAll("circle").remove();
     d3.selectAll(".name").remove();
+    d3.selectAll(".energy").remove();
     d3.selectAll(".axis").remove();
     d3.selectAll("ellipse").remove();
 
@@ -174,10 +179,15 @@ function redraw() {
     if (field_display_settings.show_fieldlines === true) {
         redraw_fieldlines();
     }
+    if (field_display_settings.show_energy === true && field_display_settings.show_points === true) {
+        redraw_energy_labels();
+    }
+    if (field_display_settings.show_potential === true) {
+        redraw_potential();
+    }
     if (field_display_settings.show_equipotentials === true) {
         redraw_equipotentials();
     }
-   
     if (field_display_settings.show_labels === true && field_display_settings.show_points === true) {
 	   redraw_labels();
     }
@@ -208,6 +218,28 @@ function checkForZeros() {
                         .remove();
 } //hides charge and labels of point charge 0 for "spectator" mode
 
+function redraw_energy_labels() {
+    for (var i = 0; i < users.length; i++) {
+        var labels = svg.append("g")
+            .attr("class", "energy")
+            .selectAll(".energy")
+            .data(users[i].charges)
+            .enter().append("text")
+            .attr("class", function(d, i) { return d.name + "_E" + (i+1)})
+            .classed("selected", function(d) { return d === selected; })
+            .attr("name", function (d) { return d.name; })
+            .attr("charge", function (d) { return d.charge})
+            .attr("x", function(d) { return field_display_settings.show_particle_size ? (d.x - AVE_DOT_SIZE - (d.radius/2)) : (d.x - AVE_DOT_SIZE); })
+            .attr("y", function(d) { return field_display_settings.show_particle_size ? (d.y - AVE_DOT_SIZE*ENERGY_LABEL_Y_SPACING - (d.radius/2)) : (d.y - AVE_DOT_SIZE*ENERGY_LABEL_Y_SPACING); })
+            .text(function(d) { 
+                var potential = calculatePotentialAtPoint([d.x, d.y]);
+                var energy = Math.floor(100*potential*d.charge);
+                return energy + " J"; 
+            });
+            //.call(drag);
+    }
+}
+
 function redraw_labels() {
     // Add name labels to circles
     // Note: Not actually grouped with circle, just placed relative, so probably not best implementation but works for now
@@ -222,7 +254,13 @@ function redraw_labels() {
             .attr("name", function (d) { return d.name; })
             .attr("charge", function (d) { return d.charge})
     	    .attr("x", function(d) { return field_display_settings.show_particle_size ? (d.x - AVE_DOT_SIZE - (d.radius/2)) : (d.x - AVE_DOT_SIZE); })
-    	    .attr("y", function(d) { return field_display_settings.show_particle_size ? (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING - (d.radius/2)) : (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING); })
+    	    .attr("y", function(d) { 
+                var spacing = LABEL_Y_SPACING;
+                if (field_display_settings.show_energy === false) {
+                    spacing -= 1.1;
+                }
+                return field_display_settings.show_particle_size ? (d.y - AVE_DOT_SIZE*spacing - (d.radius/2)) : (d.y - AVE_DOT_SIZE*spacing); 
+            })
     	    .text(function(d) { return d.name; });
     	    //.call(drag);
     }
@@ -531,8 +569,18 @@ function dragmove(d, i) {
       		.attr("cy", d.y = Math.max(radius, Math.min(height - radius, d3.event.y)));
 
 	d3.select('.name .' + d.name + "_L" + (i+1))
+            .attr("x", function(d) { return field_display_settings.show_particle_size ? (d.x - AVE_DOT_SIZE - (d.radius/2)) : (d.x - AVE_DOT_SIZE); })
+            .attr("y", function(d) { 
+                var spacing = LABEL_Y_SPACING;
+                if (field_display_settings.show_energy === false) {
+                    spacing -= 1.1;
+                }
+                return field_display_settings.show_particle_size ? (d.y - AVE_DOT_SIZE*spacing - (d.radius/2)) : (d.y - AVE_DOT_SIZE*spacing); 
+            })
+
+    d3.select('.energy .' + d.name + "_E" + (i+1))
         .attr("x", function(d) { return field_display_settings.show_particle_size ? (d.x - AVE_DOT_SIZE - (d.radius/2)) : (d.x - AVE_DOT_SIZE); })
-        .attr("y", function(d) { return field_display_settings.show_particle_size ? (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING - (d.radius/2)) : (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING); })
+        .attr("y", function(d) { return field_display_settings.show_particle_size ? (d.y - AVE_DOT_SIZE*ENERGY_LABEL_Y_SPACING - (d.radius/2)) : (d.y - AVE_DOT_SIZE*ENERGY_LABEL_Y_SPACING); })
   }
 }
 
@@ -562,10 +610,6 @@ function dragend(d, i) {
     d3.select(this)
             .attr("cx", d.x = Math.max(radius, Math.min(width - radius, Math.round(d.x/10)*10)))
             .attr("cy", d.y = Math.max(radius, Math.min(height - radius, Math.round(d.y/10)*10)));
-
-    d3.select('.name .' + d.name + "_L" + (i+1))
-        .attr("x", function(d) { return field_display_settings.show_particle_size ? (d.x - AVE_DOT_SIZE - (d.radius/2)) : (d.x - AVE_DOT_SIZE); })
-        .attr("y", function(d) { return field_display_settings.show_particle_size ? (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING - (d.radius/2)) : (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING); })
 
     if(d.name === sessionStorage.getItem('username')){
         notify_group(i);
