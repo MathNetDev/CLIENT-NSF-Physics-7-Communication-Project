@@ -89,8 +89,8 @@
         // This function takes a secret password provided by the user
         // The socket then emits this to the server to send the list of
         // current created classes and their login IDs to the user.
-        var get_classes = function (secret){
-            socket.emit('get-classes', secret);
+        var get_classes = function (secret, admin_id){
+            socket.emit('get-classes', secret, admin_id);
         }
 
         // This function disconnects the socket
