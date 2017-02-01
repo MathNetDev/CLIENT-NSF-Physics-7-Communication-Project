@@ -126,7 +126,7 @@ function leave_class_response(disconnect) {
     if(!disconnect){
         sessionStorage.removeItem('admin_class_id');
     }
-    socket.get_classes($secret);
+    socket.get_classes($secret, localStorage.getItem('admin_id'));
 }
 
 /**
@@ -188,11 +188,13 @@ function coordinate_change_response(username, class_id, group_id, info) {
  * @param {array[object]} classes array of objects holding classes and their hashed IDs
  * @description appends list objects of Classes and their IDs to an unordered list in admin.html
  */
-function get_classes_response(classes){
+function get_classes_response(classes, secret){
     var $username_password_view = $('.username_password_view');
     var $create_view = $('.create_view');
     var $manage_view = $('.manage_view');
     var $settings_view = $('.settings_view');
+
+    sessionStorage.setItem('admin_secret', secret);
 
     $username_password_view.hide();
     $create_view.show();
