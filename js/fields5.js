@@ -130,6 +130,12 @@ var line = d3.svg.line();
 d3.select("#charge").on("change", function(){
     var new_charge = parseFloat(d3.select(this).node().value);
 
+    socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " changed charge value to " + d3.select(this).node().value
+                          );
+
     if (selected && selected.name != "test_charge") { 
         selected.charge = new_charge;
         selected.radius = Math.abs(new_charge);
@@ -596,6 +602,7 @@ function dragend(d, i) {
 function changeSelected() {
   //Change current charge value
   d3.select("#charge").node().value = parseInt(selected.charge);
+  
 }
 
 function vectorStart() {
@@ -983,6 +990,9 @@ function field_move_users(username, info) {
         user_data.charges[info.index].x = info.charges[info.index].x;
         user_data.charges[info.index].y = info.charges[info.index].y;
 
+        
+
+
     } else {
         console.log("ERROR: Oh, oh: got a move_user message about somebody we don't know: " + username);
         console.log("TODO: could add this user here???");
@@ -1062,9 +1072,12 @@ function update_vector_attributes(xml, redraw) {
 /*-------------------  Options processing -----------------*/
 
 function update_display_settings () {
+
+    var temp = [];
     /* unset all the display properties */
     for (var property in field_display_settings) {
         if (field_display_settings.hasOwnProperty(property)) {
+            temp[property] = field_display_settings[property];
             field_display_settings[property] = false;
         }
     }
@@ -1073,7 +1086,31 @@ function update_display_settings () {
     $("input:checked").each(function () {
         var id = $(this).attr("id");
         field_display_settings[id] = true;
+
     });
+
+     for (var property in field_display_settings) {
+        if (field_display_settings.hasOwnProperty(property)) {
+            if(field_display_settings[property] != temp[property]) {
+                if(field_display_settings[property]) {
+                    socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " Turned on the button " + property
+                          );
+                }
+                else {
+                    socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " Turned off the button " + property
+                          );
+                }
+            }
+                
+        }
+    }
+
 
 
     console.log(field_display_settings);
@@ -1136,6 +1173,12 @@ function add_charge(btn) {
                              sessionStorage.getItem('group_id'),
                              info
                             );
+
+    socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " added a charge"
+                          );
     redraw();
 }
 
@@ -1156,6 +1199,11 @@ function remove_charge(btn) {
                              sessionStorage.getItem('group_id'),
                              info
                             );
+    socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " removed a charge"
+                          );
 
     redraw();
 }
@@ -1174,9 +1222,21 @@ function toggle_draw_vectors_mode() {
     if (toolbar_settings.draw_vectors_mode === false) {
         activate_button("#draw_vectors_button", "draw_vectors_mode");
         deactivate_button("#delete_mode_button", "delete_mode");
+
+        socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " started drawing vectors"
+                          );
     }
     else {
         deactivate_button("#draw_vectors_button", "draw_vectors_mode");
+
+        socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " stopped drawing vectors"
+                          );
     }
 }
 
@@ -1184,13 +1244,30 @@ function toggle_delete_mode() {
     if (toolbar_settings.delete_mode === false) {
         activate_button("#delete_mode_button", "delete_mode");
         deactivate_button("#draw_vectors_button", "draw_vectors_mode");
+
+        socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " toggled delete mode to on"
+                          );
     }
     else {
         deactivate_button("#delete_mode_button", "delete_mode");
+
+        socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " toggled delete mode to off"
+                          );
     }
 }
 
 function clear_vectors() {
+    socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " cleared all the vectors"
+                          );
     if (field_display_settings.show_drawn_vectors === true) {
         var usr = sessionStorage.getItem("username");
         var my_vectors = vector_attributes.filter(function(attribute) {
@@ -1207,6 +1284,8 @@ function clear_vectors() {
                               sessionStorage.getItem("group_id"), 
                               JSON.stringify(vector_attributes));
         }
+
+        
     }
     else {
         if (my_vector_attributes !== []) {

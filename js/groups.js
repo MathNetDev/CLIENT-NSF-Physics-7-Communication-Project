@@ -21,12 +21,18 @@ $(function() {
         usr.charges[index].y = cy;
         var info = {index: index};
         info.charges = usr.charges;
+
       
         socket.coordinate_change(sessionStorage.getItem('username'),
                                  sessionStorage.getItem('class_id'),
                                  sessionStorage.getItem('group_id'),
                                  info
                                 );
+        socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " moved point to "+ cx + " " + cy
+                          );
     });
     
     $leave_group_button.bind('click', function() {
@@ -35,5 +41,12 @@ $(function() {
                            sessionStorage.getItem('group_id'),
                            false
                           );
+
+        socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " left the group"
+                          );
     });
+
 });

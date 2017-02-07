@@ -113,6 +113,12 @@ function group_join_response(username, class_id, group_id) {
 
     socket.group_info(username, class_id, group_id, true);
     socket.get_settings(class_id, group_id);
+
+     socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " logged into the group"
+                          );
 }
 
 // shows class_view, and removes group_id from sessionStorage if disconnect is not true
@@ -177,6 +183,11 @@ function coordinate_change_response(username, class_id, group_id, info) {
     }
     else {
         field_move_users(username, info);
+        socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " changed coordinates to " + info.charges[info.index].x + "," + info.charges[info.index].y
+                          );
     }
 }
 
