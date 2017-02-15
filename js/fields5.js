@@ -329,7 +329,17 @@ function redraw_testcharge(){
 
     charge = svg.selectAll("ellipse").data(testCharge);
     charge.enter().append("ellipse");
-    console.log(charge);
+    console.log(testCharge);
+    // mapCoord() in 
+    // map pixel values to graph coordinates
+    // subtract 10 from x and y positions as charges have 20x20 bounding box
+    var xGraph = mapCoord(testCharge[0].x - 10,580,30,-30);
+    var yGraph = mapCoord(testCharge[0].y - 10,380,-20,20);
+    socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " changed test charge coordinates to " + xGraph + "," + yGraph 
+                          );
     var chargeAttributes = charge
                 .classed("selected", function(d) { return d === selected; })
                 .attr("name", function (d) { return d.name; })
