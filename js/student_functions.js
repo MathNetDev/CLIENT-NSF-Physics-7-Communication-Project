@@ -13,6 +13,18 @@ function escapeStr(str) {
 }
 
 /**
+ * @function proportion
+ * @param {number} value the value to be mapped to the range
+ * @param {number} max the max possible value
+ * @param {number} minrange the minimum of the range to map to
+ * @param {number} maxrange the maximum of the range to map to
+ * @description maps pixel coordinate values to the values of the charge graph
+ */
+function proportion(value,max,minrange,maxrange) {
+    return Math.round(((max-value)/(max))*(maxrange-minrange))+minrange;
+}
+
+/**
  * @function server_error
  * @param {string} error the error to output on the page
  * @description to handle errors sent by the server
@@ -182,11 +194,16 @@ function coordinate_change_response(username, class_id, group_id, info) {
         field_remove_charge(username, info);
     }
     else {
+        // map pixel values to graph coordinates
+        // subtract 10 from x and y positions as charges have 20x20 bounding box
+        var xGraph = proportion(info.charges[info.index].x - 10,580,30,-30);
+        var yGraph = proportion(info.charges[info.index].y - 10,380,-20,20);
         field_move_users(username, info);
+
         socket.add_log(sessionStorage.getItem('username'),
                            sessionStorage.getItem('class_id'),
                            sessionStorage.getItem('group_id'),
-                           " changed coordinates to " + info.charges[info.index].x + "," + info.charges[info.index].y
+                           " changed coordinates to " + xGraph + "," + yGraph 
                           );
     }
 }
