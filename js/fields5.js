@@ -36,7 +36,6 @@ var margin = {top: 40, right: 40, bottom: 40, left: 40},
     height = 480 - margin.top - margin.bottom,
     radius = MAX_DOT_SIZE,
     axisPadding = 10;
-
 // Grid size variables
 var horizontalBlock = width/10;
 var verticalBlock = height/10;
@@ -332,9 +331,9 @@ function redraw_testcharge(){
     console.log(testCharge);
     // mapCoord() in 
     // map pixel values to graph coordinates
-    // subtract 10 from x and y positions as charges have 20x20 bounding box
-    var xGraph = mapCoord(testCharge[0].x - 10,580,30,-30);
-    var yGraph = mapCoord(testCharge[0].y - 10,380,-20,20);
+    // subtract MAX_DOT_SIZE/2 from x and y positions to get center of charge as charges have 20x20 bounding box
+    var xGraph = mapCoord(testCharge[0].x - MAX_DOT_SIZE/2,width - MAX_DOT_SIZE,30,-30);
+    var yGraph = mapCoord(testCharge[0].y - MAX_DOT_SIZE/2,height - MAX_DOT_SIZE,-20,20);
     socket.add_log(sessionStorage.getItem('username'),
                            sessionStorage.getItem('class_id'),
                            sessionStorage.getItem('group_id'),
