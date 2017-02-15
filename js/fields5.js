@@ -332,8 +332,8 @@ function redraw_testcharge(){
     // mapCoord() in 
     // map pixel values to graph coordinates
     // subtract MAX_DOT_SIZE/2 from x and y positions to get center of charge as charges have 20x20 bounding box
-    var xGraph = mapCoord(testCharge[0].x - MAX_DOT_SIZE/2,width - MAX_DOT_SIZE,30,-30);
-    var yGraph = mapCoord(testCharge[0].y - MAX_DOT_SIZE/2,height - MAX_DOT_SIZE,-20,20);
+    var xGraph = mapCoord(testCharge[0].x ,width,30,-30);
+    var yGraph = mapCoord(testCharge[0].y ,height,-20,20);
     socket.add_log(sessionStorage.getItem('username'),
                            sessionStorage.getItem('class_id'),
                            sessionStorage.getItem('group_id'),

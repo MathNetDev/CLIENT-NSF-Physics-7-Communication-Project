@@ -196,8 +196,8 @@ function coordinate_change_response(username, class_id, group_id, info) {
     else {
         // map pixel values to graph coordinates
         // subtract 10 from x and y positions as charges have 20x20 bounding box
-        var xGraph = mapCoord(info.charges[info.index].x - 10,580,30,-30);
-        var yGraph = mapCoord(info.charges[info.index].y - 10,380,-20,20);
+        var xGraph = mapCoord(info.charges[info.index].x,600,30,-30);
+        var yGraph = mapCoord(info.charges[info.index].y,400,-20,20);
         field_move_users(username, info);
 
         socket.add_log(sessionStorage.getItem('username'),
