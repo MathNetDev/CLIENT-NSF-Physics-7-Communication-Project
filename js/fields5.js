@@ -329,11 +329,10 @@ function redraw_testcharge(){
     charge = svg.selectAll("ellipse").data(testCharge);
     charge.enter().append("ellipse");
     console.log(testCharge);
-    // mapCoord() in 
+    // mapCoord() in student_functions.js
     // map pixel values to graph coordinates
-    // subtract MAX_DOT_SIZE/2 from x and y positions to get center of charge as charges have 20x20 bounding box
-    var xGraph = mapCoord(testCharge[0].x ,width,30,-30);
-    var yGraph = mapCoord(testCharge[0].y ,height,-20,20);
+    var xGraph = mapCoord(testCharge[0].x ,width,horizontalBlockHalf,-horizontalBlockHalf);
+    var yGraph = mapCoord(testCharge[0].y ,height,-verticalBlockHalf,verticalBlockHalf);
     socket.add_log(sessionStorage.getItem('username'),
                            sessionStorage.getItem('class_id'),
                            sessionStorage.getItem('group_id'),
