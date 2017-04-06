@@ -13,6 +13,18 @@ function escapeStr(str) {
 }
 
 /**
+ * @function mapCoord
+ * @param {number} value the value to be mapped to the range
+ * @param {number} max the max possible value
+ * @param {number} minrange the minimum of the range to map to
+ * @param {number} maxrange the maximum of the range to map to
+ * @description maps pixel coordinate values to the values of the charge graph
+ */
+function mapCoord(value,max,minrange,maxrange) {
+    return Math.round(((max-value)/(max))*(maxrange-minrange))+minrange;
+}
+
+/**
  * @function server_error
  * @param {string} error the error to output on the page
  * @description to handle errors sent by the server
@@ -113,6 +125,12 @@ function group_join_response(username, class_id, group_id) {
 
     socket.group_info(username, class_id, group_id, true);
     socket.get_settings(class_id, group_id);
+
+     socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " logged into the group"
+                          );
 }
 
 // shows class_view, and removes group_id from sessionStorage if disconnect is not true
@@ -176,7 +194,17 @@ function coordinate_change_response(username, class_id, group_id, info) {
         field_remove_charge(username, info);
     }
     else {
+        // map pixel values to graph coordinates
+        // global vars width,height,horizontalBlockHalf, and verticalBlockHalf defined in field5.js
+        var xGraph = mapCoord(info.charges[info.index].x,width,horizontalBlockHalf,-horizontalBlockHalf);
+        var yGraph = mapCoord(info.charges[info.index].y,height,-verticalBlockHalf,verticalBlockHalf);
         field_move_users(username, info);
+
+        socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " changed coordinates to " + xGraph + "," + yGraph 
+                          );
     }
 }
 

@@ -101,7 +101,7 @@ function calculatePotentialAtPoint(p){
         var distY = p[1] - charges[j][1];
         var r_squared = distX*distX + distY*distY;
         var r = Math.sqrt(r_squared);
-
+        if (r == 0) continue;
         V += charges[j][2] / r;
    }
 
@@ -340,7 +340,7 @@ function findCrossingPoint(target, p1, p2) {
     return closestPoint;
 }
 
-function initiateFieldLineAtPoint(p, direction) {
+function initiateFieldLineAtPoint(p, direction, charges) {
 
     var dots = [];
     var curX = p[0];
@@ -350,7 +350,6 @@ function initiateFieldLineAtPoint(p, direction) {
     var chargesHit = [];
     var E_min = .00001;
     var dL = 3;
-    var charges = getCharges();
     var destinationX;
     var destinationY;
     var source1X;
@@ -423,17 +422,18 @@ function initiateFieldLineAtPoint(p, direction) {
         for (j = 0; j < charges.length; j++) {
             distX = charges[j][0] - curX;
             distY = charges[j][1] - curY;
-            if (distX*distX + distY*distY <= 16 && charges[j][2] != 0) {
-                if(charges[j][2].linesDrawn >= charges[j][2].numFieldLines) {
+            if (Math.hypot(distX, distY) <= 20 && charges[j][2] != 0) {
+                // if(charges[j][2].linesDrawn >= charges[j][2].numFieldLines) {
+                //   times=0;
+                // } else 
+                // {
+                  charges[j].linesDrawn.push([curX, curY]);
                   times=0;
-                } else {
-                  charges[j].linesDrawn += 1;
-                  times=0;
-                }
+                //}
             }
         }
     } // end line
-    return [dots, chargesHit];
+    return [dots, charges];
 }
 
 //
@@ -593,6 +593,54 @@ function redraw_fieldvectors() {
     currentTime -= new Date().getTime()
     console.log("redraw_fieldvectors iteration took: " + (-1*currentTime)+"ms." )
 
+}
+
+function redraw_potential() {
+    // set range and color scale by the potential nearby the strongest charge
+    var currentTime = new Date().getTime();
+    var charges = getCharges();
+    if (charges.length === 0)
+        return;
+
+    var maxChargeIndex = 0;
+    var maxCharge = charges[0][2];
+    var i,
+        j,
+        x,
+        y,
+        cutoff,
+        color_scale,
+        potential,
+        dots;
+
+    for (i = 0; i < charges.length; i++) {
+      if (Math.abs(charges[i][2]) > maxCharge) {
+        maxCharge = Math.abs(charges[i][2]);
+        maxChargeIndex = i;
+      }
+    }
+    x = charges[maxChargeIndex][0];
+    y = charges[maxChargeIndex][1];
+    cutoff = Math.abs(calculatePotentialAtPoint([x + 40, y + 40]));
+    color_scale = d3.scale.linear().domain([-1*cutoff, 0, cutoff]).range(['red', 'purple', 'blue']);
+    potential;
+
+    // find potential of each box in the grid
+    dots = [];
+    for (i = 0; i < numberOfBoxes_X; i++) {
+
+      for (j = 0; j < numberOfBoxes_Y; j++) {
+         x = i*boxSize + boxSize/2;
+         y = j*boxSize + boxSize/2;
+
+         potential = calculatePotentialAtPoint([x, y]);
+         dots.push([x, y, color_scale(potential)]);
+      }
+    }
+    renderDots(dots);
+
+    currentTime -= new Date().getTime()
+    console.log("redraw_potential iteration took: " + (-1*currentTime)+"ms." )
 }
 
 // different way of drawing equipotentials
@@ -776,133 +824,111 @@ function redraw_fieldlines () {
 
     // pull current location data out of users array
     var charges = getCharges();
-    var linesPerCharge = 3;
-    var numFieldLines;
+    var linesPerCharge = 5;
+    var linesToDraw;
     var fieldLineStartRadius = 20;
     var start_angle;
     var curX;
     var cury;
     var polarity;
-    var dL = 7;
     var chargeIndex,
         pointIndex,
+        result,
+        chargesHit,
+        direction,
         dots,
-        times,
-        E,
-        E_x,
-        E_y,
-        E_mag;
-    var E_min = .00001;
-    var destinationX;
-    var destinationY;
-    var source1X;
-    var source1Y;
-    var source2X;
-    var source2Y;
-    var arrowDots;
-    var j;
+        render;
 
-    //Draw the field lines
+    if (charges.length === 0)
+        return;
+
+    //Initiate charges
     for (chargeIndex = 0; chargeIndex < charges.length; chargeIndex++) {
-        charges[chargeIndex].linesDrawn = 0;
+        charges[chargeIndex].linesDrawn = [];
+        charges[chargeIndex].numFieldLines = Math.abs(linesPerCharge * Math.floor(charges[chargeIndex][2]));
     }
-    
+
     //Iterate for each charge
     for (chargeIndex = 0; chargeIndex < charges.length; chargeIndex++) {
 
         //Number of field lines proportional to charge strength
-        numFieldLines = Math.abs(linesPerCharge * Math.floor(charges[chargeIndex][2]));
+        linesToDraw = charges[chargeIndex].numFieldLines - charges[chargeIndex].linesDrawn.length;
+        var initialAngle = Math.random();
 
-        //Four lines coming from a charge
-        for (pointIndex=0; pointIndex<numFieldLines; pointIndex ++) {
+        linesDrawn = charges[chargeIndex].linesDrawn;
+        xpos = charges[chargeIndex][0];
+        ypos = charges[chargeIndex][1];
+
+        var angles = [];
+        for (var i = 0; i < linesDrawn.length; i ++) {
+          xdist = linesDrawn[i][0] - xpos;
+          ydist = linesDrawn[i][1] - ypos;
+          
+          angle = Math.atan2(ydist, xdist);
+          if (angle < 0) {
+            angle += 2*Math.PI;
+          }
+          angles.push(angle);
+        }
+        angles.sort();
+
+        start_angles = [];
+        if(charges[chargeIndex].linesDrawn.length) {
+            var maxGap = angles[1] - angles[0];
+            var maxGapAngles = [angles[1], angles[0]];
+            for (var i = 0; i < angles.length; i ++) {
+              if (i == angles.length - 1){
+                jump = 2*Math.PI - (angles[i] - angles[0]);
+                if (Math.abs(jump) > Math.abs(maxGap)) {
+                    maxGap = jump;
+                    maxGapAngles = [angles[0], angles[i] - 2*Math.PI];
+                }
+              }
+              jump = angles[i+1] - angles[i];
+              if (Math.abs(jump) > Math.abs(maxGap)) {
+                  maxGap = jump;
+                  maxGapAngles = [angles[i+1], angles[i]];
+              }
+            }
+            for (pointIndex = 0; pointIndex < linesToDraw; pointIndex++) {
+                start_angles.push(maxGapAngles[0] + (maxGapAngles[1] - maxGapAngles[0])*( (1 + pointIndex)/(1+ linesToDraw) ));
+            }
+        } else {
+            for (pointIndex = 0; pointIndex < linesToDraw; pointIndex++) {
+                start_angles.push(2*Math.PI*(pointIndex/linesToDraw) + initialAngle);
+            }
+        }
+        
+        for (pointIndex=0; pointIndex<start_angles.length; pointIndex ++) {
             
-            // start uniformly spaced around the charge
-            start_angle = 2*Math.PI*pointIndex/numFieldLines;
-            curX = charges[chargeIndex][0] + fieldLineStartRadius * Math.cos(start_angle);
-            curY = charges[chargeIndex][1] + fieldLineStartRadius * Math.sin(start_angle);
+            render = true;
+
+            //start uniformly spaced around the charge
+            curX = charges[chargeIndex][0] + fieldLineStartRadius * Math.cos(start_angles[pointIndex]);
+            curY = charges[chargeIndex][1] + fieldLineStartRadius * Math.sin(start_angles[pointIndex]);
+            
             polarity = 1;
             if (charges[chargeIndex][2] < 0) {
                 polarity = -1;
             }
 
-            dots = [];
-            dots.push([curX, curY]);
+            // initiate field line at each start point
+            result = initiateFieldLineAtPoint([curX, curY], polarity, charges);
+            charges = result[1];
+            dots = result[0];
 
-            //Maximum of 1000 points per force line
-            times = 1000;
-            while (times-- > 0) {
-
-                E = calculateFieldVectorAtPoint([curX, curY]);
-                E_x = E[0];
-                E_y = E[1];            
-                E_mag = Math.sqrt(E_x*E_x + E_y*E_y);
-
-                // if field value near zero, terminate
-                if( E_mag < E_min ) {
-                    times = 0;
-                }
-
-                //Move the next dot to follow the force vector
-                if(polarity > 0) {
-                    curX = curX + dL*E_x/E_mag;
-                    curY = curY + dL*E_y/E_mag;
-                } else {
-                    curX = curX - dL*E_x/E_mag;
-                    curY = curY - dL*E_y/E_mag;
-                }
- 
-                dots.push([curX, curY]);
-                if (times%30 == 0) {
-                    //Draw an arrow
-                    if (polarity == 1) {
-                        destinationX = curX;
-                        destinationY = curY;
-                        source1X = dots[dots.length-2][0] + dL*E_y/E_mag;
-                        source1Y = dots[dots.length-2][1] - dL*E_x/E_mag;
-                        source2X = dots[dots.length-2][0] - dL*E_y/E_mag;
-                        source2Y = dots[dots.length-2][1] + dL*E_x/E_mag;
-                    } else {
-                        destinationX = dots[dots.length-2][0];
-                        destinationY = dots[dots.length-2][1];
-                        source1X = curX + dL*E_y/E_mag;
-                        source1Y = curY - dL*E_x/E_mag;
-                        source2X = curX - dL*E_y/E_mag;
-                        source2Y = curY + dL*E_x/E_mag;
-                    }
-                    arrowDots = [];
-                    arrowDots.push([source1X, source1Y]);
-                    arrowDots.push([destinationX, destinationY]);
-                    arrowDots.push([source2X, source2Y]);
-                    svg.insert("path", "circle")
-                            .datum(arrowDots)
-                            .attr("class", "line")
-                            .attr("d", line);
-                }
-
-
-                //If the next dot is inside a circle, terminate further iterations
-                for (j = 0; j < charges.length; j++) {
-                    distX = charges[j][0] - curX;
-                    distY = charges[j][1] - curY;
-                    if (distX*distX + distY*distY <= 16) {
-                        charges[j].linesDrawn += 1;
-                        times=0;
-                    }
-                }
-
-            } // end line
-
-            //Render the line
-            svg.insert("path", "circle")
-                .datum(dots)
-                .attr("class", "line")
-                .attr("d", line);
+            if (render) {
+             //Render the line
+              svg.insert("path", "circle")
+                  .datum(dots)
+                  .attr("class", "line")
+                  .attr("d", line);
+            }
         }
-
     }
 
     currentTime -= new Date().getTime()
-    // console.log("redraw_fieldlines iteration took: " + (-1*currentTime)+"ms." )
+    console.log("redraw_fieldlines iteration took: " + (-1*currentTime)+"ms." )
 }
 
 // function redraw_equipotentials_old() {

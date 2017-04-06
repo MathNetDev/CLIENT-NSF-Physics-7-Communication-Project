@@ -10,6 +10,9 @@
     // The initialization function for the Student.Socket object
     var init = function (socket) {
         
+        var add_log = function(username, class_id, group_id, log) {
+            socket.emit('add_log', username, class_id, group_id, log);
+        }
         //This function takes a username and class_id from the user
         //It then emits a socket call to login the username to the class_id.
         var login = function (username, class_id) {
@@ -147,6 +150,7 @@
 
 
         return {
+            add_log: add_log,
             login: login,
             logout: logout,
             groups_get: groups_get,

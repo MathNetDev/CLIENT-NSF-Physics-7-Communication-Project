@@ -25,7 +25,10 @@ $(function() {
     $('body').show();
 
     $login_button.bind('click', function() {
-        socket.login($username.val().trim(), $class_id.val().trim());
+        if (valid_username($username.val().trim())) {
+            socket.login($username.val().trim(), $class_id.val().trim());
+            $username.val(""); $class_id.val(""); $error_header.hide();
+        }
     });
 
     $error_header.html(sessionStorage.getItem('error'))
@@ -36,6 +39,19 @@ $(function() {
                      sessionStorage.removeItem('group_id');
                      sessionStorage.removeItem('username');
                  });
+
+    function valid_username(username) { 
+        var alphanum = /^[A-Za-z][A-Za-z0-9]*$/;
+        if (username.match(alphanum) && username.length < 9)  
+        {  
+            return true;  
+        }
+        else  
+        {   
+            alert("Username must be alphanumeric and less than or equal to 8 characters.");
+            return false;
+        }  
+    }
 
 });
 

@@ -36,7 +36,6 @@ var margin = {top: 40, right: 40, bottom: 40, left: 40},
     height = 480 - margin.top - margin.bottom,
     radius = MAX_DOT_SIZE,
     axisPadding = 10;
-
 // Grid size variables
 var horizontalBlock = width/10;
 var verticalBlock = height/10;
@@ -51,6 +50,8 @@ var verticalBlockHalf = verticalBlock / 2;
 var field_display_settings = {
     'show_particle_charge': true,
     'show_particle_size': true,
+    'show_energy': false,
+    'show_potential': false,
     'show_equipotentials': false,
     'show_fieldlines':false, 
     'show_forcevectors':false,
@@ -128,6 +129,12 @@ var line = d3.svg.line();
 d3.select("#charge").on("change", function(){
     var new_charge = parseFloat(d3.select(this).node().value);
 
+    socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " changed charge value to " + d3.select(this).node().value
+                          );
+
     if (selected && selected.name != "test_charge") { 
         selected.charge = new_charge;
         selected.radius = Math.abs(new_charge);
@@ -149,6 +156,7 @@ function redraw() {
 
     //Clear all the lines
     //TODO: needs to be refactored as a pool of available lines/paths
+    d3.selectAll(".dot").remove();
     d3.selectAll(".line").remove();
     d3.selectAll(".field").remove();
     d3.selectAll(".pointvector").remove();
@@ -158,6 +166,7 @@ function redraw() {
 
     d3.selectAll("circle").remove();
     d3.selectAll(".name").remove();
+    d3.selectAll(".energy").remove();
     d3.selectAll(".axis").remove();
     d3.selectAll("ellipse").remove();
 
@@ -174,10 +183,15 @@ function redraw() {
     if (field_display_settings.show_fieldlines === true) {
         redraw_fieldlines();
     }
+    if (field_display_settings.show_energy === true && field_display_settings.show_testcharge === true) {
+        redraw_energy_label();
+    }
+    if (field_display_settings.show_potential === true) {
+        redraw_potential();
+    }
     if (field_display_settings.show_equipotentials === true) {
         redraw_equipotentials();
     }
-   
     if (field_display_settings.show_labels === true && field_display_settings.show_points === true) {
 	   redraw_labels();
     }
@@ -207,6 +221,19 @@ function checkForZeros() {
                         .filter( function(d){ return d.charge == 0})
                         .remove();
 } //hides charge and labels of point charge 0 for "spectator" mode
+
+function redraw_energy_label() {
+    charge = svg.selectAll("ellipse").data(testCharge);
+    charge.enter().append("text")
+        .attr("class", "energy")
+        .attr("x", function(d) { return d.x - AVE_DOT_SIZE; })
+        .attr("y", function(d) { return d.y - AVE_DOT_SIZE*LABEL_Y_SPACING; })
+        .text(function(d) { 
+            var potential = calculatePotentialAtPoint([d.x, d.y]);
+            var energy = Math.floor(100*potential*d.charge);
+            return energy + " J"; 
+        });
+}
 
 function redraw_labels() {
     // Add name labels to circles
@@ -301,7 +328,16 @@ function redraw_testcharge(){
 
     charge = svg.selectAll("ellipse").data(testCharge);
     charge.enter().append("ellipse");
-    console.log(charge);
+    console.log(testCharge);
+    // mapCoord() in student_functions.js
+    // map pixel values to graph coordinates
+    var xGraph = mapCoord(testCharge[0].x ,width,horizontalBlockHalf,-horizontalBlockHalf);
+    var yGraph = mapCoord(testCharge[0].y ,height,-verticalBlockHalf,verticalBlockHalf);
+    socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " changed test charge coordinates to " + xGraph + "," + yGraph 
+                          );
     var chargeAttributes = charge
                 .classed("selected", function(d) { return d === selected; })
                 .attr("name", function (d) { return d.name; })
@@ -531,8 +567,8 @@ function dragmove(d, i) {
       		.attr("cy", d.y = Math.max(radius, Math.min(height - radius, d3.event.y)));
 
 	d3.select('.name .' + d.name + "_L" + (i+1))
-        .attr("x", function(d) { return field_display_settings.show_particle_size ? (d.x - AVE_DOT_SIZE - (d.radius/2)) : (d.x - AVE_DOT_SIZE); })
-        .attr("y", function(d) { return field_display_settings.show_particle_size ? (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING - (d.radius/2)) : (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING); })
+            .attr("x", function(d) { return field_display_settings.show_particle_size ? (d.x - AVE_DOT_SIZE - (d.radius/2)) : (d.x - AVE_DOT_SIZE); })
+            .attr("y", function(d) { return field_display_settings.show_particle_size ? (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING - (d.radius/2)) : (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING); });
   }
 }
 
@@ -563,10 +599,6 @@ function dragend(d, i) {
             .attr("cx", d.x = Math.max(radius, Math.min(width - radius, Math.round(d.x/10)*10)))
             .attr("cy", d.y = Math.max(radius, Math.min(height - radius, Math.round(d.y/10)*10)));
 
-    d3.select('.name .' + d.name + "_L" + (i+1))
-        .attr("x", function(d) { return field_display_settings.show_particle_size ? (d.x - AVE_DOT_SIZE - (d.radius/2)) : (d.x - AVE_DOT_SIZE); })
-        .attr("y", function(d) { return field_display_settings.show_particle_size ? (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING - (d.radius/2)) : (d.y - AVE_DOT_SIZE*LABEL_Y_SPACING); })
-
     if(d.name === sessionStorage.getItem('username')){
         notify_group(i);
     }
@@ -578,6 +610,7 @@ function dragend(d, i) {
 function changeSelected() {
   //Change current charge value
   d3.select("#charge").node().value = parseInt(selected.charge);
+  
 }
 
 function vectorStart() {
@@ -965,6 +998,9 @@ function field_move_users(username, info) {
         user_data.charges[info.index].x = info.charges[info.index].x;
         user_data.charges[info.index].y = info.charges[info.index].y;
 
+        
+
+
     } else {
         console.log("ERROR: Oh, oh: got a move_user message about somebody we don't know: " + username);
         console.log("TODO: could add this user here???");
@@ -1044,9 +1080,12 @@ function update_vector_attributes(xml, redraw) {
 /*-------------------  Options processing -----------------*/
 
 function update_display_settings () {
+
+    var temp = [];
     /* unset all the display properties */
     for (var property in field_display_settings) {
         if (field_display_settings.hasOwnProperty(property)) {
+            temp[property] = field_display_settings[property];
             field_display_settings[property] = false;
         }
     }
@@ -1055,7 +1094,31 @@ function update_display_settings () {
     $("input:checked").each(function () {
         var id = $(this).attr("id");
         field_display_settings[id] = true;
+
     });
+
+     for (var property in field_display_settings) {
+        if (field_display_settings.hasOwnProperty(property)) {
+            if(field_display_settings[property] != temp[property]) {
+                if(field_display_settings[property]) {
+                    socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " Turned on the button " + property
+                          );
+                }
+                else {
+                    socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " Turned off the button " + property
+                          );
+                }
+            }
+                
+        }
+    }
+
 
 
     console.log(field_display_settings);
@@ -1118,6 +1181,12 @@ function add_charge(btn) {
                              sessionStorage.getItem('group_id'),
                              info
                             );
+
+    socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " added a charge"
+                          );
     redraw();
 }
 
@@ -1138,6 +1207,11 @@ function remove_charge(btn) {
                              sessionStorage.getItem('group_id'),
                              info
                             );
+    socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " removed a charge"
+                          );
 
     redraw();
 }
@@ -1156,9 +1230,21 @@ function toggle_draw_vectors_mode() {
     if (toolbar_settings.draw_vectors_mode === false) {
         activate_button("#draw_vectors_button", "draw_vectors_mode");
         deactivate_button("#delete_mode_button", "delete_mode");
+
+        socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " started drawing vectors"
+                          );
     }
     else {
         deactivate_button("#draw_vectors_button", "draw_vectors_mode");
+
+        socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " stopped drawing vectors"
+                          );
     }
 }
 
@@ -1166,13 +1252,30 @@ function toggle_delete_mode() {
     if (toolbar_settings.delete_mode === false) {
         activate_button("#delete_mode_button", "delete_mode");
         deactivate_button("#draw_vectors_button", "draw_vectors_mode");
+
+        socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " toggled delete mode to on"
+                          );
     }
     else {
         deactivate_button("#delete_mode_button", "delete_mode");
+
+        socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " toggled delete mode to off"
+                          );
     }
 }
 
 function clear_vectors() {
+    socket.add_log(sessionStorage.getItem('username'),
+                           sessionStorage.getItem('class_id'),
+                           sessionStorage.getItem('group_id'),
+                           " cleared all the vectors"
+                          );
     if (field_display_settings.show_drawn_vectors === true) {
         var usr = sessionStorage.getItem("username");
         var my_vectors = vector_attributes.filter(function(attribute) {
@@ -1189,6 +1292,8 @@ function clear_vectors() {
                               sessionStorage.getItem("group_id"), 
                               JSON.stringify(vector_attributes));
         }
+
+        
     }
     else {
         if (my_vector_attributes !== []) {
