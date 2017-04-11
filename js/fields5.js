@@ -377,10 +377,18 @@ function redraw_drawn_vectors() {
             return usr !== attribute["user"];
         });
     }
-    socket.xml_change(sessionStorage.getItem("username"), 
-                      sessionStorage.getItem("class_id"), 
-                      sessionStorage.getItem("group_id"), 
-                      JSON.stringify(vector_attributes));
+    var username = sessionStorage.getItem('username');
+    var class_id = sessionStorage.getItem('class_id');
+    var group_id = sessionStorage.getItem('group_id');
+    var data = {
+                username: username,
+                class_id: class_id,
+                group_id: group_id,
+                xml: JSON.stringify(vector_attributes),
+                toolbar: '',
+                toolbar_user: ''
+            };
+    socket.xml_change(data);
     draw_drawn_vectors();
 }
 
@@ -450,10 +458,18 @@ function draw_vector(attribute) {
                     && $(this).attr("y1") == vector_attributes[i]["y1"] && $(this).attr("y2") == vector_attributes[i]["y2"]) {
                     vector_attributes.splice(i, 1);
                     this.remove();
-                    socket.xml_change(sessionStorage.getItem("username"), 
-                                      sessionStorage.getItem("class_id"), 
-                                      sessionStorage.getItem("group_id"), 
-                                      JSON.stringify(vector_attributes));
+                    var username = sessionStorage.getItem('username');
+                    var class_id = sessionStorage.getItem('class_id');
+                    var group_id = sessionStorage.getItem('group_id');
+                    var data = {
+                        username: username,
+                        class_id: class_id,
+                        group_id: group_id,
+                        xml: JSON.stringify(vector_attributes),
+                        toolbar: '',
+                        toolbar_user: ''
+                    };
+                    socket.xml_change(data);
                     return;
                 }
             }
@@ -655,10 +671,18 @@ function vectorEnd() {
             vector_attribute["y2"] = drawn_vector.attr("y2");
             if (field_display_settings.show_drawn_vectors === true) {
                 vector_attributes.push(vector_attribute);
-                socket.xml_change(sessionStorage.getItem("username"), 
-                                  sessionStorage.getItem("class_id"), 
-                                  sessionStorage.getItem("group_id"), 
-                                  JSON.stringify(vector_attributes));
+                var username = sessionStorage.getItem('username');
+                var class_id = sessionStorage.getItem('class_id');
+                var group_id = sessionStorage.getItem('group_id');
+                var data = {
+                            username: username,
+                            class_id: class_id,
+                            group_id: group_id,
+                            xml: JSON.stringify(vector_attributes),
+                            toolbar: '',
+                            toolbar_user: ''
+                        };
+                socket.xml_change(data);
             }
             else {
                 my_vector_attributes.push(vector_attribute);
@@ -740,10 +764,18 @@ function field_sync_users(other_members) {
                 // update vector_attributes
                 if (users.length == 0) {
                     vector_attributes = [];
-                    socket.xml_change(sessionStorage.getItem('username'),
-                                      sessionStorage.getItem('class_id'),
-                                      sessionStorage.getItem('group_id'),
-                                      "[]");
+                    var username = sessionStorage.getItem('username');
+                    var class_id = sessionStorage.getItem('class_id');
+                    var group_id = sessionStorage.getItem('group_id');
+                    var data = {
+                                username: username,
+                                class_id: class_id,
+                                group_id: group_id,
+                                xml: JSON.stringify(vector_attributes),
+                                toolbar: '',
+                                toolbar_user: ''
+                            };
+                    socket.xml_change(data);
                 }
                 else { 
                     socket.get_xml(sessionStorage.getItem('username'),
@@ -1030,10 +1062,18 @@ function field_remove_user(username, class_id, group_id) {
     if (username == sessionStorage.getItem("username")) {
         my_vector_attributes = [];
     }
-    socket.xml_change(sessionStorage.getItem("username"), 
-                  sessionStorage.getItem("class_id"), 
-                  group_id, 
-                  JSON.stringify(vector_attributes));
+    var username = sessionStorage.getItem('username');
+    var class_id = sessionStorage.getItem('class_id');
+    var group_id = sessionStorage.getItem('group_id');
+    var data = {
+                username: username,
+                class_id: class_id,
+                group_id: group_id,
+                xml: JSON.stringify(vector_attributes),
+                toolbar: '',
+                toolbar_user: ''
+            };
+    socket.xml_change(data);
 
     // remove user that has left the group - must work backwards in case there are multiple deletes
     for (var i = users.length; i--;) {
@@ -1287,10 +1327,18 @@ function clear_vectors() {
             });
             remove_drawn_vectors();
             draw_drawn_vectors();
-            socket.xml_change(sessionStorage.getItem("username"), 
-                              sessionStorage.getItem("class_id"), 
-                              sessionStorage.getItem("group_id"), 
-                              JSON.stringify(vector_attributes));
+            var username = sessionStorage.getItem('username');
+            var class_id = sessionStorage.getItem('class_id');
+            var group_id = sessionStorage.getItem('group_id');
+            var data = {
+                        username: username,
+                        class_id: class_id,
+                        group_id: group_id,
+                        xml: JSON.stringify(vector_attributes),
+                        toolbar: '',
+                        toolbar_user: ''
+                    };
+            socket.xml_change(data);
         }
 
         
