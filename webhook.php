@@ -35,8 +35,8 @@ switch(strtolower($_SERVER["HTTP_X_GITHUB_EVENT"]))
     // Get the current user. Pull the repo, kill node and start it again
     $user = $_SERVER["USER"];
     if($user == "mathlive"){
-      system("cd /var/www/html/efields && /usr/bin/git checkout dev && /usr/bin/git reset HEAD --hard && /usr/bin/git pull origin dev", $dummy);
-      system("cd /var/www/html/efields && /usr/bin/git checkout dev && /usr/bin/git reset HEAD --hard && /usr/bin/git pull origin dev", $dummy2);
+      system("cd /var/www/html/efields && /usr/bin/git checkout dev && /usr/bin/git fetch && /usr/bin/git reset --hard origin/dev", $dummy);
+      system("cd /var/www/html/efields && /usr/bin/git checkout dev && /usr/bin/git fetch && /usr/bin/git reset --hard origin/dev", $dummy2);
       system("killall node", $dummy3);
       system("/usr/bin/node /var/www/html/live/MathNetServer/server.js 8889 > /dev/null 2>&1 &", $dummy4);
       echo "Ran LIVE commands " . $dummy . "\n" . $dummy2 . "\n" . $dummy3 . "\n" . $dummy4;
